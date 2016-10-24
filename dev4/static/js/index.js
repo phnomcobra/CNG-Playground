@@ -1,3 +1,5 @@
+var contextMenu = {};
+
 var app = angular.module('myApp', []);
 app.controller('myCtrl', function($scope, $interval, $http) {
     /* $interval(function () {
@@ -6,9 +8,13 @@ app.controller('myCtrl', function($scope, $interval, $http) {
 }); 
 
  $('#demotree').jstree({
-'plugins' : [
-    'contextmenu', 'checkbox'
-  ],
+'plugins' : ['contextmenu'],
+'contextmenu': {
+    'items': 
+        function (obj) {
+            return contextMenu;
+        }
+},
 'core' : {
   'data' : {
     'url' : function (node) {
@@ -27,43 +33,12 @@ app.controller('myCtrl', function($scope, $interval, $http) {
         'icons': true,
         'url': "css/style.min.css"
     }
-},
-'contextmenu':{         
-    'items': function (node) {
-        return {
-            'Create': {
-                'separator_before': false,
-                'separator_after': false,
-                'label': 'Create',
-                'action': function () { 
-                    $.ajax({
-                        'url' : 'ajax_create',
-                        'dataType' : 'json',
-                        'data' : {
-                            'id' : node.id
-                        },
-                        'success' : function(resp) {
-                            console.log("create success", resp);
-                        },
-                        'error' : function(resp, status, error) {
-                            console.log("create failure", resp, status, error);
-                        }
-                    });
-                }
-            },
-            'Refresh': {
-                'separator_before': false,
-                'separator_after': false,
-                'label': 'Refresh',
-                'action': function () { 
-                    $("#demotree").jstree(true).refresh();
-                    console.log("refresh success");
-                }
-            }
-        };
-    }
 }
-}).on("select_node.jstree", function(evt, data){
+});
+
+$('#demotree').on("select_node.jstree", function(event, data){
+    var evt =  window.event || event;
+    if(evt.which || evt.button == 1){
         $.ajax({
             'url' : 'ajax_select',
             'dataType' : 'json',
@@ -72,9 +47,50 @@ app.controller('myCtrl', function($scope, $interval, $http) {
             },
             'success' : function(resp) {
                 console.log("select success", resp);
+                $('#demotree').jstree('refresh');
             },
             'error' : function(resp, status, error) {
                 console.log("select failure", resp, status, error);
+            }
+        });
+    }
+});
+
+$('#demotree').on('hover_node.jstree', function (evt, data) {
+        $.ajax({
+            'url' : 'ajax_context',
+            'dataType' : 'json',
+            'data' : {
+                'id' : data.node.id
+            },
+            'success' : function(resp) {
+                contextMenu = {};
+                for(var item in resp) {
+                    contextMenu[item] = {
+                        'label' : resp[item]['label'],
+                        'option' : resp[item]['option'],
+                        'action' : function (obj) {
+                            $.ajax({
+                                'url' : 'ajax_context_select',
+                                'dataType' : 'json',
+                                'data' : {
+                                    'id' : data.node.id,
+                                    'option' : obj.item.option
+                                },
+                                'success' : function(resp) {
+                                    console.log("console select success", resp);
+                                    $('#demotree').jstree('refresh');
+                                },
+                                'error' : function(resp, status, error) {
+                                    console.log("context select failure", resp, status, error);
+                                }
+                            });
+                        }
+                    }
+                }
+            },
+            'error' : function(resp, status, error) {
+                console.log("context failure", resp, status, error);
             }
         });
     }
