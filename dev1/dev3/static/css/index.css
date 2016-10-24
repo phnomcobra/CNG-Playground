@@ -1,0 +1,23 @@
+body {
+    overflow: hidden;
+}
+
+#editor {
+    display: table;
+}
+
+#panelin {
+    display:table-cell;
+    vertical-align: top;
+    float: left;
+    height: 800px;
+    width: 600px;
+}
+
+#panelout {
+    display:table-cell;
+    height: inherit;
+    width: 100%;
+    display: table-cell;
+    vertical-align: top;
+}
