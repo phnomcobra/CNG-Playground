@@ -1,0 +1,62 @@
+#ops {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    width: 100%;
+    height: 90%;
+}
+
+#container {
+    display: table;
+    vertical-align: top;
+    width: inherit;
+    height: inherit;
+    background:#FF0;
+}
+
+#inventory {
+    display:table-cell;
+    vertical-align: top;
+    float: left;
+    height: inherit;
+    background:#FF0;
+}
+
+#tabs {
+    height: inherit;
+    width: 100%;
+    display: table-cell;
+    vertical-align: top;
+    background:#0F0;
+}
+
+#handles {
+    display: inline-block;
+    vertical-align: top;
+    width: 100%;
+    background:#900;
+}
+
+#bodies {
+    height: inherit;
+    width: 100%;
+    display: inline-block;
+    vertical-align: top;
+    background:#090;
+}
+
+#opsact {
+    display: inline-block;
+    vertical-align: top;
+    width: 100%;
+    background:#0FF;
+}
+
+#messages {
+    display: inline-block;
+    vertical-align: top;
+    width: 100%;
+    background:#00F;
+}
