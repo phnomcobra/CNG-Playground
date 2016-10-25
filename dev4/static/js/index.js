@@ -8,7 +8,7 @@ app.controller('myCtrl', function($scope, $interval, $http) {
 }); 
 
  $('#demotree').jstree({
-'plugins' : ['contextmenu'],
+'plugins' : ['contextmenu', 'dnd'],
 'contextmenu': {
     'items': 
         function (obj) {
@@ -16,6 +16,7 @@ app.controller('myCtrl', function($scope, $interval, $http) {
         }
 },
 'core' : {
+  'check_callback' : true,
   'data' : {
     'url' : function (node) {
       return node.id === '#' ?
@@ -95,3 +96,21 @@ $('#demotree').on('hover_node.jstree', function (evt, data) {
         });
     }
 );
+
+$('#demotree').on("move_node.jstree", function(event, data){
+        $.ajax({
+            'url' : 'ajax_move',
+            'dataType' : 'json',
+            'data' : {
+                'id' : data.node.id,
+                'parent' : data.node.parent
+            },
+            'success' : function(resp) {
+                console.log("move success", resp);
+            },
+            'error' : function(resp, status, error) {
+                console.log("move failure", resp, status, error);
+                $('#demotree').jstree('refresh');
+            }
+        });
+});

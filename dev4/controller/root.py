@@ -46,6 +46,13 @@ class Root(object):
         return json.dumps(self.nodes)
     
     @cherrypy.expose
+    def ajax_move(self, id, parent):
+        for node in self.nodes:
+            if node["id"] == id:
+                node["parent"] = parent
+        return json.dumps({"id" : id, "parent" : parent})
+    
+    @cherrypy.expose
     def ajax_context(self, id):
         print "context load:", id
         return json.dumps({
