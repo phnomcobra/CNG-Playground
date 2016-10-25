@@ -47,6 +47,7 @@ class Root(object):
     
     @cherrypy.expose
     def ajax_move(self, id, parent):
+        print "move node:", id, parent
         for node in self.nodes:
             if node["id"] == id:
                 node["parent"] = parent
