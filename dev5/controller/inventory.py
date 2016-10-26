@@ -14,7 +14,7 @@ import json
 
 from random import randrange
 
-class Tree(object):
+class Inventory(object):
     def __init__(self):
         self.nodes = [
        { "id" : "ajson1{0}".format(randrange(0, 9, 1)), "parent" : "#", "text" : "Simple root node{0}".format(randrange(0, 9, 1)) },
@@ -38,12 +38,10 @@ class Tree(object):
 
     @cherrypy.expose
     def ajax_roots(self, id):
-        print "tree load:", id
         return json.dumps(self.nodes)
     
     @cherrypy.expose
     def ajax_move(self, id, parent):
-        print "move node:", id, parent
         for node in self.nodes:
             if node["id"] == id:
                 node["parent"] = parent
@@ -51,7 +49,6 @@ class Tree(object):
     
     @cherrypy.expose
     def ajax_context(self, id):
-        print "context load:", id
         return json.dumps({
                 "Add": {
                     "label": "Add",
@@ -69,7 +66,6 @@ class Tree(object):
     
     @cherrypy.expose
     def ajax_context_select(self, id, option):
-        print "context select:", id, option
         if option == "add":
             child = "{0}{1}{2}{3}".format(randrange(0, 9 ,1), randrange(0, 9 ,1), randrange(0, 9 ,1), randrange(0, 9 ,1))
             
@@ -85,16 +81,13 @@ class Tree(object):
     
     @cherrypy.expose
     def ajax_get_tabs(self):
-        print "get tabs:"
         return json.dumps(self.tabs)
     
     @cherrypy.expose
     def ajax_close_tab(self, item):
-        print "close tab:", item
         del self.tabs[item];
         return json.dumps({})
     
     @cherrypy.expose
     def ajax_select(self, id):
-        print "select:", id
         return json.dumps({})

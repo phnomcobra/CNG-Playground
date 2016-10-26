@@ -14,10 +14,12 @@ import json
 
 from random import random
 from ..view.index import index_view
-from .inventory import Tree
+from .inventory import Inventory
+from .messaging import Messaging
 
 class Root(object):
-    tree = Tree()
+    inventory = Inventory()
+    messaging = Messaging()
 
     @cherrypy.expose
     def index(self):
@@ -25,5 +27,4 @@ class Root(object):
 
     @cherrypy.expose
     def get_dummy(self, item):
-        print "dummy load:"
         return json.dumps({"resp":"blah {0}".format(random()), "item":item})

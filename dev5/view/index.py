@@ -22,6 +22,8 @@ def index_view():
     <script src="js/jquery.js"></script>
     <script src="js/jquery-ui.js"></script>
     <script src="js/jstree.min.js"></script>
+    <script src="js/angular.min.js"></script>
+    <script src="js/messaging.js"></script>
 </head>
 <body>
     <div id="ops">
@@ -42,11 +44,12 @@ def index_view():
             </div>
         </div>
         <div id="messages">
-            <p>Messages</p>
+            <div ng-app="messagingApp" ng-controller="messagingCtrl">
+                <div ng-bind-html="messages"></div>
+            </div>
         </div>
     </div>
     <script src="js/inventory.js"></script>
-    <script src="js/index.js"></script>
 </body>
 
 </html>"""

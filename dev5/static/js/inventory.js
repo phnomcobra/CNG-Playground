@@ -13,7 +13,7 @@ var contextMenu = {};
   'data' : {
     'url' : function (node) {
       return node.id === '#' ?
-        'tree/ajax_roots' :
+        'inventory/ajax_roots' :
         'ajax_children';
     },
     'data' : function (node) {
@@ -34,18 +34,18 @@ $('#inventory').on("select_node.jstree", function(event, data){
     var evt =  window.event || event;
     if(evt.which || evt.button == 1){
         $.ajax({
-            'url' : 'tree/ajax_select',
+            'url' : 'inventory/ajax_select',
             'dataType' : 'json',
             'data' : {
                 'id' : data.node.id
             },
             'success' : function(resp) {
-                console.log("select success", resp);
+                addMessage("select success " + resp);
                 $('#inventory').jstree('refresh');
                 tabUpdate();
             },
             'error' : function(resp, status, error) {
-                console.log("select failure", resp, status, error);
+                addMessage("select success " + resp);
             }
         });
     }
@@ -53,7 +53,7 @@ $('#inventory').on("select_node.jstree", function(event, data){
 
 $('#inventory').on('hover_node.jstree', function (evt, data) {
         $.ajax({
-            'url' : 'tree/ajax_context',
+            'url' : 'inventory/ajax_context',
             'dataType' : 'json',
             'data' : {
                 'id' : data.node.id
@@ -66,19 +66,19 @@ $('#inventory').on('hover_node.jstree', function (evt, data) {
                         'option' : resp[item]['option'],
                         'action' : function (obj) {
                             $.ajax({
-                                'url' : 'tree/ajax_context_select',
+                                'url' : 'inventory/ajax_context_select',
                                 'dataType' : 'json',
                                 'data' : {
                                     'id' : data.node.id,
                                     'option' : obj.item.option
                                 },
                                 'success' : function(resp) {
-                                    console.log("console select success", resp);
+                                    addMessage("console select success " + resp);
                                     $('#inventory').jstree('refresh');
                                     tabUpdate();
                                 },
                                 'error' : function(resp, status, error) {
-                                    console.log("context select failure", resp, status, error);
+                                    addMessage("console select failure " + resp);
                                 }
                             });
                         }
@@ -86,7 +86,7 @@ $('#inventory').on('hover_node.jstree', function (evt, data) {
                 }
             },
             'error' : function(resp, status, error) {
-                console.log("context failure", resp, status, error);
+                addMessage("context failure " + resp);
             }
         });
     }
@@ -94,17 +94,17 @@ $('#inventory').on('hover_node.jstree', function (evt, data) {
 
 $('#inventory').on("move_node.jstree", function(event, data){
         $.ajax({
-            'url' : 'tree/ajax_move',
+            'url' : 'inventory/ajax_move',
             'dataType' : 'json',
             'data' : {
                 'id' : data.node.id,
                 'parent' : data.node.parent
             },
             'success' : function(resp) {
-                console.log("move success", resp);
+                addMessage("move success " + resp);
             },
             'error' : function(resp, status, error) {
-                console.log("move failure", resp, status, error);
+                addMessage("move failure " + resp);
                 $('#inventory').jstree('refresh');
             }
         });
@@ -112,10 +112,10 @@ $('#inventory').on("move_node.jstree", function(event, data){
 
 var tabUpdate = function () {
     $.ajax({
-            'url' : 'tree/ajax_get_tabs',
+            'url' : 'inventory/ajax_get_tabs',
             'dataType' : 'json',
             'success' : function(resp) {
-                console.log("get tabs success", resp);
+                addMessage("get tabs success " + resp);
                 document.getElementById('bodies').innerHTML = '';
                 var tabHTML = '<table><tr>';
                 for(item in resp){
@@ -134,11 +134,11 @@ var tabUpdate = function () {
                                 'item' : item
                             },
                             'success' : function(resp) {
-                                console.log("tab load success", resp);
+                                addMessage("tab load success " + resp);
                                 document.getElementById(resp['item']).innerHTML = resp['resp'];
                             },
                             'error' : function(resp, status, error) {
-                                console.log("tab load failure", resp, status, error);
+                                addMessage("tab load failure " + resp);
                             }
                         });
                     
@@ -147,16 +147,14 @@ var tabUpdate = function () {
                 document.getElementById('handles').innerHTML = tabHTML;
             },
             'error' : function(resp, status, error) {
-                console.log("get tabs failure", resp, status, error);
+                addMessage("get tabs failure " + resp);
                 document.getElementById('handles').innerHTML = '';
             }
         });
 };
 
 var tabSelect = function (item) {
-    console.log(item);
     $('#bodies').find('div').each(function(){
-        console.log($(this));
         if($(this).attr('id') == item) {
             $(this)[0].style.display = 'block';
         } else {
@@ -167,17 +165,17 @@ var tabSelect = function (item) {
 
 var tabClose = function (item) {
     $.ajax({
-            'url' : 'tree/ajax_close_tab',
+            'url' : 'inventory/ajax_close_tab',
             'dataType' : 'json',
             'data' : {
                 'item' : item
             },
             'success' : function(resp) {
-                console.log("tab close success", resp);
+                addMessage("tab close success " + resp);
                 tabUpdate();
             },
             'error' : function(resp, status, error) {
-                console.log("tab close failure", resp, status, error);
+                addMessage("tab close failure " + resp);
             }
         });
     
