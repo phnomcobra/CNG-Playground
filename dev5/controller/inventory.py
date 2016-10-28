@@ -16,12 +16,7 @@ from random import randrange
 
 class Inventory(object):
     def __init__(self):
-        self.nodes = [
-       { "id" : "ajson1{0}".format(randrange(0, 9, 1)), "parent" : "#", "text" : "Simple root node{0}".format(randrange(0, 9, 1)) },
-       { "id" : "ajson2", "parent" : "#", "text" : "Root node 2" },
-       { "id" : "ajson3", "parent" : "ajson2", "text" : "Child 1" },
-       { "id" : "ajson4{0}".format(randrange(0, 9, 1)), "parent" : "ajson2", "text" : "Child 2{0}".format(randrange(0, 9, 1)) },
-    ]
+        self.nodes = [{ "id" : "root", "parent" : "#", "text" : "root"}]
         
         self.tabs = {}
     
@@ -38,14 +33,18 @@ class Inventory(object):
 
     @cherrypy.expose
     def ajax_roots(self, id):
+        for node in self.nodes:
+            print node
+        print ""
         return json.dumps(self.nodes)
     
     @cherrypy.expose
-    def ajax_move(self, id, parent):
+    def ajax_move(self, id, parent, position):
         for node in self.nodes:
             if node["id"] == id:
                 node["parent"] = parent
-        return json.dumps({"id" : id, "parent" : parent})
+                print "inside position", id, parent, position
+        return json.dumps({})
     
     @cherrypy.expose
     def ajax_context(self, id):
