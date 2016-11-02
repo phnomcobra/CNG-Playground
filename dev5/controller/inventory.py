@@ -13,30 +13,59 @@ import cherrypy
 import json
 
 from random import randrange
+from ..model.document import Collection, Object
 
 class Inventory(object):
     def __init__(self):
-        self.nodes = [{ "id" : "root", "parent" : "#", "text" : "root"}]
+        collection = Collection("inventory")
+        try:
+            collection.create_attribute("type", "['type']")
+        except Exception:
+            pass
+        
+        try:
+            collection.create_attribute("parent", "['parent']")
+        except Exception:
+            pass
+        
+        try:
+            collection.create_attribute("objuuid", "['objuuid']")
+        except Exception:
+            pass
+        
+        root_objects = collection.find(parent = "#")
+        if not len(root_objects):
+            root_object = collection.get_object()
+            root_object.object["type"] = "container"
+            root_object.object["parent"] = '#'
+            root_object.object["children"] = []
+            root_object.object["name"] = "root"
+            print root_object.object
         
         self.tabs = {}
-    
-    def list_children(self, id, children = []):
-        for node in self.nodes:
-            if node["id"] == id:
-                children.append(node)
-        
-        for node in self.nodes:
-            if node["parent"] == id:
-                self.list_children(node["id"], children)
-        
-        return children
 
+    def get_child_nodes(self, collection, nodes, object):
+        nodes.append({"id" : object.objuuid, 
+                      "parent" : object.object["parent"], 
+                      "text" : object.object["name"]})
+        print object.object["children"]
+        for objuuid in object.object["children"]:
+            print "child:", objuuid
+            self.get_child_nodes(collection, nodes, Object(object.coluuid, objuuid))
+        
+        return nodes
+    
     @cherrypy.expose
     def ajax_roots(self, id):
-        for node in self.nodes:
-            print node
-        print ""
-        return json.dumps(self.nodes)
+        print "ajax_roots"
+        nodes = []
+        collection = Collection("inventory")
+        
+        for object in collection.find(parent = id):
+            print "root:", object.objuuid
+            nodes = self.get_child_nodes(collection, nodes, object)
+        
+        return json.dumps(nodes)
     
     @cherrypy.expose
     def ajax_move(self, id, parent, position):
@@ -65,10 +94,18 @@ class Inventory(object):
     
     @cherrypy.expose
     def ajax_context_select(self, id, option):
+        collection = Collection("inventory")
         if option == "add":
-            child = "{0}{1}{2}{3}".format(randrange(0, 9 ,1), randrange(0, 9 ,1), randrange(0, 9 ,1), randrange(0, 9 ,1))
+            new_object = collection.get_object()
+            new_object.object["type"] = "container"
+            new_object.object["parent"] = id
+            new_object.object["children"] = []
+            new_object.object["name"] = "child: " + new_object.objuuid[:8]
             
-            self.nodes.append({ "id" : child, "parent" : id, "text" : child })
+            current_object = Object(collection.coluuid, id)
+            current_object.object["children"].append(new_object.objuuid)
+            print current_object.object["children"]
+            
             return json.dumps({})
         elif option == "del":
             for node in self.list_children(id):
