@@ -54,10 +54,12 @@ class Document:
         
     def create_object(self, coluuid, objuuid):
         self.cursor.execute("insert into TBL_JSON_OBJ (COLUUID, OBJUUID, VALUE) values (?, ?, ?);", \
-                            (str(coluuid), str(objuuid), pickle.dumps({})))
+                            (str(coluuid), str(objuuid), pickle.dumps({"objuuid" : objuuid, "coluuid" : coluuid})))
         self.connection.commit()
     
     def set_object(self, coluuid, objuuid, object):
+        object["objuuid"] = objuuid
+        object["coluuid"] = coluuid
         self.cursor.execute("update TBL_JSON_OBJ set VALUE = ? where OBJUUID = ?;", \
                             (pickle.dumps(object), str(objuuid)))
         self.connection.commit()
