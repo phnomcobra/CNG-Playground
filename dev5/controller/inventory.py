@@ -40,39 +40,32 @@ class Inventory(object):
             root_object.object["parent"] = '#'
             root_object.object["children"] = []
             root_object.object["name"] = "root"
-            print root_object.object
         
         self.tabs = {}
-
-    def get_child_nodes(self, collection, nodes, object):
+    
+    def get_child_nodes(self, nodes, object):
         nodes.append({"id" : object.objuuid, 
                       "parent" : object.object["parent"], 
                       "text" : object.object["name"]})
-        print object.object["children"]
+
         for objuuid in object.object["children"]:
-            print "child:", objuuid
-            self.get_child_nodes(collection, nodes, Object(object.coluuid, objuuid))
+            nodes = self.get_child_nodes(nodes, Object(object.coluuid, objuuid))
         
         return nodes
     
     @cherrypy.expose
     def ajax_roots(self, id):
-        print "ajax_roots"
         nodes = []
         collection = Collection("inventory")
         
         for object in collection.find(parent = id):
-            print "root:", object.objuuid
-            nodes = self.get_child_nodes(collection, nodes, object)
+            nodes = self.get_child_nodes(nodes, object)
         
         return json.dumps(nodes)
     
     @cherrypy.expose
-    def ajax_move(self, id, parent, position):
-        for node in self.nodes:
-            if node["id"] == id:
-                node["parent"] = parent
-                print "inside position", id, parent, position
+    def ajax_move(self, id, parent):
+        collection = Collection("inventory").get_object(id).object.object["parent"] = parent
         return json.dumps({})
     
     @cherrypy.expose
@@ -92,6 +85,11 @@ class Inventory(object):
                     }
                 })
     
+    def delete_child_nodes(self, object):
+        for objuuid in object.object["children"]:
+            self.delete_child_nodes(Object(object.coluuid, objuuid))
+        object.destroy()
+    
     @cherrypy.expose
     def ajax_context_select(self, id, option):
         collection = Collection("inventory")
@@ -104,12 +102,11 @@ class Inventory(object):
             
             current_object = Object(collection.coluuid, id)
             current_object.object["children"].append(new_object.objuuid)
-            print current_object.object["children"]
             
             return json.dumps({})
         elif option == "del":
-            for node in self.list_children(id):
-                self.nodes.remove(node)
+            self.delete_child_nodes(Object(collection.coluuid, id))
+            
             return json.dumps({})
         elif option == "edit":
             self.tabs["tab{0}".format(id)] = {"route" : "get_dummy", "label":"edit {0}".format(id)}
