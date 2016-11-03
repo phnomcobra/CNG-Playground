@@ -98,8 +98,7 @@ $('#inventory').on("move_node.jstree", function(event, data){
             'dataType' : 'json',
             'data' : {
                 'id' : data.node.id,
-                'parent' : data.node.parent,
-                'position' : data.position
+                'parent' : data.node.parent
             },
             'success' : function(resp) {
                 addMessage("move success " + resp);
