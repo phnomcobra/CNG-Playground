@@ -41,8 +41,6 @@ $('#inventory').on("select_node.jstree", function(event, data){
             },
             'success' : function(resp) {
                 addMessage("select success " + resp);
-                $('#inventory').jstree('refresh');
-                tabUpdate();
             },
             'error' : function(resp, status, error) {
                 addMessage("select success " + resp);
