@@ -77,7 +77,7 @@ class Document:
                                     (str(objuuid), \
                                      str(coluuid), \
                                      str(attribute_name), \
-                                     str(eval("self.get_object(objuuid)" + attributes[attribute_name]))))
+                                     str(eval("str(self.get_object(objuuid)" + attributes[attribute_name] + ")"))))
                 self.connection.commit()
             except Exception as e:
                 print str(e)
@@ -121,7 +121,7 @@ class Document:
                                     (str(objuuid), \
                                      str(coluuid), \
                                      str(attribute), \
-                                     str(eval("objects[objuuid]" + path))))
+                                     str(eval("str(objects[objuuid]" + path + ")"))))
             except Exception as e:
                 print str(e)
             
@@ -248,3 +248,6 @@ class Collection(Document):
         if not objuuid:
             objuuid = sucky_uuid()
         return Object(self.coluuid, objuuid)
+    
+    def list_objuuids(self):
+        return Document.list_collection_objects(self, self.coluuid)

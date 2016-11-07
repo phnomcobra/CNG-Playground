@@ -6,111 +6,99 @@
 # justin.l.dierking.civ@mail.mil
 # (614) 692 2050
 #
-# 10/28/2016 Original construction
+# 11/07/2016 Original construction
 ################################################################################
 
-import sqlite3
-
+from .document import Collection
 from .utils import sucky_uuid
 
-class Inventory:
-    def __init__(self):
-        self.connection = sqlite3.connect("db.sqlite", 300)
-        self.cursor = self.connection.cursor()
+def __get_child_nodes(nodes, object, collection):
+    nodes.append({"id" : object.objuuid, 
+                  "parent" : object.object["parent"], 
+                  "text" : object.object["name"]})
 
-        self.cursor.execute('''CREATE TABLE IF NOT EXISTS TBL_INVENTORY (
-                               PARUUID VARCHAR(36) REFERENCES TBL_INVENTORY(ITMUUID),
-                               OBJUUID VARCHAR(36) REFERENCES TBL_OBJECT_PROTO(OBJUUID) NOT NULL,
-                               ITMUUID VARCHAR(36) NOT NULL,
-                               POSITION INTEGER NOT NULL DEFAULT 0,
-                               NAME VARCHAR(64) DEFAULT 'New Item',
-                               PRIMARY KEY (ITMUUID))''')
+    for objuuid in object.object["children"]:
+        nodes = __get_child_nodes(nodes, collection.get_object(objuuid), collection)
+ 
+    return nodes
+    
+def get_child_nodes(objuuid):
+    nodes = []
+    collection = Collection("inventory")
         
+    for object in collection.find(parent = objuuid):
+        nodes = __get_child_nodes(nodes, object, collection)
+    
+    return nodes
+    
+def set_parent_objuuid(objuuid, parent_objuuid):
+    collection = Collection("inventory")
 
-        self.connection.commit()
+    new_parent = collection.get_object(parent_objuuid)
+    current = collection.get_object(objuuid)
+    parent = collection.get_object(current.object["parent"])
         
-        self.get_objects()
-    
-    def __del__(self):
-        self.connection.close()
-    
-    def create_prototype(self, uuid = sucky_uuid(), name = "New Object Prototype"):
-        try:
-            self.cursor.execute("insert into TBL_OBJECT_PROTO (OBJUUID, NAME) values (?, ?);", \
-                                (str(uuid), str(name)))
-            self.connection.commit()
-            
-            self.get_objects()
-            
-            return {"uuid" : uuid, "name" : name}
-        except Exception as e:
-            return {"exception" : e}
-    
-    def delete_prototype(self, uuid):
-        try:
-            self.cursor.execute("delete from TBL_OBJECT_PROTO where OBJUUID = ?);", \
-                                (str(uuid),))
-            self.connection.commit()
-            
-            self.get_objects()
-            
-            return {}
-        except Exception as e:
-            return {"exception" : e}
-    
-    def rename_prototype(self, uuid, name):
-        try:
-            self.cursor.execute("update TBL_OBJECT_PROTO set NAME = ? where OBJUUID = ?);", \
-                                (str(name), str(uuid)))
-            self.connection.commit()
-            
-            self.get_objects()
-            
-            return {"uuid" : uuid, "name" : name}
-        except Exception as e:
-            return {"exception" : e}
-    
-    def create_reference(self, uuid, creates_uuid):
-        try:
-            self.cursor.execute("insert into TBL_OBJECT_XREF (OBJUUID, CREATES) values (?, ?);", \
-                                (str(uuid), str(creates_uuid)))
-            self.connection.commit()
-            
-            self.get_objects()
-            
-            return {"uuid" : uuid, "creates_uuid" : creates_uuid}
-        except Exception as e:
-            return {"exception" : e}
+    parent.object["children"].remove(objuuid)
+    parent.set()
 
-    def delete_reference(self, uuid, creates_uuid):
-        try:
-            self.cursor.execute("delete from TBL_OBJECT_XREF where OBJUUID = ? and CREATES = ?;", \
-                                (str(uuid), str(creates_uuid)))
-            self.connection.commit()
-            
-            self.get_objects()
-            
-            return {}
-        except Exception as e:
-            return {"exception" : e}
+    current.object["parent"] = parent_objuuid
+    current.set()
+
+    new_parent.object["children"].append(objuuid)
+    new_parent.set()
     
-    def get_objects(self):
-        try:
-            self.cursor.execute("select OBJUUID, NAME from TBL_OBJECT_PROTO;")
-            self.connection.commit()
-            
-            self.objects = {}
-            for object_proto_row in self.cursor.fetchall():
-                self.objects[object_proto_row[0]] = {"name" : object_proto_row[1], "creates" : {}}
-                
-                self.cursor.execute("""select T2.OBJUUID, T2.NAME from TBL_OBJECT_XREF T1, TBL_OBJECT_PROTO T2 
-                                       on T1.CREATES = T2.OBJUUID 
-                                       where T1.OBJUUID = ?;""", (object_proto_row[0],))
-                self.connection.commit()
-                
-                for object_xref_row in self.cursor.fetchall():
-                    self.objects[object_proto_row[0]]["creates"][object_xref_row[0]] = {"name" : object_xref_row[1]}
-            
-            return {}
-        except Exception as e:
-            return {"exception" : e}
+def delete_node(objuuid):
+    collection = Collection("inventory")
+    
+    parent = collection.get_object(collection.get_object(objuuid).object["parent"])
+    parent.object["children"].remove(objuuid)
+    parent.set()
+    
+    for node in get_child_nodes(objuuid):
+        current = collection.get_object(node["id"])
+        current.destroy()
+    
+    collection.get_object(objuuid).destroy()
+    
+def get_context_menu(objuuid):
+    return Collection("inventory").get_object(objuuid).object["context"]
+
+def create_container(parent_objuuid, name):
+    collection = Collection("inventory")
+    container = collection.get_object()
+    container.object = {
+        "type" : "container",
+        "parent" : parent_objuuid,
+        "children" : [],
+        "name" : name,
+        "context" : {
+            "new container" : {
+                "label" : "New Container",
+                "route" : "inventory/ajax_create_container",
+                "params" : {"id" : container.objuuid}
+            },
+            "delete" : {
+                "label" : "Delete",
+                "route" : "inventory/ajax_delete",
+                "params" : {"id" : container.objuuid}
+            }
+        },
+        "accepts" : ["container", "task"]
+    }
+    if parent_objuuid == "#":
+        del container.object["context"]["delete"]
+    else:
+        parent = collection.get_object(parent_objuuid)
+        parent.object["children"].append(container.objuuid)
+        parent.set()
+    
+    container.set()
+
+collection = Collection("inventory")
+try:
+    collection.create_attribute("parent", "['parent']")
+except Exception:
+    pass
+
+if not len(collection.find(parent = "#")):
+    create_container("#", "root")
