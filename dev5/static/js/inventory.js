@@ -30,26 +30,7 @@ var contextMenu = {};
 }
 });
 
-$('#inventory').on("select_node.jstree", function(event, data){
-    var evt =  window.event || event;
-    if(evt.which || evt.button == 1){
-        $.ajax({
-            'url' : 'inventory/ajax_select',
-            'dataType' : 'json',
-            'data' : {
-                'id' : data.node.id
-            },
-            'success' : function(resp) {
-                addMessage("select success " + resp);
-            },
-            'error' : function(resp, status, error) {
-                addMessage("select success " + resp);
-            }
-        });
-    }
-});
-
-$('#inventory').on('hover_node.jstree', function (evt, data) {
+$('#inventory').on('select_node.jstree', function (evt, data) {
         $.ajax({
             'url' : 'inventory/ajax_context',
             'dataType' : 'json',
@@ -61,15 +42,13 @@ $('#inventory').on('hover_node.jstree', function (evt, data) {
                 for(var item in resp) {
                     contextMenu[item] = {
                         'label' : resp[item]['label'],
-                        'option' : resp[item]['option'],
+                        'route' : resp[item]['route'],
+                        'params' : resp[item]['params'],
                         'action' : function (obj) {
                             $.ajax({
-                                'url' : 'inventory/ajax_context_select',
+                                'url' : obj.item.route,
                                 'dataType' : 'json',
-                                'data' : {
-                                    'id' : data.node.id,
-                                    'option' : obj.item.option
-                                },
+                                'data' : obj.item.params,
                                 'success' : function(resp) {
                                     addMessage("console select success " + resp);
                                     $('#inventory').jstree('refresh');
