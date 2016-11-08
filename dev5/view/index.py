@@ -24,6 +24,7 @@ def index_view():
     <script src="js/jstree.min.js"></script>
     <script src="js/angular.min.js"></script>
     <script src="js/messaging.js"></script>
+    <script src="js/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
     <div id="ops">
