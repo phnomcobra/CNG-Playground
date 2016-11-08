@@ -31,6 +31,8 @@ var contextMenu = {};
 });
 
 $('#inventory').on('select_node.jstree', function (evt, data) {
+        contextMenu = {};
+        
         $.ajax({
             'url' : 'inventory/ajax_context',
             'dataType' : 'json',
@@ -38,7 +40,6 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                 'id' : data.node.id
             },
             'success' : function(resp) {
-                contextMenu = {};
                 for(var item in resp) {
                     contextMenu[item] = {
                         'label' : resp[item]['label'],
@@ -89,7 +90,7 @@ $('#inventory').on("move_node.jstree", function(event, data){
 
 var tabUpdate = function () {
     $.ajax({
-            'url' : 'inventory/ajax_get_tabs',
+            'url' : 'tabs/ajax_get_tabs',
             'dataType' : 'json',
             'success' : function(resp) {
                 addMessage("get tabs success " + resp);
@@ -101,15 +102,13 @@ var tabUpdate = function () {
                         tabHTML += '<input type="button" value="x" onclick=tabClose("' + item + '"); />';
                         tabHTML +='</td>';
                     
-                        document.getElementById('bodies').innerHTML += '<div id="' + item + '"></div>';
+                        document.getElementById('bodies').innerHTML += '<div class="TabBody" id="' + item + '"></div>';
                         tabSelect(item);
                         
-                        $.ajax({
+                        /*$.ajax({
                             'url' : resp[item]['route'],
                             'dataType' : 'json',
-                            'data' : {
-                                'item' : item
-                            },
+                            'data' : {'id' : item},
                             'success' : function(resp) {
                                 addMessage("tab load success " + resp);
                                 document.getElementById(resp['item']).innerHTML = resp['resp'];
@@ -117,7 +116,7 @@ var tabUpdate = function () {
                             'error' : function(resp, status, error) {
                                 addMessage("tab load failure " + resp);
                             }
-                        });
+                        });*/
                     
                 }
                 tabHTML += '</tr></table>';
@@ -131,7 +130,7 @@ var tabUpdate = function () {
 };
 
 var tabSelect = function (item) {
-    $('#bodies').find('div').each(function(){
+    $('.TabBody').each(function(){
         if($(this).attr('id') == item) {
             $(this)[0].style.display = 'block';
         } else {
@@ -142,14 +141,15 @@ var tabSelect = function (item) {
 
 var tabClose = function (item) {
     $.ajax({
-            'url' : 'inventory/ajax_close_tab',
+            'url' : 'tabs/ajax_close_tab',
             'dataType' : 'json',
             'data' : {
-                'item' : item
+                'id' : item
             },
             'success' : function(resp) {
                 addMessage("tab close success " + resp);
                 tabUpdate();
+                $('#inventory').jstree('refresh');
             },
             'error' : function(resp, status, error) {
                 addMessage("tab close failure " + resp);
