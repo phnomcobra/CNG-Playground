@@ -13,9 +13,14 @@ from .document import Collection
 from .utils import sucky_uuid
 
 def __get_child_nodes(nodes, object, collection):
-    nodes.append({"id" : object.objuuid, 
-                  "parent" : object.object["parent"], 
-                  "text" : object.object["name"]})
+    node = {"id" : object.objuuid, 
+            "parent" : object.object["parent"], 
+            "text" : object.object["name"]}
+    
+    if "icon" in object.object:
+        node["icon"] = object.object["icon"]
+    
+    nodes.append(node)
 
     for objuuid in object.object["children"]:
         nodes = __get_child_nodes(nodes, collection.get_object(objuuid), collection)
@@ -77,6 +82,21 @@ def create_container(parent_objuuid, name):
                 "route" : "inventory/ajax_create_container",
                 "params" : {"id" : container.objuuid}
             },
+            "new task" : {
+                "label" : "New Task",
+                "route" : "inventory/ajax_create_task",
+                "params" : {"id" : container.objuuid}
+            },
+            "new procedure" : {
+                "label" : "New Procedure",
+                "route" : "inventory/ajax_create_procedure",
+                "params" : {"id" : container.objuuid}
+            },
+            "new controller" : {
+                "label" : "New Controller",
+                "route" : "inventory/ajax_create_controller",
+                "params" : {"id" : container.objuuid}
+            },
             "delete" : {
                 "label" : "Delete",
                 "route" : "inventory/ajax_delete",
@@ -87,12 +107,124 @@ def create_container(parent_objuuid, name):
     }
     if parent_objuuid == "#":
         del container.object["context"]["delete"]
+        container.object["icon"] = "images/tree_icon.png"
     else:
         parent = collection.get_object(parent_objuuid)
         parent.object["children"].append(container.objuuid)
         parent.set()
     
     container.set()
+
+def create_task(parent_objuuid, name):
+    collection = Collection("inventory")
+    task = collection.get_object()
+    task.object = {
+        "type" : "task",
+        "parent" : parent_objuuid,
+        "children" : [],
+        "name" : name,
+        "body" : "",
+        "icon" : "/images/task_icon.png",
+        "context" : {
+            "delete" : {
+                "label" : "Delete",
+                "route" : "inventory/ajax_delete",
+                "params" : {"id" : task.objuuid}
+            },
+            "edit" : {
+                "label" : "Edit",
+                "route" : "tabs/ajax_new_tab",
+                "params" : {
+                    "id" : task.objuuid,
+                    "route" : "task/get_ace_session",
+                    "label" : "Edit " + name + "[{0}]".format(task.objuuid[:8])
+                }
+            }
+        },
+        "accepts" : []
+    }
+    
+    parent = collection.get_object(parent_objuuid)
+    parent.object["children"].append(task.objuuid)
+    parent.set()
+    
+    task.set()
+
+def create_procedure(parent_objuuid, name):
+    collection = Collection("inventory")
+    procedure = collection.get_object()
+    procedure.object = {
+        "type" : "procedure",
+        "parent" : parent_objuuid,
+        "children" : [],
+        "name" : name,
+        "tasks" : [],
+        "continue" : [],
+        "title" : "",
+        "description" : "",
+        "rfcs" : [],
+        "icon" : "/images/procedure_icon.png",
+        "context" : {
+            "delete" : {
+                "label" : "Delete",
+                "route" : "inventory/ajax_delete",
+                "params" : {"id" : procedure.objuuid}
+            }
+        },
+        "accepts" : []
+    }
+    
+    parent = collection.get_object(parent_objuuid)
+    parent.object["children"].append(procedure.objuuid)
+    parent.set()
+    
+    procedure.set()
+
+def create_controller(parent_objuuid, name):
+    collection = Collection("inventory")
+    controller = collection.get_object()
+    controller.object = {
+        "type" : "controller",
+        "parent" : parent_objuuid,
+        "children" : [],
+        "name" : name,
+        "icon" : "/images/controller_icon.png",
+        "context" : {
+            "delete" : {
+                "label" : "Delete",
+                "route" : "inventory/ajax_delete",
+                "params" : {"id" : controller.objuuid}
+            }
+        },
+        "accepts" : []
+    }
+    
+    parent = collection.get_object(parent_objuuid)
+    parent.object["children"].append(controller.objuuid)
+    parent.set()
+    
+    controller.set()
+
+def get(objuuid, **kargs):
+    collection = Collection("inventory")
+    object = collection.get_object(objuuid)
+    
+    result = {}
+    for result_key, object_key in kargs.iteritems():
+        try:
+            result[result_key] = object.object[object_key]
+        except Exception as e:
+            result[result_key] = str(e)
+    return result
+
+def set(objuuid, **kargs):
+    collection = Collection("inventory")
+    object = collection.get_object(objuuid)
+    
+    for key, value in kargs.iteritems():
+            object.object[key] = value
+    
+    object.set()
 
 collection = Collection("inventory")
 try:
