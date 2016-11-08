@@ -16,15 +16,15 @@ from random import random
 from ..view.index import index_view
 from .inventory import Inventory
 from .messaging import Messaging
+from .task import Task
+from .tabs import Tabs
 
 class Root(object):
     inventory = Inventory()
     messaging = Messaging()
+    task = Task()
+    tabs = Tabs()
 
     @cherrypy.expose
     def index(self):
         return index_view()
-
-    @cherrypy.expose
-    def get_dummy(self, item):
-        return json.dumps({"resp":"blah {0}".format(random()), "item":item})

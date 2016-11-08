@@ -16,12 +16,12 @@ from ..model.inventory import get_child_nodes, \
                               set_parent_objuuid, \
                               get_context_menu, \
                               delete_node, \
-                              create_container
+                              create_container, \
+                              create_task, \
+                              create_procedure, \
+                              create_controller
 
 class Inventory(object):
-    def __init__(self):
-        self.tabs = {}
-    
     @cherrypy.expose
     def ajax_roots(self, id):
         return json.dumps(get_child_nodes(id))
@@ -37,6 +37,21 @@ class Inventory(object):
         return json.dumps({})
     
     @cherrypy.expose
+    def ajax_create_task(self, id):
+        create_task(id, "New Task")
+        return json.dumps({})
+    
+    @cherrypy.expose
+    def ajax_create_procedure(self, id):
+        create_procedure(id, "New Procedure")
+        return json.dumps({})
+    
+    @cherrypy.expose
+    def ajax_create_controller(self, id):
+        create_controller(id, "New Controller")
+        return json.dumps({})
+    
+    @cherrypy.expose
     def ajax_delete(self, id):
         delete_node(id)
         return json.dumps({})
@@ -44,15 +59,6 @@ class Inventory(object):
     @cherrypy.expose
     def ajax_context(self, id):
         return json.dumps(get_context_menu(id))
-    
-    @cherrypy.expose
-    def ajax_get_tabs(self):
-        return json.dumps(self.tabs)
-    
-    @cherrypy.expose
-    def ajax_close_tab(self, item):
-        del self.tabs[item];
-        return json.dumps({})
     
     @cherrypy.expose
     def ajax_select(self, id):
