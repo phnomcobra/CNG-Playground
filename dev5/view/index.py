@@ -33,14 +33,13 @@ def index_view():
         </div>
         <div id="container">
             <div id="inventory">
-                <p>Inventory</p>
             </div>
             <div id="tabs">
-                <div id="handles">
-                    <p>Handles</p>
-                </div>
+                <table>
+                    <tr id="handles">
+                    </tr>
+                </table>
                 <div id="bodies">
-                    <p>Bodies</p>
                 </div>
             </div>
         </div>
