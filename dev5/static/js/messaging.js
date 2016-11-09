@@ -8,8 +8,8 @@ var addMessage = function (message) {
         });
 };
 
-var app = angular.module('messagingApp', []);
-app.controller('messagingCtrl', function($scope, $interval, $http, $sce) {
+var messageingApp = angular.module('messagingApp', []);
+messageingApp.controller('messagingCtrl', function($scope, $interval, $http, $sce) {
     $interval(function () {
             $http.get("messaging/ajax_get_messages").then(function (response) {
             
