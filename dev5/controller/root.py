@@ -22,7 +22,6 @@ from .tabs import Tabs
 class Root(object):
     inventory = Inventory()
     messaging = Messaging()
-    task = Task()
     tabs = Tabs()
 
     @cherrypy.expose

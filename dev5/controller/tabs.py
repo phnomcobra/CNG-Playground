@@ -14,24 +14,28 @@ import json
 
 class Tabs(object):
     def __init__(self):
-        self.tabs = {}
+        self.tabs = []
     
     @cherrypy.expose
     def ajax_get_tabs(self):
-        return json.dumps(self.tabs)
-    
-    @cherrypy.expose
-    def ajax_get_tab(self, id):
-        return json.dumps(self.tabs[id])
+        return json.dumps({"tabs" : self.tabs})
     
     @cherrypy.expose
     def ajax_close_tab(self, id):
-        del self.tabs[id];
-        return json.dumps({})
+        self.tabs.remove(id)
+        return json.dumps({"tabs" : self.tabs})
     
     @cherrypy.expose
-    def ajax_new_tab(self, id, route, label):
-        self.tabs[id] = {};
-        self.tabs[id]["route"] = route;
-        self.tabs[id]["label"] = label;
-        return json.dumps({})
+    def ajax_all_but(self, id):
+        self.tabs = [id]
+        return json.dumps({"tabs" : self.tabs})
+    
+    @cherrypy.expose
+    def ajax_close_all(self):
+        self.tabs = []
+        return json.dumps({"tabs" : self.tabs})
+    
+    @cherrypy.expose
+    def ajax_new_tab(self, id):
+        self.tabs.append(id);
+        return json.dumps({"tabs" : self.tabs})

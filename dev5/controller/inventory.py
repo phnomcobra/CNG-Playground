@@ -12,6 +12,7 @@
 import cherrypy
 import json
 
+from ..model.document import Collection
 from ..model.inventory import get_child_nodes, \
                               set_parent_objuuid, \
                               get_context_menu, \
@@ -63,3 +64,20 @@ class Inventory(object):
     @cherrypy.expose
     def ajax_select(self, id):
         return json.dumps({})
+    
+    @cherrypy.expose
+    def ajax_get_object(self, id):
+        collection = Collection("inventory")
+        return json.dumps(collection.get_object(id).object)
+    
+    @cherrypy.expose
+    def ajax_post_object(self):
+        cl = cherrypy.request.headers['Content-Length']
+        object = json.loads(cherrypy.request.body.read(int(cl)))
+        
+        collection = Collection("inventory")
+        current = collection.get_object(object["objuuid"])
+        current.object = object
+        current.set()
+        
+        return json.dumps(current.object)
