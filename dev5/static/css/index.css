@@ -47,6 +47,13 @@
     background:#090;
 }
 
+.ace_editor {
+    vertical-align: top;
+    float: left;
+    height: 500px;
+    width: 100%;
+}
+
 #opsact {
     display: inline-block;
     vertical-align: top;
