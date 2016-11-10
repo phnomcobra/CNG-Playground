@@ -26,16 +26,12 @@ class Tabs(object):
         return json.dumps({"tabs" : self.tabs})
     
     @cherrypy.expose
-    def ajax_all_but(self, id):
-        self.tabs = [id]
-        return json.dumps({"tabs" : self.tabs})
-    
-    @cherrypy.expose
     def ajax_close_all(self):
         self.tabs = []
         return json.dumps({"tabs" : self.tabs})
     
     @cherrypy.expose
-    def ajax_new_tab(self, id):
-        self.tabs.append(id);
+    def ajax_new_tab(self, id, action, name):
+        if id not in self.tabs:
+            self.tabs.append({"id" : id, "action" : action, "name" : name});
         return json.dumps({"tabs" : self.tabs})
