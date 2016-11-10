@@ -134,7 +134,7 @@ def create_task(parent_objuuid, name):
             "edit" : {
                 "label" : "Edit",
                 "route" : "tabs/ajax_new_tab",
-                "params" : {"id" : task.objuuid}
+                "params" : {"id" : task.objuuid, "action" : "edit", "name" : "edit {0}".format(name)}
             }
         },
         "accepts" : []
@@ -227,22 +227,6 @@ try:
     collection.create_attribute("parent", "['parent']")
 except Exception:
     pass
-
-try:
-    collection.create_attribute("body", "['body']")
-except Exception:
-    pass
-
-try:
-    collection.create_attribute("name", "['name']")
-except Exception:
-    pass
-
-try:
-    collection.create_attribute("type", "['type']")
-except Exception:
-    pass
-    
     
 if not len(collection.find(parent = "#")):
     create_container("#", "root")
