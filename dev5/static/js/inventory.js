@@ -1,6 +1,6 @@
 var contextMenu = {};
-var tabs = {};
 var saving = false;
+var inventoryObjects = {};
 
  $('#inventory').jstree({
 'plugins' : ['contextmenu', 'dnd'],
@@ -92,100 +92,73 @@ $('#inventory').on("move_node.jstree", function(event, data){
 
 var tabUpdate = function () {
     $.ajax({
-            'url' : 'tabs/ajax_get_tabs',
-            'dataType' : 'json',
-            'success' : function(resp) {
-                addMessage("get tabs success " + resp);
-                for(item in resp['tabs']){
-                        if(!document.getElementById('tab-' + resp['tabs'][item])) {
-                            $.ajax({
-                                'url' : 'inventory/ajax_get_object',
-                                'dataType' : 'json',
-                                'data' : {'id' : resp['tabs'][item]},
-                                'success' : function(resp) {
-                                    addMessage("tab load success " + resp);
-                                    
-                                    document.getElementById('bodies').innerHTML += '<div class="TabBody" id="tab-' + resp['objuuid'] + '"></div>';
-                                    
-                                    var row = document.getElementById("handles");
-                                    var cell = row.insertCell(-1);
-                                    cell.innerHTML = '<input type="button" value="' + 
-                                                    resp['name'] + 
-                                                    '" onclick=tabSelect("' + 
-                                                    resp['objuuid'] + 
-                                                    '"); /><input type="button" value="x" onclick=tabClose("' 
-                                                    + resp['objuuid'] + '"); />';
-                                    cell.id = 'handle-' + resp['objuuid'];
-                                    
-                                    if(resp['type'] == 'task') {
-                                        document.getElementById('tab-' + resp['objuuid']).innerHTML = '<div id="ace-' + resp['objuuid'] + '"></div>';
-                                    
-                                        tabs[resp['objuuid']] = {'ace' : new ace.edit('ace-' + resp['objuuid'])};
-                                        tabs[resp['objuuid']]['ace'].setTheme("ace/theme/twilight");
-                                        tabs[resp['objuuid']]['ace'].session.setMode("ace/mode/python");
-                                        tabs[resp['objuuid']]['ace'].setValue(resp['body']);
-                                        tabs[resp['objuuid']]['ace'].selection.moveTo(0, 0);
-                                        tabs[resp['objuuid']]['ace']['inventoryObject'] = resp;
-                                        
-                                        tabs[resp['objuuid']]['ace'].on('change', function(e, f) {
-                                            if(!saving) {
-                                                saving = true;
-                                                f.inventoryObject.body = f.getValue();
-                                                addMessage("saving " + f.inventoryObject['name']);
-                                                $.ajax({
-                                                    type: 'POST',
-                                                    url: 'inventory/ajax_post_object',
-                                                    data: JSON.stringify(f.inventoryObject),
-                                                    contentType: "application/json",
-                                                    success: function (resp) {saving = false; addMessage("save complete");},
-                                                    failure: function (resp) {saving = false; addMessage("save failed!");},
-                                                    dataType: 'json'
-                                                });
-                                            }
-                                        });
-                                    }
-                                    
-                                    tabSelect(resp['objuuid']);
-                                },
-                                'error' : function(resp, status, error) {
-                                    addMessage("tab load failure " + resp);
-                                }
-                            });
-                        }
-                    
-                }
-            },
-            'error' : function(resp, status, error) {
-                addMessage("get tabs failure " + resp);
-                document.getElementById('handles').innerHTML = '';
-            }
-        });
-};
-
-var tabSelect = function (item) {
-    $('.TabBody').each(function(){
-        if($(this).attr('id') == 'tab-' + item) {
-            $(this)[0].style.display = 'block';
+        'url' : 'tabs/ajax_get_tabs',
+        'dataType' : 'json',
+        'success' : function(resp) {
+            document.getElementById('handles').innerHTML = '';
             
-            if(item in tabs) {
-                if('ace' in tabs[item]) {
-                    //tabs[item]['ace'] = new ace.edit('ace-' + item);
+            for(item in resp['tabs']) {
+                if(!inventoryObjects[resp['tabs'][item]['id']]) {
+                    $.ajax({
+                        'url' : 'inventory/ajax_get_object',
+                        'dataType' : 'json',
+                        'data' : {'id' : resp['tabs'][item]['id']},
+                        'success' : function(resp) {
+                            addMessage("object load success " + resp['objuuid']);
+                            resp['changed'] = false;
+                            inventoryObjects[resp['objuuid']] = resp;
+                        },
+                        'error' : function(resp, status, error) {
+                            addMessage("object load failure!");
+                        }
+                    });
                 }
+
+                var row = document.getElementById("handles");
+                var cell = row.insertCell(-1);
+                cell.innerHTML = '<input type="button" value="' + resp['tabs'][item]['name'] + '" onclick="tabSelect(&quot;' + resp['tabs'][item]['id'] + '&quot;, &quot;' + resp['tabs'][item]['action'] + '&quot;);" />';
             }
-        } else {
-            $(this)[0].style.display = 'none';
+        },   
+        'error' : function(resp, status, error) {
+            addMessage("get tabs failure " + resp);
+            document.getElementById('handles').innerHTML = '';
         }
     });
 };
 
-var tabClose = function (item) {
+var editTask = function(resp) {
+    document.getElementById('body').innerHTML = '<div id="aceInstance"></div>' + 
+                                                'Task Name: <input type="text" id="taskName" onchange="setInventoryKey(' + 
+                                                '&quot;' + resp['objuuid'] + '&quot;, &quot;name&quot;, &quot;taskName&quot;)"></input>';
+                                                
+    document.getElementById('taskName').value = resp['name'];
+    var tabBody = new ace.edit(document.getElementById('aceInstance'));
+    
+    tabBody.setTheme("ace/theme/twilight");
+    tabBody.session.setMode("ace/mode/python");
+    tabBody.setValue(resp['body']);
+    tabBody.selection.moveTo(0, 0);
+    tabBody['inventoryObject'] = resp;
+                                        
+    tabBody.on('change', function(e, f) {
+        f.inventoryObject['body'] = f.getValue();
+        f.inventoryObject['changed'] = true;
+    });
+}
+
+var tabSelect = function (objuuid, action) {
+    if(action == 'edit') {
+        editTask(inventoryObjects[objuuid]);
+    }
+};
+
+/*var tabClose = function (item) {
     var handle = document.getElementById('handle-' + item);
     handle.parentNode.removeChild(handle);
     
-    var tab = document.getElementById('tab-' + item);
-    tab.parentNode.removeChild(tab);
+    document.getElementById('body').innerHTML = '';
     
-    delete tabs[item];
+    delete inventoryObjects[item];
     
     $.ajax({
         'url' : 'tabs/ajax_close_tab',
@@ -200,4 +173,45 @@ var tabClose = function (item) {
             addMessage("tab close failure " + resp);
         }
     });
+};*/
+
+var inventoryApp = angular.module('inventoryApp', []);
+inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce) {
+    $interval(function () {
+        for(objuuid in inventoryObjects) {
+            if(inventoryObjects[objuuid]['changed']) {
+                $http.post('inventory/ajax_post_object', JSON.stringify(inventoryObjects[objuuid])
+                ).then(function successCallback(response) {
+                    addMessage("saving " + objuuid);
+                    inventoryObjects[objuuid]['changed'] = false;
+                });
+            }
+        }
+        
+        $http.get("messaging/ajax_get_messages").then(function (response) {
+            var messageData = '<code><table>';
+            var responseJSON = angular.fromJson(response)['data']['messages'];
+            for(item in responseJSON) {
+                messageData += '<tr><td>' + responseJSON[item]['timestamp'] + '</td><td>' + responseJSON[item]['message'] + '</td></tr>';
+            }
+            messageData += '</table></code>'
+            
+            $scope.messages = $sce.trustAsHtml(messageData);
+        });
+    }, 1000);
+});
+
+var addMessage = function (message) {
+    $.ajax({
+        'url' : 'messaging/ajax_add_message',
+        'dataType' : 'json',
+        'data' : {
+            'message' : message
+        },
+    });
 };
+
+var setInventoryKey = function (objuuid, key, div) {
+    inventoryObjects[objuuid][key] = document.getElementById(div).value;
+    inventoryObjects[objuuid]['changed'] = true;
+}
