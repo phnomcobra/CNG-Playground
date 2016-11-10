@@ -23,7 +23,6 @@ def index_view():
     <script src="js/jquery-ui.js"></script>
     <script src="js/jstree.min.js"></script>
     <script src="js/angular.min.js"></script>
-    <script src="js/messaging.js"></script>
     <script src="js/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
@@ -39,12 +38,12 @@ def index_view():
                     <tr id="handles">
                     </tr>
                 </table>
-                <div id="bodies">
+                <div id="body">
                 </div>
             </div>
         </div>
         <div id="messages">
-            <div ng-app="messagingApp" ng-controller="messagingCtrl">
+            <div ng-app="inventoryApp" ng-controller="inventoryCtrl">
                 <div ng-bind-html="messages"></div>
             </div>
         </div>
