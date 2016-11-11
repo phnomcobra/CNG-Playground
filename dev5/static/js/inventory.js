@@ -1,6 +1,6 @@
 var contextMenu = {};
-var saving = false;
 var inventoryObjects = {};
+var tabs = {};
 
  $('#inventory').jstree({
 'plugins' : ['contextmenu', 'dnd'],
@@ -19,7 +19,7 @@ var inventoryObjects = {};
         'ajax_children';
     },
     'data' : function (node) {
-      return { 'id' : node.id };
+      return { 'objuuid' : node.id };
     },
     'dataType' : "json",
   },
@@ -39,28 +39,29 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
             'url' : 'inventory/ajax_context',
             'dataType' : 'json',
             'data' : {
-                'id' : data.node.id
+                'objuuid' : data.node.id
             },
             'success' : function(resp) {
                 for(var item in resp) {
-                    contextMenu[item] = {
-                        'label' : resp[item]['label'],
-                        'route' : resp[item]['route'],
-                        'params' : resp[item]['params'],
-                        'action' : function (obj) {
-                            $.ajax({
-                                'url' : obj.item.route,
-                                'dataType' : 'json',
-                                'data' : obj.item.params,
-                                'success' : function(resp) {
-                                    addMessage("console select success " + resp);
-                                    $('#inventory').jstree('refresh');
-                                    tabUpdate();
-                                },
-                                'error' : function(resp, status, error) {
-                                    addMessage("console select failure " + resp);
-                                }
-                            });
+                    if(resp[item]['action']['method'] == 'ajax') {
+                        contextMenu[item] = {
+                            'label' : resp[item]['label'],
+                            'route' : resp[item]['action']['route'],
+                            'params' : resp[item]['action']['params'],
+                            'action' : function (obj) {
+                                $.ajax({
+                                    'url' : obj.item.route,
+                                    'dataType' : 'json',
+                                    'data' : obj.item.params,
+                                    'success' : function(resp) {
+                                        addMessage("console select success " + resp);
+                                        $('#inventory').jstree('refresh');
+                                    },
+                                    'error' : function(resp, status, error) {
+                                        addMessage("console select failure " + resp);
+                                    }
+                                });
+                            }
                         }
                     }
                 }
@@ -77,8 +78,8 @@ $('#inventory').on("move_node.jstree", function(event, data){
             'url' : 'inventory/ajax_move',
             'dataType' : 'json',
             'data' : {
-                'id' : data.node.id,
-                'parent' : data.node.parent
+                'objuuid' : data.node.id,
+                'parent_objuuid' : data.node.parent
             },
             'success' : function(resp) {
                 addMessage("move success " + resp);
@@ -96,6 +97,8 @@ var tabUpdate = function () {
         'dataType' : 'json',
         'success' : function(resp) {
             document.getElementById('handles').innerHTML = '';
+            
+            tabs = resp['tabs'];
             
             for(item in resp['tabs']) {
                 if(!inventoryObjects[resp['tabs'][item]['id']]) {

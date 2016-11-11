@@ -12,17 +12,13 @@
 import cherrypy
 import json
 
-from random import random
 from ..view.index import index_view
 from .inventory import Inventory
 from .messaging import Messaging
-from .task import Task
-from .tabs import Tabs
 
 class Root(object):
     inventory = Inventory()
     messaging = Messaging()
-    tabs = Tabs()
 
     @cherrypy.expose
     def index(self):

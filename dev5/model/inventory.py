@@ -79,28 +79,33 @@ def create_container(parent_objuuid, name):
         "context" : {
             "new container" : {
                 "label" : "New Container",
-                "route" : "inventory/ajax_create_container",
-                "params" : {"id" : container.objuuid}
+                "action" : {"method" : "ajax",
+                            "route" : "inventory/ajax_create_container",
+                            "params" : {"objuuid" : container.objuuid}}
             },
             "new task" : {
                 "label" : "New Task",
-                "route" : "inventory/ajax_create_task",
-                "params" : {"id" : container.objuuid}
+                "action" : {"method" : "ajax",
+                            "route" : "inventory/ajax_create_task",
+                            "params" : {"objuuid" : container.objuuid}}
             },
             "new procedure" : {
                 "label" : "New Procedure",
-                "route" : "inventory/ajax_create_procedure",
-                "params" : {"id" : container.objuuid}
+                "action" : {"method" : "ajax",
+                            "route" : "inventory/ajax_create_procedure",
+                            "params" : {"objuuid" : container.objuuid}}
             },
             "new controller" : {
                 "label" : "New Controller",
-                "route" : "inventory/ajax_create_controller",
-                "params" : {"id" : container.objuuid}
+                "action" : {"method" : "ajax",
+                            "route" : "inventory/ajax_create_controller",
+                            "params" : {"objuuid" : container.objuuid}}
             },
             "delete" : {
                 "label" : "Delete",
-                "route" : "inventory/ajax_delete",
-                "params" : {"id" : container.objuuid}
+                "action" : {"method" : "ajax",
+                            "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : container.objuuid}}
             }
         },
         "accepts" : ["container", "task"]
@@ -128,13 +133,9 @@ def create_task(parent_objuuid, name):
         "context" : {
             "delete" : {
                 "label" : "Delete",
-                "route" : "inventory/ajax_delete",
-                "params" : {"id" : task.objuuid}
-            },
-            "edit" : {
-                "label" : "Edit",
-                "route" : "tabs/ajax_new_tab",
-                "params" : {"id" : task.objuuid, "action" : "edit", "name" : "edit {0}".format(name)}
+                "action" : {"method" : "ajax",
+                            "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : task.objuuid}}
             }
         },
         "accepts" : []
@@ -163,8 +164,9 @@ def create_procedure(parent_objuuid, name):
         "context" : {
             "delete" : {
                 "label" : "Delete",
-                "route" : "inventory/ajax_delete",
-                "params" : {"id" : procedure.objuuid}
+                "action" : {"method" : "ajax",
+                            "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : procedure.objuuid}}
             }
         },
         "accepts" : []
@@ -188,8 +190,9 @@ def create_controller(parent_objuuid, name):
         "context" : {
             "delete" : {
                 "label" : "Delete",
-                "route" : "inventory/ajax_delete",
-                "params" : {"id" : controller.objuuid}
+                "action" : {"method" : "ajax",
+                            "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : controller.objuuid}}
             }
         },
         "accepts" : []

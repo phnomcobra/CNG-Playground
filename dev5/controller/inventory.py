@@ -24,49 +24,49 @@ from ..model.inventory import get_child_nodes, \
 
 class Inventory(object):
     @cherrypy.expose
-    def ajax_roots(self, id):
-        return json.dumps(get_child_nodes(id))
+    def ajax_roots(self, objuuid):
+        return json.dumps(get_child_nodes(objuuid))
     
     @cherrypy.expose
-    def ajax_move(self, id, parent):
-        set_parent_objuuid(id, parent)
+    def ajax_move(self, objuuid, parent_objuuid):
+        set_parent_objuuid(objuuid, parent_objuuid)
         return json.dumps({})
     
     @cherrypy.expose
-    def ajax_create_container(self, id):
-        create_container(id, "New Container")
+    def ajax_create_container(self, objuuid):
+        create_container(objuuid, "New Container")
         return json.dumps({})
     
     @cherrypy.expose
-    def ajax_create_task(self, id):
-        create_task(id, "New Task")
+    def ajax_create_task(self, objuuid):
+        create_task(objuuid, "New Task")
         return json.dumps({})
     
     @cherrypy.expose
-    def ajax_create_procedure(self, id):
-        create_procedure(id, "New Procedure")
+    def ajax_create_procedure(self, objuuid):
+        create_procedure(objuuid, "New Procedure")
         return json.dumps({})
     
     @cherrypy.expose
-    def ajax_create_controller(self, id):
-        create_controller(id, "New Controller")
+    def ajax_create_controller(self, objuuid):
+        create_controller(objuuid, "New Controller")
         return json.dumps({})
     
     @cherrypy.expose
-    def ajax_delete(self, id):
-        delete_node(id)
+    def ajax_delete(self, objuuid):
+        delete_node(objuuid)
         return json.dumps({})
     
     @cherrypy.expose
-    def ajax_context(self, id):
-        return json.dumps(get_context_menu(id))
+    def ajax_context(self, objuuid):
+        return json.dumps(get_context_menu(objuuid))
     
     @cherrypy.expose
-    def ajax_select(self, id):
+    def ajax_select(self, objuuid):
         return json.dumps({})
     
     @cherrypy.expose
-    def ajax_get_object(self, id):
+    def ajax_get_object(self, objuuid):
         collection = Collection("inventory")
         return json.dumps(collection.get_object(id).object)
     
