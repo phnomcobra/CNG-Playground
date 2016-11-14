@@ -106,6 +106,12 @@ def create_container(parent_objuuid, name):
                 "action" : {"method" : "ajax",
                             "route" : "inventory/ajax_delete",
                             "params" : {"objuuid" : container.objuuid}}
+            },
+            "edit" : {
+                "label" : "Edit",
+                "action" : {"method" : "edit container",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : container.objuuid}}
             }
         },
         "accepts" : ["container", "task"]
@@ -172,6 +178,12 @@ def create_procedure(parent_objuuid, name):
                 "label" : "Delete",
                 "action" : {"method" : "ajax",
                             "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : procedure.objuuid}}
+            },
+            "edit" : {
+                "label" : "Edit",
+                "action" : {"method" : "edit procedure",
+                            "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : procedure.objuuid}}
             }
         },
