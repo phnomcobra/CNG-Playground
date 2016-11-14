@@ -59,9 +59,15 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                     } else if(obj.item.method == 'edit task') {
                                         addMessage("edit task success");
                                         inventoryObject = resp;
-                                        console.log(resp);
                                         editTask();
-                                        $('#inventory').jstree('refresh');
+                                    } else if(obj.item.method == 'edit container') {
+                                        addMessage("edit container success");
+                                        inventoryObject = resp;
+                                        editContainer();
+                                    } else if(obj.item.method == 'edit procedure') {
+                                        addMessage("edit procedure success");
+                                        inventoryObject = resp;
+                                        editProcedure();
                                     }
                                 },
                                 'error' : function(resp, status, error) {
@@ -89,6 +95,7 @@ $('#inventory').on("move_node.jstree", function(event, data){
             },
             'success' : function(resp) {
                 addMessage("move success " + resp);
+                $('#inventory').jstree('refresh');
             },
             'error' : function(resp, status, error) {
                 addMessage("move failure " + resp);
@@ -98,11 +105,11 @@ $('#inventory').on("move_node.jstree", function(event, data){
 });
 
 var editTask = function() {
-    document.getElementById('body').innerHTML = '<div id="aceInstance"></div>' + 
-                                                'Task Name: <input type="text" id="taskName" onchange="setInventoryKey(' + 
-                                                '&quot;name&quot;, &quot;taskName&quot;)"></input>';
-                                                
+    document.getElementById('body').innerHTML = '<div id="aceInstance"></div>';
+    
+    document.getElementById('attributes').innerHTML = 'Task Name: <input type="text" id="taskName" onchange="setInventoryKey(&quot;name&quot;, &quot;taskName&quot;)"></input>';
     document.getElementById('taskName').value = inventoryObject['name'];
+
     var editor = new ace.edit(document.getElementById('aceInstance'));
     
     editor.setTheme("ace/theme/twilight");
@@ -117,6 +124,45 @@ var editTask = function() {
     });
 }
 
+var editContainer = function() {
+    document.getElementById('body').innerHTML = '';
+    document.getElementById('attributes').innerHTML = 'Container Name: <input type="text" id="containerName" onchange="setInventoryKey(&quot;name&quot;, &quot;containerName&quot;)"></input>';
+    document.getElementById('containerName').value = inventoryObject['name'];
+}
+
+var editProcedure = function() {
+    document.getElementById('body').innerHTML = '';
+    $.ajax({
+        'url' : 'procedure/edit',
+        'data' : {
+            'description' : inventoryObject['description']
+        },
+        'success' : function(resp) {
+            document.getElementById('body').innerHTML = resp;
+            $("#procedureEditTabs").tabs();
+        },
+        'error' : function(resp, status, error) {
+            document.getElementById('body').innerHTML = '';
+        }
+    });
+    
+    document.getElementById('attributes').innerHTML = '';
+    $.ajax({
+        'url' : 'procedure/attributes',
+        'data' : {
+            'name' : inventoryObject['name'],
+            'title' : inventoryObject['title'],
+            'objuuid' : inventoryObject['objuuid']
+        },
+        'success' : function(resp) {
+            document.getElementById('attributes').innerHTML = resp;
+        },
+        'error' : function(resp, status, error) {
+            document.getElementById('attributes').innerHTML = '';
+        }
+    });
+}
+
 var inventoryApp = angular.module('inventoryApp', []);
 inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce) {
     $interval(function () {
@@ -125,6 +171,11 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
             ).then(function successCallback(response) {
                 addMessage("saving " + inventoryObject['objuuid']);
                 inventoryObject['changed'] = false;
+                
+                if(inventoryObject['refreshTree']) {
+                    $('#inventory').jstree('refresh');
+                    inventoryObject['refreshTree'] = false;
+                }
             });
         }
         
@@ -154,4 +205,8 @@ var addMessage = function (message) {
 var setInventoryKey = function (key, div) {
     inventoryObject[key] = document.getElementById(div).value;
     inventoryObject['changed'] = true;
+    
+    if(key == 'name') {
+        inventoryObject['refreshTree'] = true;
+    }
 }
