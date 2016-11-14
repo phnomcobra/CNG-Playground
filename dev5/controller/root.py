@@ -15,10 +15,12 @@ import json
 from ..view.index import index_view
 from .inventory import Inventory
 from .messaging import Messaging
+from .procedure import Procedure
 
 class Root(object):
     inventory = Inventory()
     messaging = Messaging()
+    procedure = Procedure()
 
     @cherrypy.expose
     def index(self):
