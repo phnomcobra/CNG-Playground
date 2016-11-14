@@ -68,7 +68,7 @@ class Inventory(object):
     @cherrypy.expose
     def ajax_get_object(self, objuuid):
         collection = Collection("inventory")
-        return json.dumps(collection.get_object(id).object)
+        return json.dumps(collection.get_object(objuuid).object)
     
     @cherrypy.expose
     def ajax_post_object(self):

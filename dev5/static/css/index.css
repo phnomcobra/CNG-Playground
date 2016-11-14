@@ -24,7 +24,7 @@
     background:#FF0;
 }
 
-#tabs {
+#body {
     height: inherit;
     width: 100%;
     display: table-cell;
@@ -32,26 +32,9 @@
     background:#0F0;
 }
 
-#handles {
-    display: inline-block;
-    vertical-align: top;
-    width: 100%;
-    background:#900;
-}
-
-#body {
-    height: inherit;
-    width: 100%;
-    vertical-align: top;
-    background:#090;
-    display: table;
-}
-
 .ace_editor {
-    display:table-cell;
-    height: inherit;
+    height: 90%;
     width: 100%;
-    display: table-cell;
     vertical-align: top;
 }
 

@@ -136,6 +136,12 @@ def create_task(parent_objuuid, name):
                 "action" : {"method" : "ajax",
                             "route" : "inventory/ajax_delete",
                             "params" : {"objuuid" : task.objuuid}}
+            },
+            "edit" : {
+                "label" : "Edit",
+                "action" : {"method" : "edit task",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : task.objuuid}}
             }
         },
         "accepts" : []

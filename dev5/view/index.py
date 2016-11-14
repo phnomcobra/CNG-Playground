@@ -31,16 +31,8 @@ def index_view():
             <p>Operations Action Ribbon</p>
         </div>
         <div id="container">
-            <div id="inventory">
-            </div>
-            <div id="tabs">
-                <table>
-                    <tr id="handles">
-                    </tr>
-                </table>
-                <div id="body">
-                </div>
-            </div>
+            <div id="inventory"></div>
+            <div id="body"></div>
         </div>
         <div id="messages">
             <div ng-app="inventoryApp" ng-controller="inventoryCtrl">
