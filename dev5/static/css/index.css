@@ -1,11 +1,17 @@
-#ops {
+#jqmpage {
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
     right: 0;
     width: 100%;
-    height: 90%;
+    height: calc(100% - 150px);
+}
+
+#ops {
+    width: 100%;
+    height: 100%;
+    display: table;
 }
 
 #container {
@@ -13,27 +19,37 @@
     vertical-align: top;
     width: inherit;
     height: inherit;
+}
+
+#leftContainer {
+     display: table-cell;
+     background:#F90;
+}
+
+#leftTopContainer {
+    display:absolute;
+    height:50%;
+    overflow:auto;
     background:#FF0;
 }
 
-#inventory {
-    display:table-cell;
-    vertical-align: top;
-    float: left;
-    height: inherit;
-    background:#FF0;
+#leftBottomContainer {
+    display:absolute;
+    height:50%;
+    overflow:auto;
+    background:#F90;
 }
 
 #body {
-    height: inherit;
-    width: 100%;
     display: table-cell;
     vertical-align: top;
     background:#0F0;
+    height: 100%;
+    width: 100%;
 }
 
 .ace_editor {
-    height: 90%;
+    height: 100%;
     width: 100%;
     vertical-align: top;
 }
@@ -46,8 +62,9 @@
 }
 
 #messages {
-    display: inline-block;
-    vertical-align: top;
+    display: block;
+    vertical-align: bottom;
     width: 100%;
+    height: 100%;
     background:#99F;
 }
