@@ -9,16 +9,15 @@
 # 10/25/2016 Original construction
 ################################################################################
 
-import cherrypy
-
 def index_view():
     return """<!doctype html>
 <html>
 <head>
     <title>DEV5 Index</title>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" name="viewport" content="width=device-width, height=device-height, initial-scale=1">
     <link rel="stylesheet" href="css/index.css" />
     <link rel="stylesheet" href="css/style.min.css" />
+    <link rel="stylesheet" href="css/jquery-ui.css">
     <script src="js/jquery.js"></script>
     <script src="js/jquery-ui.js"></script>
     <script src="js/jstree.min.js"></script>
@@ -26,21 +25,29 @@ def index_view():
     <script src="js/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
-    <div id="ops">
-        <div id="opsact">
+    <div id="jqmpage" data-role="page">
+        <div id="opsact" data-role="header" data-position="fixed">
             <p>Operations Action Ribbon</p>
         </div>
-        <div id="container">
-            <div id="inventory"></div>
-            <div id="body"></div>
-        </div>
-        <div id="messages">
-            <div ng-app="inventoryApp" ng-controller="inventoryCtrl">
-                <div ng-bind-html="messages"></div>
+        <div id="ops" data-role="main" class="ui-content">
+            <div id="container">
+                <div id="leftContainer">
+                    <div id="leftTopContainer">
+                        <div id="inventory"></div>
+                    </div>
+                    <div id="leftButtomContainer">
+                        <div id="attributes"></div>
+                    </div>
+                </div>
+                <div id="body"></div>
             </div>
         </div>
+        <div id="messages" data-role="footer" data-position="fixed">
+            <div ng-app="inventoryApp" ng-controller="inventoryCtrl">
+            <div ng-bind-html="messages"></div>
+        </div>
     </div>
-    <script src="js/inventory.js"></script>
+    <script src="js/inventory.js"></script>    
 </body>
 
 </html>"""
