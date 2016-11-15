@@ -54,6 +54,19 @@
     vertical-align: top;
 }
 
+#taskTable {
+    display:absolute;
+    height:50%;
+    overflow:auto;
+}
+
+#taskTableContainer {
+    display:absolute;
+    height:100%;
+    overflow:auto;
+    background:#999;
+}
+
 #opsact {
     display: inline-block;
     vertical-align: top;
