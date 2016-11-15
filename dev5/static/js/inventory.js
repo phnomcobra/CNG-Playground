@@ -64,10 +64,14 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit container success");
                                         inventoryObject = resp;
                                         editContainer();
-                                    } else if(obj.item.method == 'edit procedure') {
+                                    } else if(obj.item.method == 'edit procedure description') {
                                         addMessage("edit procedure success");
                                         inventoryObject = resp;
-                                        editProcedure();
+                                        editProcedureDescription();
+                                    } else if(obj.item.method == 'edit procedure tasks') {
+                                        addMessage("edit procedure success");
+                                        inventoryObject = resp;
+                                        editProcedureTasks();
                                     }
                                 },
                                 'error' : function(resp, status, error) {
@@ -130,20 +134,19 @@ var editContainer = function() {
     document.getElementById('containerName').value = inventoryObject['name'];
 }
 
-var editProcedure = function() {
-    document.getElementById('body').innerHTML = '';
-    $.ajax({
-        'url' : 'procedure/edit',
-        'data' : {
-            'description' : inventoryObject['description']
-        },
-        'success' : function(resp) {
-            document.getElementById('body').innerHTML = resp;
-            $("#procedureEditTabs").tabs();
-        },
-        'error' : function(resp, status, error) {
-            document.getElementById('body').innerHTML = '';
-        }
+var editProcedureDescription = function() {
+    document.getElementById('body').innerHTML = '<div id="aceInstance"></div>';
+    var editor = new ace.edit(document.getElementById('aceInstance'));
+    
+    editor.setTheme("ace/theme/twilight");
+    editor.session.setMode("ace/mode/text");
+    editor.setValue(inventoryObject['description']);
+    editor.selection.moveTo(0, 0);
+    editor['inventoryObject'] = inventoryObject;
+                                        
+    editor.on('change', function(e, f) {
+        f.inventoryObject['description'] = f.getValue();
+        f.inventoryObject['changed'] = true;
     });
     
     document.getElementById('attributes').innerHTML = '';
@@ -162,6 +165,104 @@ var editProcedure = function() {
         }
     });
 }
+
+
+
+var createTaskTableRow = function (rowIndex) {
+    var taskTable = document.getElementById("taskTable");
+    var row;
+    var cell;
+    
+    row = taskTable.insertRow(rowIndex + 1);
+    cell = row.insertCell(-1);
+    cell.innerHTML = rowIndex;
+    
+    cell = row.insertCell(-1);
+    cell.innerHTML = '<img src="images/plus_icon.png" onclick="insertProcedureTask(' + rowIndex + ')" />';
+    
+    cell = row.insertCell(-1);
+    cell.innerHTML = '<img src="images/x_icon.png" onclick="deleteProcedureTask(' + rowIndex + ')" />';
+    
+    cell = row.insertCell(-1);
+    cell.innerHTML = '<img src="images/up_icon.png"/>';
+    
+    cell = row.insertCell(-1);
+    cell.innerHTML = '<img src="images/down_icon.png"/>';
+    
+    cell = row.insertCell(-1);
+    cell.innerHTML = '<img src="images/paste_icon.png"/>';
+}
+
+var populateTaskTable = function() {
+    document.getElementById('body').innerHTML = '<div id="taskTableContainer"><table id="taskTable"></table></div>';
+    
+    var taskTable = document.getElementById("taskTable");
+    var row;
+    var cell;
+    
+    row = taskTable.insertRow(rowIndex);
+    cell = row.insertCell(-1);
+    cell.innerHTML = '<b>Row</b>';
+    
+    cell = row.insertCell(-1);
+    cell.innerHTML = '<b>Insert</b>';
+    
+    cell = row.insertCell(-1);
+    cell.innerHTML = '<b>Delete</b>';
+    
+    cell = row.insertCell(-1);
+    cell.innerHTML = '<b>Move Up</b>';
+    
+    cell = row.insertCell(-1);
+    cell.innerHTML = '<b>Move Down</b>';
+    
+    cell = row.insertCell(-1);
+    cell.innerHTML = '<b>Paste</b>';
+    
+    for(var rowIndex = 0; rowIndex < inventoryObject['tasks'].length; rowIndex++) {
+        createTaskTableRow(rowIndex);
+    }
+}
+
+var insertProcedureTask = function(rowIndex) {
+    inventoryObject['tasks'].splice(rowIndex, 0, null);
+    inventoryObject['changed'] = true;
+    populateTaskTable();
+}
+
+var deleteProcedureTask = function(rowIndex) {
+    inventoryObject['tasks'].splice(rowIndex, 1);
+    inventoryObject['changed'] = true;
+    populateTaskTable();
+}
+
+var editProcedureTasks = function() {
+    if(inventoryObject['tasks'].length == 0) {
+        inventoryObject['tasks'].push(null);
+        inventoryObject['changed'] = true;
+    }
+    
+    populateTaskTable();
+    
+    document.getElementById('attributes').innerHTML = '';
+    $.ajax({
+        'url' : 'procedure/attributes',
+        'data' : {
+            'name' : inventoryObject['name'],
+            'title' : inventoryObject['title'],
+            'objuuid' : inventoryObject['objuuid']
+        },
+        'success' : function(resp) {
+            document.getElementById('attributes').innerHTML = resp;
+        },
+        'error' : function(resp, status, error) {
+            document.getElementById('attributes').innerHTML = '';
+        }
+    });
+}
+
+
+
 
 var inventoryApp = angular.module('inventoryApp', []);
 inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce) {
