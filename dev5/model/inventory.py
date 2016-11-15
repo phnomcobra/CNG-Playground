@@ -180,9 +180,15 @@ def create_procedure(parent_objuuid, name):
                             "route" : "inventory/ajax_delete",
                             "params" : {"objuuid" : procedure.objuuid}}
             },
-            "edit" : {
-                "label" : "Edit",
-                "action" : {"method" : "edit procedure",
+            "edit description" : {
+                "label" : "Edit Description",
+                "action" : {"method" : "edit procedure description",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : procedure.objuuid}}
+            },
+            "edit tasks" : {
+                "label" : "Edit Tasks",
+                "action" : {"method" : "edit procedure tasks",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : procedure.objuuid}}
             }
