@@ -8,63 +8,70 @@
     height: calc(100% - 150px);
 }
 
-#ops {
-    width: 100%;
-    height: 100%;
+.tbl {
     display: table;
-}
-
-#container {
-    display: table;
-    vertical-align: top;
     width: inherit;
     height: inherit;
 }
 
-#leftContainer {
-     display: table-cell;
-     background:#F90;
+#ops {
+    display: table;
+    width: 100%;
+    height: 100%;
 }
 
-#leftTopContainer {
-    display:absolute;
-    height:50%;
-    overflow:auto;
-    background:#FF0;
+
+.tblrow {
+    display: table-row;
+    width: inherit;
+    height: inherit;
 }
 
-#leftBottomContainer {
-    display:absolute;
-    height:50%;
-    overflow:auto;
-    background:#F90;
+.tblcell {
+    display: table-cell;
+    width: inherit;
+    height: inherit;    
 }
 
 #body {
-    display: table-cell;
-    vertical-align: top;
+    //display: table-cell;
+    //vertical-align: top;
     background:#0F0;
-    height: 100%;
-    width: 100%;
+    //height: 100%;
+    //width: 50%;
 }
 
 .ace_editor {
     height: 100%;
     width: 100%;
-    vertical-align: top;
+    //vertical-align: top;
+}
+
+#attributes {
+    background:#F90;
+    //height: 100%;
+    //width: 100%;
+    //overflow: auto;
+    //display: absolute;
+}
+
+#inventory {
+    background:#FF0;
+    //height: 100%;
+    //width: 100%;
+    //overflow: auto;
+    //display: absolute;
 }
 
 #taskTable {
-    display:absolute;
-    height:50%;
-    overflow:auto;
 }
 
 #taskTableContainer {
-    display:absolute;
-    height:100%;
-    overflow:auto;
-    background:#999;
+    //display:absolute;
+    //height:inherit;
+    //width:inherit;
+    //overflow:auto;
+    //background:#999;
 }
 
 #opsact {

@@ -30,16 +30,18 @@ def index_view():
             <p>Operations Action Ribbon</p>
         </div>
         <div id="ops" data-role="main" class="ui-content">
-            <div id="container">
-                <div id="leftContainer">
-                    <div id="leftTopContainer">
-                        <div id="inventory"></div>
-                    </div>
-                    <div id="leftButtomContainer">
-                        <div id="attributes"></div>
+            <div class="tblrow">
+                <div class="tblcell">
+                    <div class="tbl">
+                        <div class="tblrow">
+                            <div id="inventory" class="tblcell"></div>
+                        </div>
+                        <div class="tblrow">
+                            <div id="attributes" class="tblcell"></div>
+                        </div>
                     </div>
                 </div>
-                <div id="body"></div>
+                <div class="tblcell" id="body"></div>
             </div>
         </div>
         <div id="messages" data-role="footer" data-position="fixed">
