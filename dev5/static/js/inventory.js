@@ -1,5 +1,6 @@
 var contextMenu = {};
 var inventoryObject = {};
+var saving = false;
 
  $('#inventory').jstree({
 'plugins' : ['contextmenu', 'dnd'],
@@ -29,6 +30,25 @@ var inventoryObject = {};
         'url': "css/style.min.css"
     }
 }
+});
+
+$(document).on('dnd_stop.vakata', function (e, data) {
+    $.ajax({
+        'url' : 'inventory/ajax_get_object',
+        'dataType' : 'json',
+        'data' : {'objuuid' : data.data.nodes[0]},
+        'success' : function(resp) {
+            if(resp['type'] == 'task' && 
+               document.getElementById("taskTable") &&
+               inventoryObject['type'] == 'procedure') {
+                inventoryObject['tasks'].push(resp['objuuid']);
+                inventoryObject['changed'] = true;
+                populateTaskTable();
+            }
+        },
+        'error' : function(resp, status, error) {
+        }
+    });
 });
 
 $('#inventory').on('select_node.jstree', function (evt, data) {
@@ -166,68 +186,76 @@ var editProcedureDescription = function() {
     });
 }
 
-
-
-var createTaskTableRow = function (rowIndex) {
+var createTaskTableRow = function (rowIndex, objuuid) {
     var taskTable = document.getElementById("taskTable");
-    var row;
-    var cell;
+    var taskRow;
+    var taskCell;
     
-    row = taskTable.insertRow(rowIndex + 1);
-    cell = row.insertCell(-1);
-    cell.innerHTML = rowIndex;
+    taskRow = taskTable.insertRow(rowIndex);
     
-    cell = row.insertCell(-1);
-    cell.innerHTML = '<img src="images/plus_icon.png" onclick="insertProcedureTask(' + rowIndex + ')" />';
+    taskCell = taskRow.insertCell(-1);
+    taskCell.innerHTML = rowIndex;
     
-    cell = row.insertCell(-1);
-    cell.innerHTML = '<img src="images/x_icon.png" onclick="deleteProcedureTask(' + rowIndex + ')" />';
+    taskCell = taskRow.insertCell(-1);
+    taskCell.innerHTML = '<table></table>';
     
-    cell = row.insertCell(-1);
-    cell.innerHTML = '<img src="images/up_icon.png"/>';
+    var tileRow;
+    var tileCell;
+    var tileTable = taskCell.childNodes[0];
     
-    cell = row.insertCell(-1);
-    cell.innerHTML = '<img src="images/down_icon.png"/>';
+    tileRow = tileTable.insertRow(-1);
     
-    cell = row.insertCell(-1);
-    cell.innerHTML = '<img src="images/paste_icon.png"/>';
+    tileCell = tileRow.insertCell(-1);
+    tileCell.innerHTML = '<img src="images/up_icon.png" onclick="moveUpProcedureTask(' + rowIndex + ')" />';
+    
+    tileCell = tileRow.insertCell(-1);
+    tileCell.innerHTML = '<img src="images/edit_icon.png" onclick="loadAndEditTask(&quot;' + objuuid + '&quot;)" />';
+    
+    tileCell = tileRow.insertCell(-1);
+    tileCell.innerHTML = '<div name="name-' + objuuid + '"><img src="images/throbber.gif"/></div>';
+    
+    tileRow = tileTable.insertRow(-1);
+    
+    
+    tileCell = tileRow.insertCell(-1);
+    tileCell.innerHTML = '<img src="images/down_icon.png" onclick="moveDownProcedureTask(' + rowIndex + ')" />';
+    
+    tileCell = tileRow.insertCell(-1);
+    tileCell.innerHTML = '<img src="images/x_icon.png" onclick="deleteProcedureTask(' + rowIndex + ')" />';
+    
+    tileCell = tileRow.insertCell(-1);
+    tileCell.innerHTML = objuuid;
+    
+    $.ajax({
+        'url' : 'inventory/ajax_get_object',
+        'dataType' : 'json',
+        'data' : {'objuuid' : objuuid},
+        'success' : function(resp) {
+            var elements = document.getElementsByName('name-' + objuuid);
+            for(var element in elements) {elements[element].innerHTML = resp['name'];}
+        }
+    });
+}
+
+var loadAndEditTask = function(objuuid) {
+    document.getElementById('body').innerHTML = '';
+    $.ajax({
+        'url' : 'inventory/ajax_get_object',
+        'dataType' : 'json',
+        'data' : {'objuuid' : objuuid},
+        'success' : function(resp) {
+            inventoryObject = resp;
+            editTask();
+        }
+    });
 }
 
 var populateTaskTable = function() {
-    document.getElementById('body').innerHTML = '<div id="taskTableContainer"><table id="taskTable"></table></div>';
-    
-    var taskTable = document.getElementById("taskTable");
-    var row;
-    var cell;
-    
-    row = taskTable.insertRow(rowIndex);
-    cell = row.insertCell(-1);
-    cell.innerHTML = '<b>Row</b>';
-    
-    cell = row.insertCell(-1);
-    cell.innerHTML = '<b>Insert</b>';
-    
-    cell = row.insertCell(-1);
-    cell.innerHTML = '<b>Delete</b>';
-    
-    cell = row.insertCell(-1);
-    cell.innerHTML = '<b>Move Up</b>';
-    
-    cell = row.insertCell(-1);
-    cell.innerHTML = '<b>Move Down</b>';
-    
-    cell = row.insertCell(-1);
-    cell.innerHTML = '<b>Paste</b>';
+    document.getElementById('body').innerHTML = '<table id="taskTable"></table>';
     
     for(var rowIndex = 0; rowIndex < inventoryObject['tasks'].length; rowIndex++) {
-        createTaskTableRow(rowIndex);
+        createTaskTableRow(rowIndex, inventoryObject['tasks'][rowIndex]);
     }
-}
-
-var insertProcedureTask = function(rowIndex) {
-    inventoryObject['tasks'].splice(rowIndex, 0, null);
-    inventoryObject['changed'] = true;
-    populateTaskTable();
 }
 
 var deleteProcedureTask = function(rowIndex) {
@@ -236,11 +264,23 @@ var deleteProcedureTask = function(rowIndex) {
     populateTaskTable();
 }
 
-var editProcedureTasks = function() {
-    if(inventoryObject['tasks'].length == 0) {
-        inventoryObject['tasks'].push(null);
+var moveUpProcedureTask = function(rowIndex) {
+    if(rowIndex > 0) {
+        inventoryObject['tasks'][rowIndex] = inventoryObject['tasks'].splice(rowIndex - 1, 1, inventoryObject['tasks'][rowIndex])[0];
         inventoryObject['changed'] = true;
+        populateTaskTable();
     }
+}
+
+var moveDownProcedureTask = function(rowIndex) {
+    if(rowIndex < inventoryObject['tasks'].length - 1) {
+        inventoryObject['tasks'][rowIndex] = inventoryObject['tasks'].splice(rowIndex + 1, 1, inventoryObject['tasks'][rowIndex])[0];
+        inventoryObject['changed'] = true;
+        populateTaskTable();
+    }
+}
+
+var editProcedureTasks = function() {
     
     populateTaskTable();
     
@@ -267,16 +307,21 @@ var editProcedureTasks = function() {
 var inventoryApp = angular.module('inventoryApp', []);
 inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce) {
     $interval(function () {
-        if(inventoryObject['changed']) {
+        if(inventoryObject['changed'] && !saving) {
+            saving = true;
             $http.post('inventory/ajax_post_object', JSON.stringify(inventoryObject)
             ).then(function successCallback(response) {
                 addMessage("saving " + inventoryObject['objuuid']);
+                saving = false;
                 inventoryObject['changed'] = false;
                 
                 if(inventoryObject['refreshTree']) {
                     $('#inventory').jstree('refresh');
                     inventoryObject['refreshTree'] = false;
                 }
+            }, function errorCallback(response) {
+                addMessage("save failure " + inventoryObject['objuuid']);
+                saving = false;
             });
         }
         
