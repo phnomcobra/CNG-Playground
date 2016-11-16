@@ -25,29 +25,20 @@ def index_view():
     <script src="js/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 </head>
 <body>
-    <div id="jqmpage" data-role="page">
-        <div id="opsact" data-role="header" data-position="fixed">
+    <div id="jqmpage">
+        <header id="opsact">
             <p>Operations Action Ribbon</p>
-        </div>
-        <div id="ops" data-role="main" class="ui-content">
-            <div class="tblrow">
-                <div class="tblcell">
-                    <div class="tbl">
-                        <div class="tblrow">
-                            <div id="inventory" class="tblcell"></div>
-                        </div>
-                        <div class="tblrow">
-                            <div id="attributes" class="tblcell"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="tblcell" id="body"></div>
-            </div>
-        </div>
-        <div id="messages" data-role="footer" data-position="fixed">
+        </header>
+        <nav>
+            <div id="inventory"></div>
+            <div id="attributes"></div>
+        </nav>
+        <article id="body"></article>
+        <footer>
             <div ng-app="inventoryApp" ng-controller="inventoryCtrl">
-            <div ng-bind-html="messages"></div>
-        </div>
+                <div ng-bind-html="messages"></div>
+            </div>
+        </footer>
     </div>
     <script src="js/inventory.js"></script>    
 </body>
