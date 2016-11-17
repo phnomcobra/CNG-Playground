@@ -101,6 +101,12 @@ def create_container(parent_objuuid, name):
                             "route" : "inventory/ajax_create_controller",
                             "params" : {"objuuid" : container.objuuid}}
             },
+            "new rfc" : {
+                "label" : "New RFC",
+                "action" : {"method" : "ajax",
+                            "route" : "inventory/ajax_create_rfc",
+                            "params" : {"objuuid" : container.objuuid}}
+            },
             "delete" : {
                 "label" : "Delete",
                 "action" : {"method" : "ajax",
@@ -191,6 +197,12 @@ def create_procedure(parent_objuuid, name):
                 "action" : {"method" : "edit procedure tasks",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : procedure.objuuid}}
+            },
+            "edit rfcs" : {
+                "label" : "Edit RFCs",
+                "action" : {"method" : "edit procedure rfcs",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : procedure.objuuid}}
             }
         },
         "accepts" : []
@@ -201,6 +213,44 @@ def create_procedure(parent_objuuid, name):
     parent.set()
     
     procedure.set()
+
+def create_rfc(parent_objuuid, name):
+    collection = Collection("inventory")
+    rfc = collection.get_object()
+    rfc.object = {
+        "type" : "rfc",
+        "parent" : parent_objuuid,
+        "children" : [],
+        "name" : name,
+        "title" : "",
+        "description" : "",
+        "poc name" : "",
+        "poc email" : "",
+        "poc phone" : "",
+        "number" : "",
+        "icon" : "/images/rfc_icon.png",
+        "context" : {
+            "delete" : {
+                "label" : "Delete",
+                "action" : {"method" : "ajax",
+                            "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : rfc.objuuid}}
+            },
+            "edit" : {
+                "label" : "Edit",
+                "action" : {"method" : "edit rfc",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : rfc.objuuid}}
+            }
+        },
+        "accepts" : []
+    }
+    
+    parent = collection.get_object(parent_objuuid)
+    parent.object["children"].append(rfc.objuuid)
+    parent.set()
+    
+    rfc.set()
 
 def create_controller(parent_objuuid, name):
     collection = Collection("inventory")
