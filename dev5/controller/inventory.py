@@ -20,7 +20,8 @@ from ..model.inventory import get_child_nodes, \
                               create_container, \
                               create_task, \
                               create_procedure, \
-                              create_controller
+                              create_controller, \
+                              create_rfc
 
 class Inventory(object):
     @cherrypy.expose
@@ -50,6 +51,11 @@ class Inventory(object):
     @cherrypy.expose
     def ajax_create_controller(self, objuuid):
         create_controller(objuuid, "New Controller")
+        return json.dumps({})
+    
+    @cherrypy.expose
+    def ajax_create_rfc(self, objuuid):
+        create_rfc(objuuid, "New RFC")
         return json.dumps({})
     
     @cherrypy.expose
