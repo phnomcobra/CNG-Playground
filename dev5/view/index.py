@@ -23,6 +23,10 @@ def index_view():
     <script src="js/jstree.min.js"></script>
     <script src="js/angular.min.js"></script>
     <script src="js/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/procedure.js"></script>
+    <script src="js/task.js"></script>
+    <script src="js/rfc.js"></script>
+    <script src="js/container.js"></script>
 </head>
 <body>
     <div id="jqmpage">
