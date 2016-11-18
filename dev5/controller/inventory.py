@@ -14,6 +14,7 @@ import json
 
 from ..model.document import Collection
 from ..model.inventory import get_child_nodes, \
+                              get_status_objects, \
                               set_parent_objuuid, \
                               get_context_menu, \
                               delete_node, \
@@ -21,7 +22,8 @@ from ..model.inventory import get_child_nodes, \
                               create_task, \
                               create_procedure, \
                               create_controller, \
-                              create_rfc
+                              create_rfc, \
+                              create_status_code
 
 class Inventory(object):
     @cherrypy.expose
@@ -41,6 +43,11 @@ class Inventory(object):
     @cherrypy.expose
     def ajax_create_task(self, objuuid):
         create_task(objuuid, "New Task")
+        return json.dumps({})
+    
+    @cherrypy.expose
+    def ajax_create_status_code(self, objuuid):
+        create_status_code(objuuid, "New Status Code")
         return json.dumps({})
     
     @cherrypy.expose
@@ -75,6 +82,10 @@ class Inventory(object):
     def ajax_get_object(self, objuuid):
         collection = Collection("inventory")
         return json.dumps(collection.get_object(objuuid).object)
+    
+    @cherrypy.expose
+    def ajax_get_status_objects(self):
+        return json.dumps(get_status_objects())
     
     @cherrypy.expose
     def ajax_post_object(self):
