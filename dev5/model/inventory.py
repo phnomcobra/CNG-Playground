@@ -39,18 +39,20 @@ def get_child_nodes(objuuid):
 def set_parent_objuuid(objuuid, parent_objuuid):
     collection = Collection("inventory")
 
-    new_parent = collection.get_object(parent_objuuid)
     current = collection.get_object(objuuid)
-    parent = collection.get_object(current.object["parent"])
-        
-    parent.object["children"].remove(objuuid)
-    parent.set()
+    
+    if current.object["parent"] != '#':
+        parent = collection.get_object(current.object["parent"])
+        parent.object["children"].remove(objuuid)
+        parent.set()
 
     current.object["parent"] = parent_objuuid
     current.set()
-
-    new_parent.object["children"].append(objuuid)
-    new_parent.set()
+    
+    if parent_objuuid != '#':
+        new_parent = collection.get_object(parent_objuuid)
+        new_parent.object["children"].append(objuuid)
+        new_parent.set()
     
 def delete_node(objuuid):
     collection = Collection("inventory")
@@ -105,6 +107,12 @@ def create_container(parent_objuuid, name):
                 "label" : "New RFC",
                 "action" : {"method" : "ajax",
                             "route" : "inventory/ajax_create_rfc",
+                            "params" : {"objuuid" : container.objuuid}}
+            },
+            "new status" : {
+                "label" : "New Status Code",
+                "action" : {"method" : "ajax",
+                            "route" : "inventory/ajax_create_status_code",
                             "params" : {"objuuid" : container.objuuid}}
             },
             "delete" : {
@@ -174,7 +182,6 @@ def create_procedure(parent_objuuid, name):
         "children" : [],
         "name" : name,
         "tasks" : [],
-        "continue" : [],
         "title" : "",
         "description" : "",
         "rfcs" : [],
@@ -278,6 +285,45 @@ def create_controller(parent_objuuid, name):
     
     controller.set()
 
+def create_status_code(parent_objuuid, name):
+    status = Collection("inventory")
+    status = collection.get_object()
+    status.object = {
+        "type" : "status",
+        "parent" : parent_objuuid,
+        "children" : [],
+        "name" : name,
+        "alias" : "STATUS_{0}".format(str(name).upper()),
+        "code" : 0,
+        "abbreviation" : name,
+        "cfg" : "000000",
+        "cbg" : "FFFFFF",
+        "sfg" : "000000",
+        "sbg" : "999999",
+        "icon" : "/images/status_icon.png",
+        "context" : {
+            "delete" : {
+                "label" : "Delete",
+                "action" : {"method" : "ajax",
+                            "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : status.objuuid}}
+            },
+            "edit" : {
+                "label" : "Edit",
+                "action" : {"method" : "edit status code",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : status.objuuid}}
+            }
+        },
+        "accepts" : []
+    }
+    
+    parent = collection.get_object(parent_objuuid)
+    parent.object["children"].append(status.objuuid)
+    parent.set()
+    
+    status.set()
+
 def get(objuuid, **kargs):
     collection = Collection("inventory")
     object = collection.get_object(objuuid)
@@ -299,9 +345,30 @@ def set(objuuid, **kargs):
     
     object.set()
 
+def get_status_objects():
+    collection = Collection("inventory")
+    
+    status_objects = []
+    
+    for object in collection.find(type = "status"):
+        status_objects.append(object.object)
+        
+    return status_objects
+    
 collection = Collection("inventory")
+
 try:
     collection.create_attribute("parent", "['parent']")
+except Exception:
+    pass
+
+try:
+    collection.create_attribute("type", "['type']")
+except Exception:
+    pass
+
+try:
+    collection.create_attribute("name", "['name']")
 except Exception:
     pass
     
