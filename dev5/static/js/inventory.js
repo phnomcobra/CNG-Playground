@@ -107,6 +107,10 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit rfc success");
                                         inventoryObject = resp;
                                         editRFC();
+                                    } else if(obj.item.method == 'edit status code') {
+                                        addMessage("edit rfc success");
+                                        inventoryObject = resp;
+                                        editStatusCode();
                                     }
                                 },
                                 'error' : function(resp, status, error) {
@@ -159,6 +163,37 @@ var addAttributeTextBox = function(fieldName, inventoryKey) {
     var id = 'inventory-obj-key-' + inventoryKey;
     attributeCell.innerHTML = '<input type="text" id="' + id + '" onchange="setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
     document.getElementById(id).value = inventoryObject[inventoryKey];
+}
+
+var addAttributeCheckBox = function(fieldName, inventoryKey) {
+    var attributeTable = document.getElementById("attributesTable");
+    var attributeRow = attributeTable.insertRow(-1);
+    var attributeCell;
+    
+    attributeCell = attributeRow.insertCell(-1);
+    attributeCell.innerHTML = fieldName;
+    
+    attributeCell = attributeRow.insertCell(-1);
+    var id = 'inventory-obj-key-' + inventoryKey;
+    attributeCell.innerHTML = '<input type="checkbox" id="' + id + '" onchange="this.value = this.checked;setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)"></input>';
+    document.getElementById(id).checked = inventoryObject[inventoryKey];
+    document.getElementById(id).value = inventoryObject[inventoryKey];
+}
+
+var addAttributeColor = function(fieldName, inventoryKey) {
+    var attributeTable = document.getElementById("attributesTable");
+    var attributeRow = attributeTable.insertRow(-1);
+    var attributeCell;
+    
+    attributeCell = attributeRow.insertCell(-1);
+    attributeCell.innerHTML = fieldName;
+    
+    attributeCell = attributeRow.insertCell(-1);
+    var id = 'inventory-obj-key-' + inventoryKey;
+    attributeCell.innerHTML = '<input class="jscolor" id="' + id + '" onchange="setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
+    jsc.tryInstallOnElements([document.getElementById(id)], "jscolor");
+    jsc.register();
+    document.getElementById(id).jscolor.fromString(inventoryObject[inventoryKey]);
 }
 
 var addAttributeText = function(fieldName, inventoryKey) {

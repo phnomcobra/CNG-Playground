@@ -26,12 +26,34 @@ var moveDownProcedureTask = function(rowIndex) {
     }
 }
 
-var editProcedureRFCs = function() {
+var populateProcedureAttributes = function() {
     initAttributes();
+    
     addAttributeText('Procedure UUID', 'objuuid');
     addAttributeTextBox('Procedure Name', 'name');
     addAttributeTextBox('Procedure Title', 'title');
     
+    $.ajax({
+        'url' : 'inventory/ajax_get_status_objects',
+        'dataType' : 'json',
+        'success' : function(resp) {
+            for(var i = 0; i < resp.length; i++) {
+                resp[i];
+                
+                var continueKey = 'continue ' + resp[i].code;
+                
+                if(!(inventoryObject.hasOwnProperty(continueKey))) {
+                    inventoryObject[continueKey] = false;
+                }
+                
+                addAttributeCheckBox('Continue on ' + resp[i].name, continueKey);
+            }
+        }
+    });
+}
+
+var editProcedureRFCs = function() {
+    populateProcedureAttributes();
     populateRFCTable();
 }
 
@@ -143,11 +165,7 @@ var createRFCTableRow = function (rowIndex, objuuid) {
 }
 
 var editProcedureTasks = function() {
-    initAttributes();
-    addAttributeText('Procedure UUID', 'objuuid');
-    addAttributeTextBox('Procedure Name', 'name');
-    addAttributeTextBox('Procedure Title', 'title');
-    
+    populateProcedureAttributes();    
     populateTaskTable();
 }
 
