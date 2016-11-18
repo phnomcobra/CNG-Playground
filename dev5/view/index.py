@@ -27,6 +27,8 @@ def index_view():
     <script src="js/task.js"></script>
     <script src="js/rfc.js"></script>
     <script src="js/container.js"></script>
+    <script src="js/status.js"></script>
+    <script src="js/jscolor.js"></script>
 </head>
 <body>
     <div id="jqmpage">
