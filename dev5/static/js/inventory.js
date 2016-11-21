@@ -3,7 +3,7 @@ var inventoryObject = {};
 var saving = false;
 
  $('#inventory').jstree({
-'plugins' : ['contextmenu', 'dnd'],
+'plugins' : ['contextmenu', 'dnd', 'checkbox'],
 'contextmenu': {
     'items': 
         function (obj) {
@@ -34,27 +34,42 @@ var saving = false;
 
 $(document).on('dnd_stop.vakata', function (e, data) {
     if(data.event.toElement.id == 'body') {
-        $.ajax({
-            'url' : 'inventory/ajax_get_object',
-            'dataType' : 'json',
-            'data' : {'objuuid' : data.data.nodes[0]},
-            'success' : function(resp) {
-                if(resp['type'] == 'task' && 
-                   document.getElementById('taskTable') &&
-                   inventoryObject['type'] == 'procedure') {
-                    inventoryObject['tasks'].push(resp['objuuid']);
-                    inventoryObject['changed'] = true;
-                    populateTaskTable();
-                } else if(resp['type'] == 'rfc' && 
-                          document.getElementById('rfcTable') &&
-                          inventoryObject['type'] == 'procedure' &&
-                          inventoryObject['rfcs'].indexOf(resp['objuuid']) == -1) {
-                    inventoryObject['rfcs'].push(resp['objuuid']);
-                    inventoryObject['changed'] = true;
-                    populateRFCTable();
+        var nodes = $('#inventory').jstree().get_selected(true);
+    
+        for(i in nodes) {
+            $.ajax({
+                'url' : 'inventory/ajax_get_object',
+                'dataType' : 'json',
+                'data' : {'objuuid' : nodes[i].id},
+                'success' : function(resp) {
+                    $('#inventory').jstree("deselect_all");
+                    if(resp['type'] == 'task' && 
+                       document.getElementById('taskTable') &&
+                       inventoryObject['type'] == 'procedure') {
+                        inventoryObject['tasks'].push(resp['objuuid']);
+                        inventoryObject['changed'] = true;
+                    } else if(resp['type'] == 'rfc' && 
+                              document.getElementById('rfcTable') &&
+                              inventoryObject['type'] == 'procedure' &&
+                              inventoryObject['rfcs'].indexOf(resp['objuuid']) == -1) {
+                        inventoryObject['rfcs'].push(resp['objuuid']);
+                        inventoryObject['changed'] = true;
+                    } else if(resp['type'] == 'host' && 
+                              document.getElementById('controllerTable') &&
+                              inventoryObject['type'] == 'controller' &&
+                              inventoryObject['hosts'].indexOf(resp['objuuid']) == -1) {
+                        inventoryObject['hosts'].push(resp['objuuid']);
+                        inventoryObject['changed'] = true;
+                    } else if(resp['type'] == 'procedure' && 
+                              document.getElementById('controllerTable') &&
+                              inventoryObject['type'] == 'controller' &&
+                              inventoryObject['procedures'].indexOf(resp['objuuid']) == -1) {
+                        inventoryObject['procedures'].push(resp['objuuid']);
+                        inventoryObject['changed'] = true;
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 });
 
@@ -80,6 +95,7 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                 'dataType' : 'json',
                                 'data' : obj.item.params,
                                 'success' : function(resp) {
+                                    $('#inventory').jstree("deselect_all");
                                     if(obj.item.method == 'ajax') {
                                         addMessage("console select success " + resp);
                                         $('#inventory').jstree('refresh'); 
@@ -108,9 +124,17 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         inventoryObject = resp;
                                         editRFC();
                                     } else if(obj.item.method == 'edit status code') {
-                                        addMessage("edit rfc success");
+                                        addMessage("edit status success");
                                         inventoryObject = resp;
                                         editStatusCode();
+                                    } else if(obj.item.method == 'edit host') {
+                                        addMessage("edit host success");
+                                        inventoryObject = resp;
+                                        editHost();
+                                    } else if(obj.item.method == 'edit controller') {
+                                        addMessage("edit controller success");
+                                        inventoryObject = resp;
+                                        editController();
                                     }
                                 },
                                 'error' : function(resp, status, error) {
@@ -129,6 +153,7 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
 );
 
 $('#inventory').on("move_node.jstree", function(event, data){
+        $('#inventory').jstree("deselect_all");
         $.ajax({
             'url' : 'inventory/ajax_move',
             'dataType' : 'json',
@@ -138,7 +163,6 @@ $('#inventory').on("move_node.jstree", function(event, data){
             },
             'success' : function(resp) {
                 addMessage("move success " + resp);
-                $('#inventory').jstree('refresh');
             },
             'error' : function(resp, status, error) {
                 addMessage("move failure " + resp);
@@ -225,6 +249,19 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
                     $('#inventory').jstree('refresh');
                     inventoryObject['refreshTree'] = false;
                 }
+                
+                if(document.getElementById('taskTable')) {
+                    populateTaskTable();
+                }
+                
+                if(document.getElementById('rfcTable')) {
+                    populateRFCTable();
+                }
+                
+                if(document.getElementById('controllerTable')) {
+                    populateControllerTable();
+                }
+                
             }, function errorCallback(response) {
                 addMessage("save failure " + inventoryObject['objuuid']);
                 saving = false;
@@ -259,6 +296,6 @@ var setInventoryKey = function (key, div) {
     inventoryObject['changed'] = true;
     
     if(key == 'name') {
-        inventoryObject['refreshTree'] = true;
+        $("#inventory").jstree('rename_node', inventoryObject['objuuid'] , inventoryObject[key]);
     }
 }

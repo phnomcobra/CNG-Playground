@@ -1,20 +1,17 @@
 var deleteProcedureTask = function(rowIndex) {
     inventoryObject['tasks'].splice(rowIndex, 1);
     inventoryObject['changed'] = true;
-    populateTaskTable();
 }
 
 var deleteProcedureRFC = function(rowIndex) {
     inventoryObject['rfcs'].splice(rowIndex, 1);
     inventoryObject['changed'] = true;
-    populateRFCTable();
 }
 
 var moveUpProcedureTask = function(rowIndex) {
     if(rowIndex > 0) {
         inventoryObject['tasks'][rowIndex] = inventoryObject['tasks'].splice(rowIndex - 1, 1, inventoryObject['tasks'][rowIndex])[0];
         inventoryObject['changed'] = true;
-        populateTaskTable();
     }
 }
 
@@ -22,7 +19,6 @@ var moveDownProcedureTask = function(rowIndex) {
     if(rowIndex < inventoryObject['tasks'].length - 1) {
         inventoryObject['tasks'][rowIndex] = inventoryObject['tasks'].splice(rowIndex + 1, 1, inventoryObject['tasks'][rowIndex])[0];
         inventoryObject['changed'] = true;
-        populateTaskTable();
     }
 }
 
