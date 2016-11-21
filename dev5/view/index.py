@@ -29,6 +29,8 @@ def index_view():
     <script src="js/container.js"></script>
     <script src="js/status.js"></script>
     <script src="js/jscolor.js"></script>
+    <script src="js/host.js"></script>
+    <script src="js/controller.js"></script>
 </head>
 <body>
     <div id="jqmpage">
