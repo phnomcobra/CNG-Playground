@@ -115,6 +115,12 @@ def create_container(parent_objuuid, name):
                             "route" : "inventory/ajax_create_status_code",
                             "params" : {"objuuid" : container.objuuid}}
             },
+            "new host" : {
+                "label" : "New Host",
+                "action" : {"method" : "ajax",
+                            "route" : "inventory/ajax_create_host",
+                            "params" : {"objuuid" : container.objuuid}}
+            },
             "delete" : {
                 "label" : "Delete",
                 "action" : {"method" : "ajax",
@@ -266,6 +272,8 @@ def create_controller(parent_objuuid, name):
         "type" : "controller",
         "parent" : parent_objuuid,
         "children" : [],
+        "hosts" : [],
+        "procedures" : [],
         "name" : name,
         "icon" : "/images/controller_icon.png",
         "context" : {
@@ -273,6 +281,12 @@ def create_controller(parent_objuuid, name):
                 "label" : "Delete",
                 "action" : {"method" : "ajax",
                             "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : controller.objuuid}}
+            },
+            "edit" : {
+                "label" : "Edit",
+                "action" : {"method" : "edit controller",
+                            "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : controller.objuuid}}
             }
         },
@@ -323,6 +337,39 @@ def create_status_code(parent_objuuid, name):
     parent.set()
     
     status.set()
+
+def create_host(parent_objuuid, name):
+    host = Collection("inventory")
+    host = collection.get_object()
+    host.object = {
+        "type" : "host",
+        "parent" : parent_objuuid,
+        "children" : [],
+        "name" : name,
+        "host" : "",
+        "icon" : "/images/host_icon.png",
+        "context" : {
+            "delete" : {
+                "label" : "Delete",
+                "action" : {"method" : "ajax",
+                            "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : host.objuuid}}
+            },
+            "edit" : {
+                "label" : "Edit",
+                "action" : {"method" : "edit host",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : host.objuuid}}
+            }
+        },
+        "accepts" : []
+    }
+    
+    parent = collection.get_object(parent_objuuid)
+    parent.object["children"].append(host.objuuid)
+    parent.set()
+    
+    host.set()
 
 def get(objuuid, **kargs):
     collection = Collection("inventory")
