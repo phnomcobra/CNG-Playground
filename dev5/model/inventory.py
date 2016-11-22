@@ -81,49 +81,49 @@ def create_container(parent_objuuid, name):
         "context" : {
             "new container" : {
                 "label" : "New Container",
-                "action" : {"method" : "ajax",
+                "action" : {"method" : "create container",
                             "route" : "inventory/ajax_create_container",
                             "params" : {"objuuid" : container.objuuid}}
             },
             "new task" : {
                 "label" : "New Task",
-                "action" : {"method" : "ajax",
+                "action" : {"method" : "create task",
                             "route" : "inventory/ajax_create_task",
                             "params" : {"objuuid" : container.objuuid}}
             },
             "new procedure" : {
                 "label" : "New Procedure",
-                "action" : {"method" : "ajax",
+                "action" : {"method" : "create procedure",
                             "route" : "inventory/ajax_create_procedure",
                             "params" : {"objuuid" : container.objuuid}}
             },
             "new controller" : {
                 "label" : "New Controller",
-                "action" : {"method" : "ajax",
+                "action" : {"method" : "create controller",
                             "route" : "inventory/ajax_create_controller",
                             "params" : {"objuuid" : container.objuuid}}
             },
             "new rfc" : {
                 "label" : "New RFC",
-                "action" : {"method" : "ajax",
+                "action" : {"method" : "create rfc",
                             "route" : "inventory/ajax_create_rfc",
                             "params" : {"objuuid" : container.objuuid}}
             },
             "new status" : {
                 "label" : "New Status Code",
-                "action" : {"method" : "ajax",
+                "action" : {"method" : "create status",
                             "route" : "inventory/ajax_create_status_code",
                             "params" : {"objuuid" : container.objuuid}}
             },
             "new host" : {
                 "label" : "New Host",
-                "action" : {"method" : "ajax",
+                "action" : {"method" : "create host",
                             "route" : "inventory/ajax_create_host",
                             "params" : {"objuuid" : container.objuuid}}
             },
             "delete" : {
                 "label" : "Delete",
-                "action" : {"method" : "ajax",
+                "action" : {"method" : "delete node",
                             "route" : "inventory/ajax_delete",
                             "params" : {"objuuid" : container.objuuid}}
             },
@@ -145,6 +145,7 @@ def create_container(parent_objuuid, name):
         parent.set()
     
     container.set()
+    return container.object
 
 def create_task(parent_objuuid, name):
     collection = Collection("inventory")
@@ -159,7 +160,7 @@ def create_task(parent_objuuid, name):
         "context" : {
             "delete" : {
                 "label" : "Delete",
-                "action" : {"method" : "ajax",
+                "action" : {"method" : "delete node",
                             "route" : "inventory/ajax_delete",
                             "params" : {"objuuid" : task.objuuid}}
             },
@@ -178,6 +179,7 @@ def create_task(parent_objuuid, name):
     parent.set()
     
     task.set()
+    return task.object
 
 def create_procedure(parent_objuuid, name):
     collection = Collection("inventory")
@@ -195,25 +197,13 @@ def create_procedure(parent_objuuid, name):
         "context" : {
             "delete" : {
                 "label" : "Delete",
-                "action" : {"method" : "ajax",
+                "action" : {"method" : "delete node",
                             "route" : "inventory/ajax_delete",
                             "params" : {"objuuid" : procedure.objuuid}}
             },
-            "edit description" : {
-                "label" : "Edit Description",
-                "action" : {"method" : "edit procedure description",
-                            "route" : "inventory/ajax_get_object",
-                            "params" : {"objuuid" : procedure.objuuid}}
-            },
-            "edit tasks" : {
-                "label" : "Edit Tasks",
-                "action" : {"method" : "edit procedure tasks",
-                            "route" : "inventory/ajax_get_object",
-                            "params" : {"objuuid" : procedure.objuuid}}
-            },
-            "edit rfcs" : {
-                "label" : "Edit RFCs",
-                "action" : {"method" : "edit procedure rfcs",
+            "edit" : {
+                "label" : "Edit",
+                "action" : {"method" : "edit procedure",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : procedure.objuuid}}
             }
@@ -226,6 +216,7 @@ def create_procedure(parent_objuuid, name):
     parent.set()
     
     procedure.set()
+    return procedure.object
 
 def create_rfc(parent_objuuid, name):
     collection = Collection("inventory")
@@ -245,7 +236,7 @@ def create_rfc(parent_objuuid, name):
         "context" : {
             "delete" : {
                 "label" : "Delete",
-                "action" : {"method" : "ajax",
+                "action" : {"method" : "delete node",
                             "route" : "inventory/ajax_delete",
                             "params" : {"objuuid" : rfc.objuuid}}
             },
@@ -264,6 +255,7 @@ def create_rfc(parent_objuuid, name):
     parent.set()
     
     rfc.set()
+    return rfc.object
 
 def create_controller(parent_objuuid, name):
     collection = Collection("inventory")
@@ -279,7 +271,7 @@ def create_controller(parent_objuuid, name):
         "context" : {
             "delete" : {
                 "label" : "Delete",
-                "action" : {"method" : "ajax",
+                "action" : {"method" : "delete node",
                             "route" : "inventory/ajax_delete",
                             "params" : {"objuuid" : controller.objuuid}}
             },
@@ -298,6 +290,7 @@ def create_controller(parent_objuuid, name):
     parent.set()
     
     controller.set()
+    return controller.object
 
 def create_status_code(parent_objuuid, name):
     status = Collection("inventory")
@@ -318,7 +311,7 @@ def create_status_code(parent_objuuid, name):
         "context" : {
             "delete" : {
                 "label" : "Delete",
-                "action" : {"method" : "ajax",
+                "action" : {"method" : "delete node",
                             "route" : "inventory/ajax_delete",
                             "params" : {"objuuid" : status.objuuid}}
             },
@@ -337,6 +330,7 @@ def create_status_code(parent_objuuid, name):
     parent.set()
     
     status.set()
+    return status.object
 
 def create_host(parent_objuuid, name):
     host = Collection("inventory")
@@ -351,7 +345,7 @@ def create_host(parent_objuuid, name):
         "context" : {
             "delete" : {
                 "label" : "Delete",
-                "action" : {"method" : "ajax",
+                "action" : {"method" : "delete node",
                             "route" : "inventory/ajax_delete",
                             "params" : {"objuuid" : host.objuuid}}
             },
@@ -370,6 +364,7 @@ def create_host(parent_objuuid, name):
     parent.set()
     
     host.set()
+    return host.object
 
 def get(objuuid, **kargs):
     collection = Collection("inventory")
