@@ -10,15 +10,11 @@
 ################################################################################
 
 import cherrypy
+import json
 
-from ..view.procedure import edit_view, \
-                             attribute_view
+from ..model.procedure import get_task_grid
 
 class Procedure(object):
     @cherrypy.expose
-    def edit(self, description):
-        return edit_view(description)
-    
-    @cherrypy.expose
-    def attributes(self, name, title, objuuid):
-        return attribute_view(name, title, objuuid)
+    def ajax_get_task_grid(self, objuuid):
+        return json.dumps(get_task_grid(objuuid))

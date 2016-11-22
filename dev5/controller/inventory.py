@@ -12,6 +12,8 @@
 import cherrypy
 import json
 
+from time import sleep
+
 from ..model.document import Collection
 from ..model.inventory import get_child_nodes, \
                               get_status_objects, \
@@ -27,54 +29,63 @@ from ..model.inventory import get_child_nodes, \
                               create_host
 
 class Inventory(object):
+    def __init__(self):
+        self.moving = False
+
     @cherrypy.expose
     def ajax_roots(self, objuuid):
         return json.dumps(get_child_nodes(objuuid))
     
     @cherrypy.expose
     def ajax_move(self, objuuid, parent_objuuid):
-        set_parent_objuuid(objuuid, parent_objuuid)
+        while self.moving:
+            sleep(.1)
+        
+        try:
+            self.moving = True
+            set_parent_objuuid(objuuid, parent_objuuid)
+        except Exception as e:
+            pass
+        finally:
+            self.moving = False
+            
         return json.dumps({})
     
     @cherrypy.expose
     def ajax_create_container(self, objuuid):
-        create_container(objuuid, "New Container")
-        return json.dumps({})
+        return json.dumps(create_container(objuuid, "New Container"))
     
     @cherrypy.expose
     def ajax_create_host(self, objuuid):
-        create_host(objuuid, "New Host")
-        return json.dumps({})
+        return json.dumps(create_host(objuuid, "New Host"))
     
     @cherrypy.expose
     def ajax_create_task(self, objuuid):
-        create_task(objuuid, "New Task")
-        return json.dumps({})
+        return json.dumps(create_task(objuuid, "New Task"))
     
     @cherrypy.expose
     def ajax_create_status_code(self, objuuid):
-        create_status_code(objuuid, "New Status Code")
-        return json.dumps({})
+        return json.dumps(create_status_code(objuuid, "New Status Code"))
     
     @cherrypy.expose
     def ajax_create_procedure(self, objuuid):
-        create_procedure(objuuid, "New Procedure")
-        return json.dumps({})
+        return json.dumps(create_procedure(objuuid, "New Procedure"))
     
     @cherrypy.expose
     def ajax_create_controller(self, objuuid):
-        create_controller(objuuid, "New Controller")
-        return json.dumps({})
+        return json.dumps(create_controller(objuuid, "New Controller"))
     
     @cherrypy.expose
     def ajax_create_rfc(self, objuuid):
-        create_rfc(objuuid, "New RFC")
-        return json.dumps({})
+        return json.dumps(create_rfc(objuuid, "New RFC"))
     
     @cherrypy.expose
     def ajax_delete(self, objuuid):
+        while self.moving:
+            sleep(.1)
+            
         delete_node(objuuid)
-        return json.dumps({})
+        return json.dumps({"id" : objuuid})
     
     @cherrypy.expose
     def ajax_context(self, objuuid):
