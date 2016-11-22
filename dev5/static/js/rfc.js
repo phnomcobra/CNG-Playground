@@ -1,5 +1,5 @@
 var editRFC = function() {
-    document.getElementById('body').innerHTML = '<div id="aceInstance"></div>';
+    document.getElementById('body').innerHTML = '';
     
     initAttributes();
     addAttributeText('RFC UUID', 'objuuid');
@@ -9,19 +9,7 @@ var editRFC = function() {
     addAttributeTextBox('POC Name', 'poc name');
     addAttributeTextBox('POC Email', 'poc email');
     addAttributeTextBox('POC Phone', 'poc phone');
-    
-    var editor = new ace.edit(document.getElementById('aceInstance'));
-    
-    editor.setTheme("ace/theme/twilight");
-    editor.session.setMode("ace/mode/text");
-    editor.setValue(inventoryObject['description']);
-    editor.selection.moveTo(0, 0);
-    editor['inventoryObject'] = inventoryObject;
-                                        
-    editor.on('change', function(e, f) {
-        f.inventoryObject['description'] = f.getValue();
-        f.inventoryObject['changed'] = true;
-    });
+    addAttributeTextArea('Description', 'description');
 }
 
 var loadAndEditRFC = function(objuuid) {

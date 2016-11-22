@@ -33,9 +33,9 @@ var saving = false;
 });
 
 $(document).on('dnd_stop.vakata', function (e, data) {
-    if(data.event.toElement.id == 'body') {
+    if(data.event.target.offsetParent.id == 'taskGrid' ||
+       data.event.target.offsetParent.className == 'js-grid-body') {
         var nodes = $('#inventory').jstree().get_selected(true);
-    
         for(i in nodes) {
             $.ajax({
                 'url' : 'inventory/ajax_get_object',
@@ -43,35 +43,29 @@ $(document).on('dnd_stop.vakata', function (e, data) {
                 'data' : {'objuuid' : nodes[i].id},
                 'success' : function(resp) {
                     $('#inventory').jstree("deselect_all");
-                    if(resp['type'] == 'task' && 
-                       document.getElementById('taskTable') &&
-                       inventoryObject['type'] == 'procedure') {
-                        inventoryObject['tasks'].push(resp['objuuid']);
-                        inventoryObject['changed'] = true;
-                    } else if(resp['type'] == 'rfc' && 
-                              document.getElementById('rfcTable') &&
-                              inventoryObject['type'] == 'procedure' &&
-                              inventoryObject['rfcs'].indexOf(resp['objuuid']) == -1) {
-                        inventoryObject['rfcs'].push(resp['objuuid']);
-                        inventoryObject['changed'] = true;
-                    } else if(resp['type'] == 'host' && 
-                              document.getElementById('controllerTable') &&
-                              inventoryObject['type'] == 'controller' &&
-                              inventoryObject['hosts'].indexOf(resp['objuuid']) == -1) {
-                        inventoryObject['hosts'].push(resp['objuuid']);
-                        inventoryObject['changed'] = true;
-                    } else if(resp['type'] == 'procedure' && 
-                              document.getElementById('controllerTable') &&
-                              inventoryObject['type'] == 'controller' &&
-                              inventoryObject['procedures'].indexOf(resp['objuuid']) == -1) {
-                        inventoryObject['procedures'].push(resp['objuuid']);
-                        inventoryObject['changed'] = true;
+                    if(resp['type'] == 'task') {
+                        addProcedureTask(resp['objuuid']);
                     }
                 }
             });
         }
     }
 });
+
+var createNode = function(object) {
+    var parentNode = $('#inventory').find("[id='" + object['parent'] + "']");
+    $('#inventory').jstree('create_node', parentNode, {'id' : object['objuuid'], 'parent' : object['parent'], 'text' : object['name'], 'icon' : object['icon']}, 'last', false, false);
+}
+
+var deleteNode = function(objuuid) {
+    var node = $('#inventory').find("[id='" + objuuid + "']");
+    $('#inventory').jstree('delete_node', node);
+    if(inventoryObject['objuuid'] == objuuid) {
+        inventoryObject = {}
+        document.getElementById('attributes').innerHTML = '';
+        document.getElementById('body').innerHTML = '';
+    }
+}
 
 $('#inventory').on('select_node.jstree', function (evt, data) {
         contextMenu = {};
@@ -96,9 +90,41 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                 'data' : obj.item.params,
                                 'success' : function(resp) {
                                     $('#inventory').jstree("deselect_all");
-                                    if(obj.item.method == 'ajax') {
-                                        addMessage("console select success " + resp);
-                                        $('#inventory').jstree('refresh'); 
+                                    if(obj.item.method == 'create container') {
+                                        addMessage('create container success');
+                                        inventoryObject = resp;
+                                        createNode(resp);
+                                        editContainer();
+                                    } else if(obj.item.method == 'create task') {
+                                        addMessage('create task success');
+                                        inventoryObject = resp;
+                                        createNode(resp);
+                                        editTask();
+                                    } else if(obj.item.method == 'create rfc') {
+                                        addMessage('create rfc success');
+                                        inventoryObject = resp;
+                                        createNode(resp);
+                                        editRFC();
+                                    } else if(obj.item.method == 'create procedure') {
+                                        addMessage('create procedure success');
+                                        inventoryObject = resp;
+                                        createNode(resp);
+                                        editProcedure();
+                                    } else if(obj.item.method == 'create status') {
+                                        addMessage('create status success');
+                                        inventoryObject = resp;
+                                        createNode(resp);
+                                        editStatusCode();
+                                    } else if(obj.item.method == 'create host') {
+                                        addMessage('create host success');
+                                        inventoryObject = resp;
+                                        createNode(resp);
+                                        editHost();
+                                    } else if(obj.item.method == 'create controller') {
+                                        addMessage('create controller success');
+                                        inventoryObject = resp;
+                                        createNode(resp);
+                                        editController();
                                     } else if(obj.item.method == 'edit task') {
                                         addMessage("edit task success");
                                         inventoryObject = resp;
@@ -107,18 +133,10 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit container success");
                                         inventoryObject = resp;
                                         editContainer();
-                                    } else if(obj.item.method == 'edit procedure description') {
+                                    } else if(obj.item.method == 'edit procedure') {
                                         addMessage("edit procedure success");
                                         inventoryObject = resp;
-                                        editProcedureDescription();
-                                    } else if(obj.item.method == 'edit procedure tasks') {
-                                        addMessage("edit procedure success");
-                                        inventoryObject = resp;
-                                        editProcedureTasks();
-                                    } else if(obj.item.method == 'edit procedure rfcs') {
-                                        addMessage("edit procedure success");
-                                        inventoryObject = resp;
-                                        editProcedureRFCs();
+                                        editProcedure();
                                     } else if(obj.item.method == 'edit rfc') {
                                         addMessage("edit rfc success");
                                         inventoryObject = resp;
@@ -135,6 +153,9 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit controller success");
                                         inventoryObject = resp;
                                         editController();
+                                    } else if(obj.item.method == 'delete node') {
+                                        addMessage("delete success");
+                                        deleteNode(resp['id']);
                                     }
                                 },
                                 'error' : function(resp, status, error) {
@@ -152,7 +173,7 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
     }
 );
 
-$('#inventory').on("move_node.jstree", function(event, data){
+$('#inventory').on("move_node.jstree", function(event, data) {
         $('#inventory').jstree("deselect_all");
         $.ajax({
             'url' : 'inventory/ajax_move',
@@ -162,10 +183,10 @@ $('#inventory').on("move_node.jstree", function(event, data){
                 'parent_objuuid' : data.node.parent
             },
             'success' : function(resp) {
-                addMessage("move success " + resp);
+                addMessage('move success');
             },
             'error' : function(resp, status, error) {
-                addMessage("move failure " + resp);
+                addMessage('move failure');
                 $('#inventory').jstree('refresh');
             }
         });
@@ -186,6 +207,20 @@ var addAttributeTextBox = function(fieldName, inventoryKey) {
     attributeCell = attributeRow.insertCell(-1);
     var id = 'inventory-obj-key-' + inventoryKey;
     attributeCell.innerHTML = '<input type="text" id="' + id + '" onchange="setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
+    document.getElementById(id).value = inventoryObject[inventoryKey];
+}
+
+var addAttributeTextArea = function(fieldName, inventoryKey) {
+    var attributeTable = document.getElementById("attributesTable");
+    var attributeRow = attributeTable.insertRow(-1);
+    var attributeCell;
+    
+    attributeCell = attributeRow.insertCell(-1);
+    attributeCell.innerHTML = fieldName;
+    
+    attributeCell = attributeRow.insertCell(-1);
+    var id = 'inventory-obj-key-' + inventoryKey;
+    attributeCell.innerHTML = '<textarea rows = "5" id="' + id + '" onchange="setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)" style="width:98%;"></textarea>';
     document.getElementById(id).value = inventoryObject[inventoryKey];
 }
 
@@ -248,18 +283,6 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
                 if(inventoryObject['refreshTree']) {
                     $('#inventory').jstree('refresh');
                     inventoryObject['refreshTree'] = false;
-                }
-                
-                if(document.getElementById('taskTable')) {
-                    populateTaskTable();
-                }
-                
-                if(document.getElementById('rfcTable')) {
-                    populateRFCTable();
-                }
-                
-                if(document.getElementById('controllerTable')) {
-                    populateControllerTable();
                 }
                 
             }, function errorCallback(response) {
