@@ -14,15 +14,18 @@ def index_view():
 <html>
 <head>
     <title>DEV5 Index</title>
-    <meta charset="UTF-8" name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+    <meta charset="UTF-8">
     <link rel="stylesheet" href="css/index.css" />
     <link rel="stylesheet" href="css/style.min.css" />
     <link rel="stylesheet" href="css/jquery-ui.css">
+    <link rel="stylesheet" href="css/jsgrid.min.css">
+    <link rel="stylesheet" href="css/jsgrid-theme.min.css">
     <script src="js/jquery.js"></script>
     <script src="js/jquery-ui.js"></script>
+    <script src="js/jsgrid.min.js"></script>
     <script src="js/jstree.min.js"></script>
     <script src="js/angular.min.js"></script>
-    <script src="js/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+    <script src="js/ace/src-min-noconflict/ace.js"></script>
     <script src="js/procedure.js"></script>
     <script src="js/task.js"></script>
     <script src="js/rfc.js"></script>
