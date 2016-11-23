@@ -22,7 +22,7 @@ def index_view():
     <link rel="stylesheet" href="css/jsgrid-theme.min.css">
     <script src="js/jquery.js"></script>
     <script src="js/jquery-ui.js"></script>
-    <script src="js/jsgrid.min.js"></script>
+    <script src="js/jsgrid.js"></script>
     <script src="js/jstree.min.js"></script>
     <script src="js/angular.min.js"></script>
     <script src="js/ace/src-min-noconflict/ace.js"></script>
