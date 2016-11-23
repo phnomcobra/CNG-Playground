@@ -1,64 +1,156 @@
-var populateControllerTable = function() {
-    document.getElementById('body').innerHTML = '<table id="controllerTable"></table>';
-    
-    var controllerTable = document.getElementById("controllerTable");
-    
-    for(var rowIndex = 0; rowIndex < inventoryObject['procedures'].length + 4; rowIndex++) {
-        var row = controllerTable.insertRow(rowIndex);
-        
-        for(var cellIndex = 0; cellIndex < inventoryObject['procedures'].length + 4; cellIndex++) {
-            var cell = row.insertCell(cellIndex);
-            
-            cell.innerHTML = '<div id="controller-table-cell-' + cellIndex + '-' + rowIndex + '"></div>';
+var addControllerProcedure = function(objuuid) {
+    $.ajax({
+        'url' : 'inventory/ajax_get_object',
+        'dataType' : 'json',
+        'data' : {'objuuid' : objuuid},
+        'success' : function(resp) {
+            $("#procedureGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid']});
         }
-    }
-    
-    for(var i = 0; i < inventoryObject['procedures'].length; i++) {
-        document.getElementById('controller-table-cell-1-' + (i + 3)).innerHTML = '<div id="procedure-name-' + inventoryObject['procedures'][i] + '">Procedure UUID: ' + inventoryObject['procedures'][i] + '</div>';
-        
-        document.getElementById('controller-table-cell-0-' + (i + 3)).innerHTML = '<img src="images/x_icon.png" onclick="deleteControllerProcedure(' + i + ')" />';
-        
-        $.ajax({
-            'url' : 'inventory/ajax_get_object',
-            'dataType' : 'json',
-            'data' : {'objuuid' : inventoryObject['procedures'][i]},
-            'success' : function(resp) {
-                document.getElementById('procedure-name-' + resp['objuuid']).innerHTML = resp['name'];
-            }
-        });
-    }
-    
-    for(var i = 0; i < inventoryObject['hosts'].length; i++) {
-        document.getElementById('controller-table-cell-' + (i + 2) + '-1').innerHTML = '<div id="host-name-' + inventoryObject['hosts'][i] + '">Host UUID: ' + inventoryObject['hosts'][i] + '</div>';
-        
-        document.getElementById('controller-table-cell-' + (i + 2) + '-0').innerHTML = '<img src="images/x_icon.png" onclick="deleteControllerHost(' + i + ')" />';
-        
-        $.ajax({
-            'url' : 'inventory/ajax_get_object',
-            'dataType' : 'json',
-            'data' : {'objuuid' : inventoryObject['hosts'][i]},
-            'success' : function(resp) {
-                document.getElementById('host-name-' + resp['objuuid']).innerHTML = '<div>' + resp['name'] + '</div><div>' + resp['host'] + '</div>';
-            }
-        });
-    }
+    });
+}
+
+var addControllerHost = function(objuuid) {
+    $.ajax({
+        'url' : 'inventory/ajax_get_object',
+        'dataType' : 'json',
+        'data' : {'objuuid' : objuuid},
+        'success' : function(resp) {
+            $("#hostGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid'], 'host' : resp['host']});
+        }
+    });
 }
 
 var editController = function() {
-    populateControllerTable();
-    
     initAttributes();
     addAttributeText('Controller UUID', 'objuuid');
     addAttributeTextBox('Controller Name', 'name');
+    
+    document.getElementById('body').innerHTML = '<div id="procedureGrid" style="padding:10px"></div><div id="hostGrid" style="padding:10px"></div>';
+    
+    $("#procedureGrid").jsGrid({
+        height: "calc(50% - 5px)",
+        width: "calc(100% - 5px)",
+        autoload: true,
+        
+        deleteButton: true,
+        confirmDeleting: false,
+        
+        rowClass: function(item, itemIndex) {
+            return "client-" + itemIndex;
+        },
+ 
+        controller: {
+            loadData: function(filter) {
+                return $.ajax({
+                    type: "GET",
+                    url: "/controller/ajax_get_procedure_grid",
+                    data: {'objuuid' : inventoryObject['objuuid']},
+                    dataType: "JSON"
+                });
+            },
+            insertItem: function(item) {
+                inventoryObject['procedures'].push(item.objuuid);
+                inventoryObject['changed'] = true;
+            },
+            deleteItem: function(item) {
+                inventoryObject['procedures'].splice(inventoryObject['procedures'].indexOf(item.objuuid), 1);
+                inventoryObject['changed'] = true;
+            }
+        },
+        
+        fields: [
+            {name : "name", type : "text", title : "Procedure Name"},
+            {name : "objuuid", type : "text", visible: false},
+            {type : "control" }
+        ],
+ 
+        onRefreshed: function() {
+            var $gridData = $("#procedureGrid .jsgrid-grid-body tbody");
+ 
+            $gridData.sortable({
+                update: function(e, ui) {
+                    // array of indexes
+                    var clientIndexRegExp = /\s*client-(\d+)\s*/;
+                    var indexes = $.map($gridData.sortable("toArray", { attribute: "class" }), function(classes) {
+                        return clientIndexRegExp.exec(classes)[1];
+                    });
+ 
+                    // arrays of items
+                    var items = $.map($gridData.find("tr"), function(row) {
+                        return $(row).data("JSGridItem");
+                    });
+                    
+                    inventoryObject['procedures'] = [];
+                    for(var i in items) {
+                        inventoryObject['procedures'].push(items[i].objuuid);
+                    }
+                    inventoryObject['changed'] = true;
+                }
+            });
+        }
+    });
+    
+    $("#hostGrid").jsGrid({
+        height: "calc(50% - 5px)",
+        width: "calc(100% - 5px)",
+        autoload: true,
+        
+        deleteButton: true,
+        confirmDeleting: false,
+        
+        rowClass: function(item, itemIndex) {
+            return "client-" + itemIndex;
+        },
+ 
+        controller: {
+            loadData: function(filter) {
+                return $.ajax({
+                    type: "GET",
+                    url: "/controller/ajax_get_host_grid",
+                    data: {'objuuid' : inventoryObject['objuuid']},
+                    dataType: "JSON"
+                });
+            },
+            insertItem: function(item) {
+                inventoryObject['hosts'].push(item.objuuid);
+                inventoryObject['changed'] = true;
+            },
+            deleteItem: function(item) {
+                inventoryObject['hosts'].splice(inventoryObject['hosts'].indexOf(item.objuuid), 1);
+                inventoryObject['changed'] = true;
+            }
+        },
+        
+        fields: [
+            {name : "name", type : "text", title : "Host Name"},
+            {name : "host", type : "text", title : "Host"},
+            {name : "objuuid", type : "text", visible: false},
+            {type : "control" }
+        ],
+ 
+        onRefreshed: function() {
+            var $gridData = $("#hostGrid .jsgrid-grid-body tbody");
+ 
+            $gridData.sortable({
+                update: function(e, ui) {
+                    // array of indexes
+                    var clientIndexRegExp = /\s*client-(\d+)\s*/;
+                    var indexes = $.map($gridData.sortable("toArray", { attribute: "class" }), function(classes) {
+                        return clientIndexRegExp.exec(classes)[1];
+                    });
+ 
+                    // arrays of items
+                    var items = $.map($gridData.find("tr"), function(row) {
+                        return $(row).data("JSGridItem");
+                    });
+                    
+                    inventoryObject['hosts'] = [];
+                    for(var i in items) {
+                        inventoryObject['hosts'].push(items[i].objuuid);
+                    }
+                    inventoryObject['changed'] = true;
+                }
+            });
+        }
+    });
 }
-
-var deleteControllerProcedure = function(index) {
-    inventoryObject['procedures'].splice(index, 1);
-    inventoryObject['changed'] = true;
-}
-
-var deleteControllerHost = function(index) {
-    inventoryObject['hosts'].splice(index, 1);
-    inventoryObject['changed'] = true;
-}
-

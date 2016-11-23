@@ -33,7 +33,7 @@ var saving = false;
 });
 
 $(document).on('dnd_stop.vakata', function (e, data) {
-    if(data.event.target.offsetParent.id == 'jsgrid-grid-body' ||
+    if(data.event.target.className == 'jsgrid-grid-body' ||
        data.event.target.className == 'jsgrid-cell') {
         var nodes = $('#inventory').jstree().get_selected(true);
         for(i in nodes) {
@@ -45,6 +45,15 @@ $(document).on('dnd_stop.vakata', function (e, data) {
                     $('#inventory').jstree("deselect_all");
                     if(resp['type'] == 'task') {
                         addProcedureTask(resp['objuuid']);
+                    } else if(resp['type'] == 'rfc' &&
+                              inventoryObject['rfcs'].indexOf(resp['objuuid']) == -1) {
+                        addProcedureRFC(resp['objuuid']);
+                    } else if(resp['type'] == 'host' &&
+                              inventoryObject['hosts'].indexOf(resp['objuuid']) == -1) {
+                        addControllerHost(resp['objuuid']);
+                    } else if(resp['type'] == 'procedure' &&
+                              inventoryObject['procedures'].indexOf(resp['objuuid']) == -1) {
+                        addControllerProcedure(resp['objuuid']);
                     }
                 }
             });
