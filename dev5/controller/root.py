@@ -16,11 +16,15 @@ from ..view.index import index_view
 from .inventory import Inventory
 from .messaging import Messaging
 from .procedure import Procedure
+from .controller import Controller
+from .rfc import RFC
 
 class Root(object):
     inventory = Inventory()
     messaging = Messaging()
     procedure = Procedure()
+    controller = Controller()
+    rfc = RFC()
 
     @cherrypy.expose
     def index(self):
