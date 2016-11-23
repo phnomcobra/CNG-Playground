@@ -20,6 +20,6 @@ def start():
     cherrypy.config.update({'environment': 'production',
                             'tools.staticdir.on': True,
                             'tools.staticdir.dir': os.path.join(current_dir, './static'),
-                            'server.socket_host': '127.0.0.1'})
+                            'server.socket_host': '0.0.0.0'})
 
     cherrypy.quickstart(Root())

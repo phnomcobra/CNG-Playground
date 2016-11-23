@@ -65,7 +65,16 @@ var editProcedure = function() {
                     data: {'objuuid' : inventoryObject['objuuid']},
                     dataType: "JSON"
                 });
-            }
+            },
+            insertItem: function(item) {
+                console.log(item);
+            },
+            updateItem: function(item) {
+                console.log(item);
+            },
+            deleteItem: function(item) {
+                console.log(item);
+            },
         },
  
         fields: [

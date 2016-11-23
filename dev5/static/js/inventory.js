@@ -33,8 +33,8 @@ var saving = false;
 });
 
 $(document).on('dnd_stop.vakata', function (e, data) {
-    if(data.event.target.offsetParent.id == 'taskGrid' ||
-       data.event.target.offsetParent.className == 'js-grid-body') {
+    if(data.event.target.offsetParent.id == 'jsgrid-grid-body' ||
+       data.event.target.className == 'jsgrid-cell') {
         var nodes = $('#inventory').jstree().get_selected(true);
         for(i in nodes) {
             $.ajax({

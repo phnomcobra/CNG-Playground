@@ -201,10 +201,6 @@ class Object(Document):
     def destroy(self):
         Document.delete_object(self, self.objuuid)
         self.object = None
-    
-    def __del__(self):
-        if self.object:
-            self.set()
         
 class Collection(Document):
     def __init__(self, collection_name):
