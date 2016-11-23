@@ -201,7 +201,7 @@ class Object(Document):
     def destroy(self):
         Document.delete_object(self, self.objuuid)
         self.object = None
-        
+
 class Collection(Document):
     def __init__(self, collection_name):
         Document.__init__(self)
