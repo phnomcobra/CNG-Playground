@@ -25,3 +25,17 @@ def get_task_grid(prcuuid):
         grid_data.append({"name" : task.object["name"], "objuuid" : task.object["objuuid"]})
         
     return grid_data
+
+def get_related_procedure_grid(prcuuid):
+    collection = Collection("inventory")
+    
+    procedure = collection.get_object(prcuuid)
+    
+    grid_data = []
+    
+    for prcuuid in procedure.object["procedures"]:
+        related_procedure = collection.get_object(prcuuid)
+        
+        grid_data.append({"name" : related_procedure.object["name"], "objuuid" : related_procedure.object["objuuid"]})
+        
+    return grid_data

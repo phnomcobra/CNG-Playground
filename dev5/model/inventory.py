@@ -121,6 +121,12 @@ def create_container(parent_objuuid, name):
                             "route" : "inventory/ajax_create_host",
                             "params" : {"objuuid" : container.objuuid}}
             },
+            "new console" : {
+                "label" : "New Console",
+                "action" : {"method" : "create console",
+                            "route" : "inventory/ajax_create_console",
+                            "params" : {"objuuid" : container.objuuid}}
+            },
             "delete" : {
                 "label" : "Delete",
                 "action" : {"method" : "delete node",
@@ -193,6 +199,7 @@ def create_procedure(parent_objuuid, name):
         "title" : "",
         "description" : "",
         "rfcs" : [],
+        "procedures" : [],
         "icon" : "/images/procedure_icon.png",
         "context" : {
             "delete" : {
@@ -291,6 +298,41 @@ def create_controller(parent_objuuid, name):
     
     controller.set()
     return controller.object
+
+def create_user(parent_objuuid, name):
+    collection = Collection("inventory")
+    user = collection.get_object()
+    user.object = {
+        "type" : "user",
+        "parent" : parent_objuuid,
+        "children" : [],
+        "name" : name,
+        "phone" : "",
+        "email" : "",
+        "icon" : "/images/user_icon.png",
+        "context" : {
+            "delete" : {
+                "label" : "Delete",
+                "action" : {"method" : "delete node",
+                            "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : user.objuuid}}
+            },
+            "edit" : {
+                "label" : "Edit",
+                "action" : {"method" : "edit controller",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : user.objuuid}}
+            }
+        },
+        "accepts" : []
+    }
+    
+    parent = collection.get_object(parent_objuuid)
+    parent.object["children"].append(user.objuuid)
+    parent.set()
+    
+    user.set()
+    return user.object
 
 def create_status_code(parent_objuuid, name):
     status = Collection("inventory")
