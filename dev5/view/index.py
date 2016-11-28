@@ -34,11 +34,22 @@ def index_view():
     <script src="js/jscolor.js"></script>
     <script src="js/host.js"></script>
     <script src="js/controller.js"></script>
+    <script src="js/menubar.js"></script>
 </head>
 <body>
     <div id="jqmpage">
         <header id="opsact">
-            <p>Operations Action Ribbon</p>
+            <div id="menuBarStaticLeft">
+                <div class="menuBarItem">Back</div>
+                <div class="menuBarItem">Forward</div>
+                <div class="menuBarItem">Export</div>
+                <div class="menuBarItem">Import</div>
+                <div class="menuBarItem" onclick="setCredentials()">Set Credentials</div>
+            </div>
+            <div id="menuBarDynamic"></div>
+            <div id="menuBarStaticRight">
+                <div class="menuBarItem" onclick="setCredentials()">SSH:Null SQL:Null</div>
+            </div>
         </header>
         <nav>
             <div id="inventory"></div>
@@ -50,6 +61,9 @@ def index_view():
                 <div ng-bind-html="messages"></div>
             </div>
         </footer>
+    </div>
+    <div id="modal">
+        <div id="modal-content"></div>
     </div>
     <script src="js/inventory.js"></script>    
 </body>
