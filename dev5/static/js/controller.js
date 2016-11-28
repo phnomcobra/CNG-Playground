@@ -38,6 +38,10 @@ var editController = function() {
         rowClass: function(item, itemIndex) {
             return "client-" + itemIndex;
         },
+        
+        rowDoubleClick: function(args) {
+            loadAndEditProcedure(args.item.objuuid);
+        },
  
         controller: {
             loadData: function(filter) {
@@ -100,6 +104,10 @@ var editController = function() {
         
         rowClass: function(item, itemIndex) {
             return "client-" + itemIndex;
+        },
+        
+        rowDoubleClick: function(args) {
+            loadAndEditHost(args.item.objuuid);
         },
  
         controller: {

@@ -43,17 +43,26 @@ $(document).on('dnd_stop.vakata', function (e, data) {
                 'data' : {'objuuid' : nodes[i].id},
                 'success' : function(resp) {
                     $('#inventory').jstree("deselect_all");
-                    if(resp['type'] == 'task') {
+                    if(resp['type'] == 'task' && document.getElementById('taskGrid')) {
                         addProcedureTask(resp['objuuid']);
                     } else if(resp['type'] == 'rfc' &&
-                              inventoryObject['rfcs'].indexOf(resp['objuuid']) == -1) {
+                              inventoryObject['rfcs'].indexOf(resp['objuuid']) == -1 &&
+                              document.getElementById('RFCGrid')) {
                         addProcedureRFC(resp['objuuid']);
                     } else if(resp['type'] == 'host' &&
-                              inventoryObject['hosts'].indexOf(resp['objuuid']) == -1) {
+                              inventoryObject['hosts'].indexOf(resp['objuuid']) == -1 &&
+                              document.getElementById('hostGrid')) {
                         addControllerHost(resp['objuuid']);
                     } else if(resp['type'] == 'procedure' &&
-                              inventoryObject['procedures'].indexOf(resp['objuuid']) == -1) {
+                              inventoryObject['procedures'].indexOf(resp['objuuid']) == -1 &&
+                              document.getElementById('procedureGrid')) {
                         addControllerProcedure(resp['objuuid']);
+                    } else if(resp['type'] == 'procedure' &&
+                              inventoryObject['procedures'].indexOf(resp['objuuid']) == -1 &&
+                              document.getElementById('relatedProcedureGrid')) {
+                        if(resp['objuuid'] != inventoryObject['objuuid']) {
+                            addProcedureRelated(resp['objuuid']);
+                        }
                     }
                 }
             });
@@ -217,6 +226,31 @@ var addAttributeTextBox = function(fieldName, inventoryKey) {
     var id = 'inventory-obj-key-' + inventoryKey;
     attributeCell.innerHTML = '<input type="text" id="' + id + '" onchange="setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
     document.getElementById(id).value = inventoryObject[inventoryKey];
+}
+
+var addAttributeRadioGroup = function(fieldName, inventoryKey, radioButtons) {
+    var attributeTable = document.getElementById("attributesTable");
+    var attributeRow = attributeTable.insertRow(-1);
+    var attributeCell;
+    
+    attributeCell = attributeRow.insertCell(-1);
+    attributeCell.innerHTML = fieldName;
+    
+    attributeCell = attributeRow.insertCell(-1);
+    attributeCell.innerHTML = '';
+    for(var i = 0; i < radioButtons.length; i++) {
+        if(inventoryObject[inventoryKey] == radioButtons[i].value) {
+            attributeCell.innerHTML += '<input type="radio" name="radio-' + inventoryKey + 
+                                       '" value="' + radioButtons[i].value + 
+                                       '" checked=true onclick="inventoryObject[&quot;' + inventoryKey + '&quot;]=this.value;inventoryObject[&quot;changed&quot;]=true;">' +
+                                       radioButtons[i].name + '<br>';
+        } else {
+            attributeCell.innerHTML += '<input type="radio" name="radio-' + inventoryKey + 
+                                       '" value="' + radioButtons[i].value + 
+                                       '" onclick="inventoryObject[&quot;' + inventoryKey + '&quot;]=this.value;inventoryObject[&quot;changed&quot;]=true;">' +
+                                       radioButtons[i].name + '<br>';
+        }
+    }
 }
 
 var addAttributeTextArea = function(fieldName, inventoryKey) {
