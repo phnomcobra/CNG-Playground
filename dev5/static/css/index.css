@@ -8,6 +8,31 @@
     height: 100%;
 }
 
+#menuBarStaticLeft {
+    float: left;
+}
+
+#menuBarDynamic {
+    float: left;
+    margin-left: auto;
+}
+
+#menuBarStaticRight {
+    float: right;
+}
+
+.menuBarItem  {
+    float: left;
+    margin-left: auto;
+    background: #444;
+    color: #FFF;
+    padding: 10px;
+}
+
+.menuBarItem:hover {
+    background: #999;
+}
+
 nav {
     float: left;
     height: calc(100% - 150px)
@@ -29,7 +54,7 @@ header {
     display: inline-block;
     vertical-align: top;
     width: 100%;
-    background:#0FF;
+    background:#444;
 }
 
 #attributes {
