@@ -19,7 +19,8 @@ def start():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     cherrypy.config.update({'environment': 'production',
                             'tools.staticdir.on': True,
+                            'tools.sessions.on' : True,
                             'tools.staticdir.dir': os.path.join(current_dir, './static'),
-                            'server.socket_host': '0.0.0.0'})
+                            'server.socket_host': '127.0.0.1'})
 
     cherrypy.quickstart(Root())
