@@ -62,8 +62,10 @@ def index_view():
             </div>
         </footer>
     </div>
-    <div id="modal">
-        <div id="modal-content"></div>
+    <div id="modal-content">
+        <div id="modal-header"></div>
+        <div id="modal-body"></div>
+        <div id="modal-footer"></div>
     </div>
     <script src="js/inventory.js"></script>    
 </body>
