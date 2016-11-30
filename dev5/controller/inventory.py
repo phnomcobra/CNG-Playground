@@ -26,7 +26,8 @@ from ..model.inventory import get_child_nodes, \
                               create_controller, \
                               create_rfc, \
                               create_status_code, \
-                              create_host
+                              create_host, \
+                              create_console
 
 class Inventory(object):
     def __init__(self):
@@ -58,6 +59,10 @@ class Inventory(object):
     @cherrypy.expose
     def ajax_create_host(self, objuuid):
         return json.dumps(create_host(objuuid, "New Host"))
+    
+    @cherrypy.expose
+    def ajax_create_console(self, objuuid):
+        return json.dumps(create_console(objuuid, "New Console"))
     
     @cherrypy.expose
     def ajax_create_task(self, objuuid):

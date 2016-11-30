@@ -18,6 +18,8 @@ from .messaging import Messaging
 from .procedure import Procedure
 from .controller import Controller
 from .credentials import Credentials
+from .console import Console
+from .task import Task
 from .rfc import RFC
 
 class Root(object):
@@ -26,7 +28,9 @@ class Root(object):
     procedure = Procedure()
     controller = Controller()
     credentials = Credentials()
+    console = Console()
     rfc = RFC()
+    task = Task()
 
     @cherrypy.expose
     def index(self):
