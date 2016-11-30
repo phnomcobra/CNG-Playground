@@ -35,6 +35,7 @@ def index_view():
     <script src="js/host.js"></script>
     <script src="js/controller.js"></script>
     <script src="js/menubar.js"></script>
+    <script src="js/console.js"></script>
 </head>
 <body>
     <div id="jqmpage">
