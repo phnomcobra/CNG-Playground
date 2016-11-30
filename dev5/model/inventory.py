@@ -163,6 +163,7 @@ def create_task(parent_objuuid, name):
         "name" : name,
         "body" : "",
         "icon" : "/images/task_icon.png",
+        "hosts" : [],
         "context" : {
             "delete" : {
                 "label" : "Delete",
@@ -173,6 +174,12 @@ def create_task(parent_objuuid, name):
             "edit" : {
                 "label" : "Edit",
                 "action" : {"method" : "edit task",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : task.objuuid}}
+            },
+            "run" : {
+                "label" : "Run",
+                "action" : {"method" : "run task",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : task.objuuid}}
             }
@@ -199,6 +206,7 @@ def create_procedure(parent_objuuid, name):
         "title" : "",
         "description" : "",
         "rfcs" : [],
+        "hosts" : [],
         "procedures" : [],
         "icon" : "/images/procedure_icon.png",
         "context" : {
@@ -384,6 +392,7 @@ def create_host(parent_objuuid, name):
         "name" : name,
         "host" : "",
         "icon" : "/images/host_icon.png",
+        "console" : None,
         "context" : {
             "delete" : {
                 "label" : "Delete",
@@ -407,6 +416,41 @@ def create_host(parent_objuuid, name):
     
     host.set()
     return host.object
+
+def create_console(parent_objuuid, name):
+    collection = Collection("inventory")
+    console = collection.get_object()
+    console.object = {
+        "type" : "console",
+        "parent" : parent_objuuid,
+        "children" : [],
+        "name" : name,
+        "body" : "",
+        "icon" : "/images/console_icon.png",
+        "context" : {
+            "delete" : {
+                "label" : "Delete",
+                "action" : {"method" : "delete node",
+                            "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : console.objuuid}}
+            },
+            "edit" : {
+                "label" : "Edit",
+                "action" : {"method" : "edit console",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : console.objuuid}}
+            }
+        },
+        "accepts" : []
+    }
+    
+    parent = collection.get_object(parent_objuuid)
+    parent.object["children"].append(console.objuuid)
+    parent.set()
+    
+    console.set()
+    return console.object
+
 
 def get(objuuid, **kargs):
     collection = Collection("inventory")
