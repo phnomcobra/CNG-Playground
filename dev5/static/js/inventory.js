@@ -138,6 +138,11 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         inventoryObject = resp;
                                         createNode(resp);
                                         editHost();
+                                    } else if(obj.item.method == 'create console') {
+                                        addMessage('create console success');
+                                        inventoryObject = resp;
+                                        createNode(resp);
+                                        editConsole();
                                     } else if(obj.item.method == 'create controller') {
                                         addMessage('create controller success');
                                         inventoryObject = resp;
@@ -171,6 +176,14 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit controller success");
                                         inventoryObject = resp;
                                         editController();
+                                    } else if(obj.item.method == 'edit console') {
+                                        addMessage("edit console success");
+                                        inventoryObject = resp;
+                                        editConsole();
+                                    } else if(obj.item.method == 'run task') {
+                                        addMessage("run task success");
+                                        inventoryObject = resp;
+                                        runTask();
                                     } else if(obj.item.method == 'delete node') {
                                         addMessage("delete success");
                                         deleteNode(resp['id']);
