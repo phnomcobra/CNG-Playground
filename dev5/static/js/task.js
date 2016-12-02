@@ -1,6 +1,5 @@
 var editTask = function() {
     document.getElementById('body').innerHTML = '<div id="aceInstance"></div>';
-    document.getElementById('menuBarDynamic').innerHTML = '';
     
     initAttributes();
     addAttributeText('Task UUID', 'objuuid');
@@ -44,28 +43,55 @@ var addRunTaskHost = function(objuuid) {
     });
 }
 
+var viewTaskResult = function(result) {
+    document.getElementById('section-header-' + result.host.objuuid).innerHTML = result.host.name + '<br>' + result.host.host + '<br>' + result.status.name;
+    
+    for(var i = 0; i < result.output.length; i++)
+        document.getElementById('section-body-' + result.host.objuuid).innerHTML += result.output[i];
+        
+    document.getElementById('section-header-' + result.host.objuuid).style.color = '#' + result.status.cfg;
+    document.getElementById('section-header-' + result.host.objuuid).style.backgroundColor = '#' + result.status.cbg;
+}
+
 var executeTask = function() {
+    initAttributes();
+    addAttributeText('Task UUID', 'objuuid');
+    addAttributeTextBox('Task Name', 'name');
+    
+    document.getElementById('body').innerHTML = '<div id="taskResultAccordion"></div>';
+    
     for(var i = 0; i < inventoryObject.hosts.length; i++) {
+        addMessage('executing ' + inventoryObject.name + ' hstuuid: ' + inventoryObject.hosts[i]);
+        
+        document.getElementById('taskResultAccordion').innerHTML += '<div id="section-header-' + inventoryObject.hosts[i] + '"></div>';
+        document.getElementById('taskResultAccordion').innerHTML += '<pre><code id="section-body-' + inventoryObject.hosts[i] + '"></code></pre>';
+        
         $.ajax({
             'url' : 'task/ajax_execute_task',
             'dataType' : 'json',
             'data' : {'tskuuid' : inventoryObject.objuuid, 'hstuuid' : inventoryObject.hosts[i]},
             'success' : function(resp) {
-                console.log(resp);
+                viewTaskResult(resp);
             }
         });
     }
+    
+    $("#taskResultAccordion").accordion({
+        collapsible: true,
+        heightStyle: "content",
+        active: false
+    });
 }
 
-var runTask = function() {
+var editTaskHosts = function() {
     initAttributes();
     addAttributeText('Task UUID', 'objuuid');
+    addAttributeTextBox('Task Name', 'name');
     
-    document.getElementById('menuBarDynamic').innerHTML = '<div class="menuBarItem" onclick="executeTask()">Run Task</div>';
     document.getElementById('body').innerHTML = '<div id="hostGrid" style="padding:10px"></div>';
     
     $("#hostGrid").jsGrid({
-        height: "calc(50% - 5px)",
+        height: "calc(100% - 5px)",
         width: "calc(100% - 5px)",
         autoload: true,
         

@@ -152,6 +152,10 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit task success");
                                         inventoryObject = resp;
                                         editTask();
+                                    } else if(obj.item.method == 'edit task hosts') {
+                                        addMessage("edit task success");
+                                        inventoryObject = resp;
+                                        editTaskHosts();
                                     } else if(obj.item.method == 'edit container') {
                                         addMessage("edit container success");
                                         inventoryObject = resp;
@@ -183,7 +187,11 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                     } else if(obj.item.method == 'run task') {
                                         addMessage("run task success");
                                         inventoryObject = resp;
-                                        runTask();
+                                        executeTask();
+                                    } else if(obj.item.method == 'view task result') {
+                                        addMessage("view task success");
+                                        inventoryObject = resp;
+                                        viewTaskResult();                                    
                                     } else if(obj.item.method == 'delete node') {
                                         addMessage("delete success");
                                         deleteNode(resp['id']);
