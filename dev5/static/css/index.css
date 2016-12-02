@@ -40,7 +40,7 @@ nav {
 
 article {
     margin-left: auto;
-    background:#0F0;
+    //background:#FFF;
     height: calc(100% - 150px);
     overflow: auto;
 }
