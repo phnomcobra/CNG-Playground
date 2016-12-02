@@ -11,6 +11,7 @@
 
 import cherrypy
 import json
+import traceback
 
 from ..model.task import get_host_grid, execute
 
@@ -22,3 +23,4 @@ class Task(object):
     @cherrypy.expose
     def ajax_execute_task(self, tskuuid, hstuuid):
         return json.dumps(execute(tskuuid, hstuuid, cherrypy.session))
+        

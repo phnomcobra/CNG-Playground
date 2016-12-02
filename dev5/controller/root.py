@@ -10,7 +10,6 @@
 ################################################################################
 
 import cherrypy
-import json
 
 from ..view.index import index_view
 from .inventory import Inventory
