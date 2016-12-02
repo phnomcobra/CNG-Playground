@@ -9,21 +9,27 @@
 # 11/07/2016 Original construction
 ################################################################################
 
+import traceback
+
 from .document import Collection
 from .utils import sucky_uuid
 
 def __get_child_nodes(nodes, object, collection):
-    node = {"id" : object.objuuid, 
-            "parent" : object.object["parent"], 
-            "text" : object.object["name"]}
+    try:
+        node = {"id" : object.objuuid, 
+                "parent" : object.object["parent"], 
+                "text" : object.object["name"]}
     
-    if "icon" in object.object:
-        node["icon"] = object.object["icon"]
+        if "icon" in object.object:
+            node["icon"] = object.object["icon"]
     
-    nodes.append(node)
+        nodes.append(node)
 
-    for objuuid in object.object["children"]:
-        nodes = __get_child_nodes(nodes, collection.get_object(objuuid), collection)
+        for objuuid in object.object["children"]:
+            nodes = __get_child_nodes(nodes, collection.get_object(objuuid), collection)
+    except Exception:
+        print traceback.format_exc()
+        print object.object
  
     return nodes
     
@@ -177,6 +183,12 @@ def create_task(parent_objuuid, name):
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : task.objuuid}}
             },
+            "edit hosts" : {
+                "label" : "Edit Hosts",
+                "action" : {"method" : "edit task hosts",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : task.objuuid}}
+            },
             "run" : {
                 "label" : "Run",
                 "action" : {"method" : "run task",
@@ -307,41 +319,6 @@ def create_controller(parent_objuuid, name):
     controller.set()
     return controller.object
 
-def create_user(parent_objuuid, name):
-    collection = Collection("inventory")
-    user = collection.get_object()
-    user.object = {
-        "type" : "user",
-        "parent" : parent_objuuid,
-        "children" : [],
-        "name" : name,
-        "phone" : "",
-        "email" : "",
-        "icon" : "/images/user_icon.png",
-        "context" : {
-            "delete" : {
-                "label" : "Delete",
-                "action" : {"method" : "delete node",
-                            "route" : "inventory/ajax_delete",
-                            "params" : {"objuuid" : user.objuuid}}
-            },
-            "edit" : {
-                "label" : "Edit",
-                "action" : {"method" : "edit controller",
-                            "route" : "inventory/ajax_get_object",
-                            "params" : {"objuuid" : user.objuuid}}
-            }
-        },
-        "accepts" : []
-    }
-    
-    parent = collection.get_object(parent_objuuid)
-    parent.object["children"].append(user.objuuid)
-    parent.set()
-    
-    user.set()
-    return user.object
-
 def create_status_code(parent_objuuid, name):
     status = Collection("inventory")
     status = collection.get_object()
@@ -450,7 +427,6 @@ def create_console(parent_objuuid, name):
     
     console.set()
     return console.object
-
 
 def get(objuuid, **kargs):
     collection = Collection("inventory")

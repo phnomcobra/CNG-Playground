@@ -7,16 +7,22 @@
 # (614) 692 2050
 #
 # 11/01/2016 Original construction
+# 12/02/2016 Combined set and index methods in the document class
+#            Added mutex lock to set to resolve sqlite deadlocking
 ################################################################################
 
 import sqlite3
 import pickle
 
+from threading import Lock
+
 from .utils import sucky_uuid
 
 class Document:
     def __init__(self):
-        self.connection = sqlite3.connect("db.sqlite", 300)
+        self.mutex = Lock()
+        
+        self.connection = sqlite3.connect("db.sqlite", 30)
         self.cursor = self.connection.cursor()
 
         self.cursor.execute("PRAGMA foreign_keys = ON")
@@ -58,14 +64,13 @@ class Document:
         self.connection.commit()
     
     def set_object(self, coluuid, objuuid, object):
+        self.mutex.acquire()
         object["objuuid"] = objuuid
         object["coluuid"] = coluuid
         self.cursor.execute("update TBL_JSON_OBJ set VALUE = ? where OBJUUID = ?;", \
                             (pickle.dumps(object), str(objuuid)))
         self.connection.commit()
-        self.index_object(coluuid, objuuid)
-    
-    def index_object(self, coluuid, objuuid):
+
         self.cursor.execute("delete from TBL_JSON_IDX where OBJUUID = ?;", (objuuid,))
         self.connection.commit()
         
@@ -81,7 +86,8 @@ class Document:
                 self.connection.commit()
             except Exception as e:
                 print str(e)
-    
+        self.mutex.release()
+        
     def get_object(self, objuuid):
         self.cursor.execute("select VALUE from TBL_JSON_OBJ where OBJUUID = ?;", (str(objuuid),))
         self.connection.commit()
@@ -122,10 +128,10 @@ class Document:
                                      str(coluuid), \
                                      str(attribute), \
                                      str(eval("str(objects[objuuid]" + path + ")"))))
+                self.connection.commit()
             except Exception as e:
                 print str(e)
-            
-        self.connection.commit()
+        
     
     def delete_attribute(self, coluuid, attribute):
         self.cursor.execute("delete from TBL_JSON_ATTR where COLUUID = ? and ATTRIBUTE = ?;", \
