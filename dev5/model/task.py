@@ -26,34 +26,37 @@ class TaskError:
         return self.status
 
 def execute(tskuuid, hstuuid, session):
-    collection = Collection("inventory")
+    inventory = Collection("inventory")
+    results = Collection("results")
     
-    result = {}
+    result = results.get_object()
     
-    result['start'] = time()
+    
+    result.object['start'] = time()
         
     status_code_body = ""
     status_data = {}
     
-    for status in collection.find(type = "status"):
+    for status in inventory.find(type = "status"):
         try:
             status_code_body += "{0}=int('{1}')\n".format(status.object["alias"], status.object["code"])
             status_data[int(status.object["code"])] = status.object
         except Exception:
             print traceback.format_exc()
     
-    host = collection.get_object(hstuuid)
+    host = inventory.get_object(hstuuid)
     
     tempmodule = new_module("tempmodule")
     
     try:
-        exec collection.get_object(host.object["console"]).object["body"] in tempmodule.__dict__
+        exec inventory.get_object(host.object["console"]).object["body"] in tempmodule.__dict__
         cli = tempmodule.Console(session = session, host = host.object["host"])
         
-        result['host'] = host.object
+        result.object['host'] = host.object
         
         try:
-            exec status_code_body + collection.get_object(tskuuid).object["body"] in tempmodule.__dict__
+            result.object['task'] = inventory.get_object(tskuuid).object
+            exec status_code_body + inventory.get_object(tskuuid).object["body"] in tempmodule.__dict__
             task = tempmodule.Task()
             
             try:
@@ -65,19 +68,21 @@ def execute(tskuuid, hstuuid, session):
     except Exception:
         task = TaskError(tskuuid)
         
-    result['output'] = task.output
+    result.object['output'] = task.output
     
     try:
-        result['status'] = status_data[task.status]
+        result.object['status'] = status_data[task.status]
     except Exception:
-        result['status'] = {"code" : task.status}
+        result.object['status'] = {"code" : task.status}
         
-    result['stop'] = time()
+    result.object['stop'] = time()
         
     #for line in dir(tempmodule):
     #    print "module: ", line
     
-    return result
+    result.set()
+    
+    return result.object
 
 def get_host_grid(tskuuid):
     collection = Collection("inventory")

@@ -233,6 +233,12 @@ def create_procedure(parent_objuuid, name):
                 "action" : {"method" : "edit procedure",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : procedure.objuuid}}
+            },
+            "run" : {
+                "label" : "Run",
+                "action" : {"method" : "run procedure",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : procedure.objuuid}}
             }
         },
         "accepts" : []
@@ -460,21 +466,9 @@ def get_status_objects():
     return status_objects
     
 collection = Collection("inventory")
-
-try:
-    collection.create_attribute("parent", "['parent']")
-except Exception:
-    pass
-
-try:
-    collection.create_attribute("type", "['type']")
-except Exception:
-    pass
-
-try:
-    collection.create_attribute("name", "['name']")
-except Exception:
-    pass
+collection.create_attribute("parent", "['parent']")
+collection.create_attribute("type", "['type']")
+collection.create_attribute("name", "['name']")
     
 if not len(collection.find(parent = "#")):
     create_container("#", "root")
