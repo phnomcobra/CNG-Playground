@@ -18,9 +18,12 @@ from threading import Lock
 
 from .utils import sucky_uuid
 
+global DOCUMENT_LOCK
+DOCUMENT_LOCK = Lock()
+
 class Document:
     def __init__(self):
-        self.mutex = Lock()
+        DOCUMENT_LOCK.acquire()
         
         self.connection = sqlite3.connect("db.sqlite", 30)
         self.cursor = self.connection.cursor()
@@ -58,13 +61,17 @@ class Document:
         
         self.connection.commit()
         
+        DOCUMENT_LOCK.release()
+    
     def create_object(self, coluuid, objuuid):
+        DOCUMENT_LOCK.acquire()
         self.cursor.execute("insert into TBL_JSON_OBJ (COLUUID, OBJUUID, VALUE) values (?, ?, ?);", \
                             (str(coluuid), str(objuuid), pickle.dumps({"objuuid" : objuuid, "coluuid" : coluuid})))
         self.connection.commit()
+        DOCUMENT_LOCK.release()
     
     def set_object(self, coluuid, objuuid, object):
-        self.mutex.acquire()
+        DOCUMENT_LOCK.acquire()
         object["objuuid"] = objuuid
         object["coluuid"] = coluuid
         self.cursor.execute("update TBL_JSON_OBJ set VALUE = ? where OBJUUID = ?;", \
@@ -86,7 +93,8 @@ class Document:
                 self.connection.commit()
             except Exception as e:
                 print str(e)
-        self.mutex.release()
+        
+        DOCUMENT_LOCK.release()
         
     def get_object(self, objuuid):
         self.cursor.execute("select VALUE from TBL_JSON_OBJ where OBJUUID = ?;", (str(objuuid),))
@@ -103,10 +111,13 @@ class Document:
         return objuuids
     
     def delete_object(self, objuuid):
+        DOCUMENT_LOCK.acquire()
         self.cursor.execute("delete from TBL_JSON_OBJ where OBJUUID = ?;", (str(objuuid),))
         self.connection.commit()
+        DOCUMENT_LOCK.release()
     
     def create_attribute(self, coluuid, attribute, path):
+        DOCUMENT_LOCK.acquire()
         self.cursor.execute("insert into TBL_JSON_ATTR (COLUUID, ATTRIBUTE, PATH) values (?, ?, ?);", \
                             (str(coluuid), str(attribute), str(path)))
         self.connection.commit()
@@ -132,11 +143,14 @@ class Document:
             except Exception as e:
                 print str(e)
         
+        DOCUMENT_LOCK.release()
     
     def delete_attribute(self, coluuid, attribute):
+        DOCUMENT_LOCK.acquire()
         self.cursor.execute("delete from TBL_JSON_ATTR where COLUUID = ? and ATTRIBUTE = ?;", \
                             (str(coluuid), str(attribute)))
         self.connection.commit()
+        DOCUMENT_LOCK.release()
         
     def list_attributes(self, coluuid):
         self.cursor.execute("select ATTRIBUTE, PATH from TBL_JSON_ATTR where COLUUID = ?;", (str(coluuid),))
@@ -148,22 +162,28 @@ class Document:
         return attributes
     
     def create_collection(self, uuid = None, name = "New Collection"):
+        DOCUMENT_LOCK.acquire()
         if not uuid:
             uuid = sucky_uuid()
             
         self.cursor.execute("insert into TBL_JSON_COL (COLUUID, NAME) values (?, ?);", \
                             (str(uuid), str(name)))
         self.connection.commit()
+        DOCUMENT_LOCK.release()
         return uuid
     
     def delete_collection(self, uuid):
+        DOCUMENT_LOCK.acquire()
         self.cursor.execute("delete from TBL_JSON_COL where COLUUID = ?;", (str(uuid),))
         self.connection.commit()
+        DOCUMENT_LOCK.release()
     
     def rename_collection(self, uuid, name):
+        DOCUMENT_LOCK.acquire()
         self.cursor.execute("update TBL_JSON_COL set NAME = ? where COLUUID = ?;", \
                             (str(name), str(uuid)))
         self.connection.commit()
+        DOCUMENT_LOCK.release()
     
     def list_collections(self):
         self.cursor.execute("select NAME, COLUUID from TBL_JSON_COL;")
