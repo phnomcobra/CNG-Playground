@@ -188,6 +188,10 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("run task success");
                                         inventoryObject = resp;
                                         executeTask();
+                                    } else if(obj.item.method == 'run procedure') {
+                                        addMessage("run procedure success");
+                                        inventoryObject = resp;
+                                        executeProcedure();
                                     } else if(obj.item.method == 'view task result') {
                                         addMessage("view task success");
                                         inventoryObject = resp;

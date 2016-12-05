@@ -71,6 +71,7 @@ var executeTask = function() {
             'dataType' : 'json',
             'data' : {'tskuuid' : inventoryObject.objuuid, 'hstuuid' : inventoryObject.hosts[i]},
             'success' : function(resp) {
+                //console.log(resp);
                 viewTaskResult(resp);
             }
         });
