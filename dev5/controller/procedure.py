@@ -12,7 +12,10 @@
 import cherrypy
 import json
 
-from ..model.procedure import get_task_grid, get_related_procedure_grid
+from ..model.procedure import get_task_grid, \
+                              get_related_procedure_grid, \
+                              get_host_grid, \
+                              execute
 
 class Procedure(object):
     @cherrypy.expose
@@ -20,5 +23,13 @@ class Procedure(object):
         return json.dumps(get_task_grid(objuuid))
     
     @cherrypy.expose
+    def ajax_get_host_grid(self, objuuid):
+        return json.dumps(get_host_grid(objuuid))
+    
+    @cherrypy.expose
     def ajax_get_related_procedure_grid(self, objuuid):
         return json.dumps(get_related_procedure_grid(objuuid))
+    
+    @cherrypy.expose
+    def ajax_execute_procedure(self, prcuuid, hstuuid):
+        return json.dumps(execute(prcuuid, hstuuid, cherrypy.session))
