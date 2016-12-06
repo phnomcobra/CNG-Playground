@@ -10,6 +10,7 @@
 # 12/02/2016 Combined set and index methods in the document class
 #            Added mutex lock to set to resolve sqlite deadlocking
 # 12/05/2016 Added try statements to all mutating document methods
+# 12/06/2016 Added commits to finally blocks
 ################################################################################
 
 import sqlite3
@@ -27,7 +28,7 @@ class Document:
     def __init__(self):
         DOCUMENT_LOCK.acquire()
         
-        self.connection = sqlite3.connect("db.sqlite", 30)
+        self.connection = sqlite3.connect("db.sqlite", 5)
         self.cursor = self.connection.cursor()
 
         self.cursor.execute("PRAGMA foreign_keys = ON")
@@ -74,6 +75,7 @@ class Document:
         except Exception:
             print traceback.format_exc()
         finally:
+            self.connection.commit()
             DOCUMENT_LOCK.release()
     
     def set_object(self, coluuid, objuuid, object):
@@ -103,6 +105,7 @@ class Document:
         except Exception:
             print traceback.format_exc()
         finally:
+            self.connection.commit()
             DOCUMENT_LOCK.release()
         
     def get_object(self, objuuid):
@@ -110,9 +113,9 @@ class Document:
         self.connection.commit()
         return pickle.loads(self.cursor.fetchall()[0][0])
     
-    def find_objects(self, attribute, value):
-        self.cursor.execute("select OBJUUID from TBL_JSON_IDX where ATTRIBUTE = ? and VALUE = ?;", \
-                            (str(attribute), str(value)))
+    def find_objects(self, coluuid, attribute, value):
+        self.cursor.execute("select OBJUUID from TBL_JSON_IDX where ATTRIBUTE = ? and VALUE = ? and COLUUID = ?;", \
+                            (str(attribute), str(value), str(coluuid)))
         self.connection.commit()
         objuuids = []
         for row in self.cursor.fetchall():
@@ -127,6 +130,7 @@ class Document:
         except Exception:
             print traceback.format_exc()
         finally:
+            self.connection.commit()
             DOCUMENT_LOCK.release()
     
     def create_attribute(self, coluuid, attribute, path):
@@ -160,6 +164,7 @@ class Document:
         except Exception:
             print traceback.format_exc()
         finally:
+            self.connection.commit()
             DOCUMENT_LOCK.release()
     
     def delete_attribute(self, coluuid, attribute):
@@ -171,6 +176,7 @@ class Document:
         except Exception:
             print traceback.format_exc()
         finally:
+            self.connection.commit()
             DOCUMENT_LOCK.release()
         
     def list_attributes(self, coluuid):
@@ -194,6 +200,7 @@ class Document:
         except Exception:
             print traceback.format_exc()
         finally:
+            self.connection.commit()
             DOCUMENT_LOCK.release()
         return uuid
     
@@ -205,6 +212,7 @@ class Document:
         except Exception:
             print traceback.format_exc()
         finally:
+            self.connection.commit()
             DOCUMENT_LOCK.release()
     
     def rename_collection(self, uuid, name):
@@ -216,6 +224,7 @@ class Document:
         except Exception:
             print traceback.format_exc()
         finally:
+            self.connection.commit()
             DOCUMENT_LOCK.release()
     
     def list_collections(self):
@@ -287,7 +296,7 @@ class Collection(Document):
     def find(self, **kargs):
         objuuid_sets = []
         for attribute, value in kargs.iteritems():
-            objuuid_sets.append(Document.find_objects(self, attribute, value))
+            objuuid_sets.append(Document.find_objects(self, self.coluuid, attribute, value))
         
         intersection = set(objuuid_sets[0])
         for objuuids in objuuid_sets[1:]:

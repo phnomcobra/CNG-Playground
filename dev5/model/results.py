@@ -18,20 +18,41 @@ def delete(objuuid):
     collection = Collection("results")
     collection.get_object(objuuid).destroy()
 
-def create_task(parent_objuuid, name):
-    collection = Collection("results")
-    task = collection.get_object()
-    task.object = {
-        "type" : "task",
-        "name" : name,
-        "body" : "",
-        "icon" : "/images/task_icon.png",
-        "hosts" : [],
-    }
-    task.set()
-    return task.object
+def get_controller_results(ctruuid):
+    results = Collection("results")
+    inventory = Collection("inventory")
+    
+    controller = inventory.get_object(ctruuid)
+    
+    controller_results = []
+    
+    for hstuuid in controller.object["hosts"]:
+        for prcuuid in controller.object["procedures"]:
+            stop_time = None
+            
+            controller_result = None
+            
+            for result in results.find(hstuuid = hstuuid, prcuuid = prcuuid):
+                if result.object["stop"]:
+                    if stop_time == None:
+                        stop_time = int(result.object["stop"])
+                        controller_result = result.object
+                    elif int(result.object["stop"]) > stop_time:
+                        stop_time = int(result.object["stop"])
+                        controller_result = result.object
+                elif stop_time == None:
+                    controller_result = result.object
+            
+            if controller_result:
+                controller_results.append(controller_result)
+    
+    return controller_results
 
+Collection("results").destroy()
+    
 collection = Collection("results")
-collection.create_attribute("parent", "['parent']")
-collection.create_attribute("type", "['type']")
-collection.create_attribute("name", "['name']")
+collection.create_attribute("start", "['start']")
+collection.create_attribute("stop", "['stop']")
+collection.create_attribute("tskuuid", "['task']['objuuid']")
+collection.create_attribute("prcuuid", "['procedure']['objuuid']")
+collection.create_attribute("hstuuid", "['host']['objuuid']")

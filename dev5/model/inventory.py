@@ -313,6 +313,12 @@ def create_controller(parent_objuuid, name):
                 "action" : {"method" : "edit controller",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : controller.objuuid}}
+            },
+            "run" : {
+                "label" : "Run",
+                "action" : {"method" : "run controller",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : controller.objuuid}}
             }
         },
         "accepts" : []

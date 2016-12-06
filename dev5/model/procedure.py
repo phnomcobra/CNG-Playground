@@ -15,6 +15,7 @@ from time import time
 from imp import new_module
 
 from .document import Collection
+from ..controller.flags import touch_flag
 
 def get_task_grid(prcuuid):
     collection = Collection("inventory")
@@ -144,7 +145,9 @@ def execute(prcuuid, hstuuid, session):
         print traceback.format_exc()
         
     result.object['stop'] = time()
-        
+
+    touch_flag("results")
+    
     #for line in dir(tempmodule):
     #    print "module: ", line
     
