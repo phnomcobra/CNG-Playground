@@ -1,6 +1,7 @@
 var contextMenu = {};
 var inventoryObject = {};
 var saving = false;
+var inventoryStateFlag = null;
 
  $('#inventory').jstree({
 'plugins' : ['contextmenu', 'dnd', 'checkbox'],
@@ -73,6 +74,7 @@ $(document).on('dnd_stop.vakata', function (e, data) {
 var createNode = function(object) {
     var parentNode = $('#inventory').find("[id='" + object['parent'] + "']");
     $('#inventory').jstree('create_node', parentNode, {'id' : object['objuuid'], 'parent' : object['parent'], 'text' : object['name'], 'icon' : object['icon']}, 'last', false, false);
+    touchInventory();
 }
 
 var deleteNode = function(objuuid) {
@@ -83,6 +85,7 @@ var deleteNode = function(objuuid) {
         document.getElementById('attributes').innerHTML = '';
         document.getElementById('body').innerHTML = '';
     }
+    touchInventory();
 }
 
 $('#inventory').on('select_node.jstree', function (evt, data) {
@@ -113,41 +116,49 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         inventoryObject = resp;
                                         createNode(resp);
                                         editContainer();
+                                        touchInventory();
                                     } else if(obj.item.method == 'create task') {
                                         addMessage('create task success');
                                         inventoryObject = resp;
                                         createNode(resp);
                                         editTask();
+                                        touchInventory();
                                     } else if(obj.item.method == 'create rfc') {
                                         addMessage('create rfc success');
                                         inventoryObject = resp;
                                         createNode(resp);
                                         editRFC();
+                                        touchInventory();
                                     } else if(obj.item.method == 'create procedure') {
                                         addMessage('create procedure success');
                                         inventoryObject = resp;
                                         createNode(resp);
                                         editProcedure();
+                                        touchInventory();
                                     } else if(obj.item.method == 'create status') {
                                         addMessage('create status success');
                                         inventoryObject = resp;
                                         createNode(resp);
                                         editStatusCode();
+                                        touchInventory();
                                     } else if(obj.item.method == 'create host') {
                                         addMessage('create host success');
                                         inventoryObject = resp;
                                         createNode(resp);
                                         editHost();
+                                        touchInventory();
                                     } else if(obj.item.method == 'create console') {
                                         addMessage('create console success');
                                         inventoryObject = resp;
                                         createNode(resp);
                                         editConsole();
+                                        touchInventory();
                                     } else if(obj.item.method == 'create controller') {
                                         addMessage('create controller success');
                                         inventoryObject = resp;
                                         createNode(resp);
                                         editController();
+                                        touchInventory();
                                     } else if(obj.item.method == 'edit task') {
                                         addMessage("edit task success");
                                         inventoryObject = resp;
@@ -192,6 +203,10 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("run procedure success");
                                         inventoryObject = resp;
                                         executeProcedure();
+                                    } else if(obj.item.method == 'run controller') {
+                                        addMessage("run controller success");
+                                        inventoryObject = resp;
+                                        executeController();
                                     } else if(obj.item.method == 'view task result') {
                                         addMessage("view task success");
                                         inventoryObject = resp;
@@ -199,6 +214,7 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                     } else if(obj.item.method == 'delete node') {
                                         addMessage("delete success");
                                         deleteNode(resp['id']);
+                                        touchInventory();
                                     }
                                 },
                                 'error' : function(resp, status, error) {
@@ -227,6 +243,7 @@ $('#inventory').on("move_node.jstree", function(event, data) {
             },
             'success' : function(resp) {
                 addMessage('move success');
+                touchInventory();
             },
             'error' : function(resp, status, error) {
                 addMessage('move failure');
@@ -352,7 +369,6 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
                     $('#inventory').jstree('refresh');
                     inventoryObject['refreshTree'] = false;
                 }
-                
             }, function errorCallback(response) {
                 addMessage("save failure " + inventoryObject['objuuid']);
                 saving = false;
@@ -368,6 +384,20 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
             messageData += '</table></code>'
             
             $scope.messages = $sce.trustAsHtml(messageData);
+        });
+        
+        $.ajax({
+            'url' : 'flags/ajax_get',
+            'dataType' : 'json',
+            'data' : {
+                'key' : 'inventoryState'
+            },
+            'success' : function(resp) {
+                if(inventoryStateFlag != resp.value) {
+                    inventoryStateFlag = resp.value;
+                    $('#inventory').jstree('refresh');
+                }
+            },
         });
     }, 1000);
 });
@@ -388,5 +418,19 @@ var setInventoryKey = function (key, div) {
     
     if(key == 'name') {
         $("#inventory").jstree('rename_node', inventoryObject['objuuid'] , inventoryObject[key]);
+        touchInventory();
     }
+}
+
+var touchInventory = function() {
+    $.ajax({
+        'url' : 'flags/ajax_touch',
+        'dataType' : 'json',
+        'data' : {
+            'key' : 'inventoryState'
+        },
+        'success' : function(resp) {
+            inventoryStateFlag = resp.value;
+        },
+    });
 }
