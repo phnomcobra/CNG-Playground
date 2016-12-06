@@ -12,7 +12,7 @@
 import cherrypy
 import json
 
-from ..model.controller import get_procedure_grid, get_host_grid
+from ..model.controller import get_procedure_grid, get_host_grid, get_tiles
 
 class Controller(object):
     @cherrypy.expose
@@ -22,3 +22,7 @@ class Controller(object):
     @cherrypy.expose
     def ajax_get_host_grid(self, objuuid):
         return json.dumps(get_host_grid(objuuid))
+        
+    @cherrypy.expose
+    def ajax_get_tiles(self, objuuid):
+        return json.dumps(get_tiles(objuuid))

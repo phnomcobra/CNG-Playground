@@ -20,6 +20,8 @@ from .credentials import Credentials
 from .console import Console
 from .task import Task
 from .rfc import RFC
+from .results import Results
+from .flags import Flags
 
 class Root(object):
     inventory = Inventory()
@@ -30,6 +32,8 @@ class Root(object):
     console = Console()
     rfc = RFC()
     task = Task()
+    results = Results()
+    flags = Flags()
 
     @cherrypy.expose
     def index(self):
