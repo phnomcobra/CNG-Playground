@@ -45,6 +45,15 @@ def get_related_procedure_grid(prcuuid):
         
     return grid_data
 
+def get_related_procedures(prcuuid):
+    collection = Collection("inventory")
+    
+    procedures = []
+    for rlpuuid in collection.get_object(prcuuid).object["procedures"]:
+        procedures.append(collection.get_object(rlpuuid).object)
+        
+    return procedures
+
 def get_host_grid(prcuuid):
     collection = Collection("inventory")
     

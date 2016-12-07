@@ -46,30 +46,13 @@ def get_tiles(ctruuid):
     
     controller = collection.get_object(ctruuid)
     
-    tiles = []
-    hosts = []
     procedures = []
-    
     for prcuuid in controller.object["procedures"]:
         procedures.append(collection.get_object(prcuuid).object)
     
-    for x, hstuuid in enumerate(controller.object["hosts"]):
+    hosts = []
+    for hstuuid in controller.object["hosts"]:
         host = collection.get_object(hstuuid)
-        hosts.append(host.object)
-        
-        for y, prcuuid in enumerate(controller.object["procedures"]):
-            procedure = collection.get_object(prcuuid)
-            
-            tile = {}
-            tile["position"] = [x, y]
-            tile["host"] = host.object
-            tile["procedure"] = procedure.object
-            tile["selected"] = False
-            
-            tile["procedures"] = []
-            for rlpuuid in procedure.object["procedures"]:
-                tile["procedures"].append(collection.get_object(rlpuuid).object)
-            
-            tiles.append(tile)
+        hosts.append(collection.get_object(hstuuid).object)
     
-    return {"tiles" : tiles, "hosts" : hosts, "procedures" : procedures}
+    return {"hosts" : hosts, "procedures" : procedures}
