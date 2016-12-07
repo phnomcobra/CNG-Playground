@@ -39,7 +39,8 @@ var addControllerHost = function(objuuid) {
 }
 
 var executeController = function() {
-    document.getElementById('body').innerHTML = '<div><table id="controllerTable"></table></div>'
+    document.getElementById('body').innerHTML = '<table id="controllerTable"></table>'
+    document.getElementById('menuBarDynamic').innerHTML = '';
     
     initAttributes();
     addAttributeText('Controller UUID', 'objuuid');
@@ -54,27 +55,154 @@ var executeController = function() {
             var row;
             var cell;
             
-            row = table.insertRow(-1);
-            cell = row.insertCell(-1);
-            for(var x = 0; x < resp.hosts.length; x++) {
-                cell = row.insertCell(-1);
-                cell.innerHTML = resp.hosts[x].name + '<br>' + resp.hosts[x].host;
-            }
-            
             for(var y = 0; y < resp.procedures.length; y++) {
                 row = table.insertRow(-1);
-                cell = row.insertCell(-1);
-                cell.innerHTML = resp.procedures[y].name;
                 
                 for(var x = 0; x < resp.hosts.length; x++) {
                     cell = row.insertCell(-1);
                     cell.setAttribute('id', 'controller-cell-' + resp.hosts[x].objuuid + '-' + resp.procedures[y].objuuid);
+                    cell.setAttribute('data-host-objuuid', resp.hosts[x].objuuid);
+                    cell.setAttribute('data-host-name', resp.hosts[x].name);
+                    cell.setAttribute('data-host-host', resp.hosts[x].host);
+                    cell.setAttribute('data-procedure-objuuid', resp.procedures[y].objuuid);
+                    cell.setAttribute('data-procedure-name', resp.procedures[y].name);
+                    cell.setAttribute('data-selected', 'false');
+                    cell.setAttribute('onclick', 'cellClick(this)');
+                    cell.setAttribute('class', 'controllerCell');
+                    
+                    cell.innerHTML = cell.getAttribute('data-procedure-name') + '<br>';
+                    cell.innerHTML += cell.getAttribute('data-host-name') + '<br>';
+                    cell.innerHTML += cell.getAttribute('data-host-host');
+                    
+                    cell.style.borderStyle = 'solid';
+                    cell.style.borderColor = '#000';
                 }
             }
             
             updateControllerStateData();
             updateControllerTimer();
         }
+    });
+    
+    cell = document.createElement("DIV");
+    cell.innerHTML = "Run All";
+    cell.setAttribute('class', 'menuBarItem');
+    cell.setAttribute('onclick', 'executeAllProcedures()');
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    cell = document.createElement("DIV");
+    cell.innerHTML = "Run Selected";
+    cell.setAttribute('class', 'menuBarItem');
+    cell.setAttribute('onclick', 'executeSelectedProcedures()');
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    cell = document.createElement("DIV");
+    cell.innerHTML = "Select All";
+    cell.setAttribute('class', 'menuBarItem');
+    cell.setAttribute('onclick', 'selectAllProcedures()');
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    cell = document.createElement("DIV");
+    cell.innerHTML = "Deselect All";
+    cell.setAttribute('class', 'menuBarItem');
+    cell.setAttribute('onclick', 'deselectAllProcedures()');
+    document.getElementById('menuBarDynamic').appendChild(cell);
+}
+
+var cellClick = function(item) {
+    if(item.getAttribute('data-selected') == 'true') {
+        item.setAttribute('data-selected', false);
+        item.style.borderStyle = 'solid';
+        item.style.borderColor = '#000';
+    } else {
+        item.setAttribute('data-selected', true);
+        item.style.borderStyle = 'solid';
+        item.style.borderColor = '#FFF';
+    }
+    
+    /*$.ajax({
+        'url' : 'procedure/ajax_get_related_procedures',
+        'dataType' : 'json',
+        'hstuuid' : item.getAttribute('data-host-objuuid'),
+        'hstname' : item.getAttribute('data-host-name'),
+        'hsthost' : item.getAttribute('data-host-host'),
+        'data' : {'objuuid' : item.getAttribute('data-procedure-objuuid')},
+        'success' : function(resp) {
+            for(var i = 0; i < resp.length; i++) {
+                var cell = document.createElement("DIV");
+                cell.innerHTML = resp[i].name;
+                cell.setAttribute('data-host-objuuid', this.hstuuid);
+                cell.setAttribute('data-procedure-objuuid', resp[i].objuuid);
+                cell.setAttribute('class', 'menuBarItem');
+                cell.setAttribute('onclick', 'executeRelatedProcedure(this)');
+                document.getElementById('menuBarDynamic').appendChild(cell);
+            }
+        }
+    });*/
+}
+
+var executeAllProcedures = function() {
+    $('#controllerTable tr').each(function(){
+        $(this).find('td').each(function(){
+            addMessage("executing " + $(this)[0].attributes['data-procedure-name'].value + " on " + $(this)[0].attributes['data-host-name'].value + "...");
+            
+            $.ajax({
+                'url' : 'procedure/ajax_execute_procedure',
+                'dataType' : 'json',
+                'data' : {
+                    'prcuuid' : $(this)[0].attributes['data-procedure-objuuid'].value, 
+                    'hstuuid' : $(this)[0].attributes['data-host-objuuid'].value
+                }
+            });
+        });
+    });
+}
+
+var executeSelectedProcedures = function() {
+    $('#controllerTable tr').each(function(){
+        $(this).find('td').each(function(){
+            if($(this)[0].attributes['data-selected'].value == 'true') {
+                addMessage("executing " + $(this)[0].attributes['data-procedure-name'].value + " on " + $(this)[0].attributes['data-host-name'].value + "...");
+            
+                $.ajax({
+                    'url' : 'procedure/ajax_execute_procedure',
+                    'dataType' : 'json',
+                    'data' : {
+                        'prcuuid' : $(this)[0].attributes['data-procedure-objuuid'].value, 
+                        'hstuuid' : $(this)[0].attributes['data-host-objuuid'].value
+                    }
+                });
+            }
+        });
+    });
+}
+
+var selectAllProcedures = function() {
+    $('#controllerTable tr').each(function(){
+        $(this).find('td').each(function(){
+            document.getElementById($(this)[0].id).setAttribute('data-selected', true);
+            document.getElementById($(this)[0].id).style.borderStyle = 'solid';
+            document.getElementById($(this)[0].id).style.borderColor = '#FFF';
+        });
+    });
+}
+
+var deselectAllProcedures = function() {
+    $('#controllerTable tr').each(function(){
+        $(this).find('td').each(function(){
+            document.getElementById($(this)[0].id).setAttribute('data-selected', false);
+            document.getElementById($(this)[0].id).style.borderStyle = 'solid';
+            document.getElementById($(this)[0].id).style.borderColor = '#000';
+        });
+    });
+}
+
+var executeRelatedProcedure = function(item) {
+    addMessage("executing procedure...");
+    $.ajax({
+        'url' : 'procedure/ajax_execute_procedure',
+        'dataType' : 'json',
+        'data' : {'prcuuid' : item.getAttribute('data-procedure-objuuid'), 'hstuuid' : item.getAttribute('data-host-objuuid')}
     });
 }
 
@@ -93,11 +221,18 @@ var drawCells = function(resultItems) {
                 cell.style.color = '#' + resultItems[i].status.cfg;
                 cell.style.backgroundColor = '#' + resultItems[i].status.cbg;
             }
-            cell.innerHTML = resultItems[i].status.abbreviation + '<br>' + Math.round(currentTime - resultItems[i].stop);
+            cell.innerHTML = cell.getAttribute('data-procedure-name') + '<br>';
+            cell.innerHTML += cell.getAttribute('data-host-name') + '<br>';
+            cell.innerHTML += cell.getAttribute('data-host-host') + '<br>';
+            cell.innerHTML += resultItems[i].status.abbreviation + '<br>';
+            cell.innerHTML += Math.round(currentTime - resultItems[i].stop);
         } else {
             cell.style.color = '#' + resultItems[i].status.cfg;
             cell.style.backgroundColor = '#' + resultItems[i].status.cbg;
-            cell.innerHTML = resultItems[i].status.abbreviation;
+            cell.innerHTML = cell.getAttribute('data-procedure-name') + '<br>';
+            cell.innerHTML += cell.getAttribute('data-host-name') + '<br>';
+            cell.innerHTML += cell.getAttribute('data-host-host') + '<br>';
+            cell.innerHTML += resultItems[i].status.abbreviation;
         }
     }
 }
@@ -116,7 +251,8 @@ var updateControllerTimer = function() {
                     controllerStateFlag = resp.value;
                     updateControllerStateData();
                 } else {
-                    drawCells(controllerStateData);
+                    if(controllerStateData)
+                        drawCells(controllerStateData);
                 }
                 setTimeout(updateControllerTimer, 1000);
             },
