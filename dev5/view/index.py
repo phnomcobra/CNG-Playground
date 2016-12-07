@@ -49,7 +49,6 @@ def index_view():
             </div>
             <div id="menuBarDynamic"></div>
             <div id="menuBarStaticRight">
-                <div class="menuBarItem" onclick="setCredentials()">SSH:Null SQL:Null</div>
             </div>
         </header>
         <nav>
