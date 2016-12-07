@@ -13,8 +13,8 @@
 }
 
 #menuBarDynamic {
-    float: left;
-    margin-left: auto;
+    float: right;
+    margin-right: auto;
 }
 
 #menuBarStaticRight {
@@ -31,6 +31,20 @@
 
 .menuBarItem:hover {
     background: #999;
+}
+
+.controllerCell:hover {
+    background: #999 !important;
+}
+
+.controllerCell {
+    background: #444
+}
+
+#controllerTable {
+    width: 100%;
+    height: 100%;
+    background: #000;
 }
 
 nav {
