@@ -82,8 +82,14 @@ header {
 
 #inventory {
     background:#FF0;
-    height: 50%;
+    height: calc(50% - 19px);
     overflow: auto;
+}
+
+#inventorySearchTextBox {
+    width: calc(100% - 4px);
+    height: 15px;
+    background:#CCC;
 }
 
 footer {

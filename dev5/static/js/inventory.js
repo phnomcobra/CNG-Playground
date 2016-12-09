@@ -4,7 +4,7 @@ var saving = false;
 var inventoryStateFlag = null;
 
  $('#inventory').jstree({
-'plugins' : ['contextmenu', 'dnd', 'checkbox'],
+'plugins' : ['contextmenu', 'dnd', 'checkbox', 'search'],
 'contextmenu': {
     'items': 
         function (obj) {
@@ -32,6 +32,10 @@ var inventoryStateFlag = null;
     }
 }
 });
+
+var searchInventoryTree = function(item) {
+    $('#inventory').jstree(true).search(item.value);
+}
 
 $(document).on('dnd_stop.vakata', function (e, data) {
     if(data.event.target.className == 'jsgrid-grid-body' ||

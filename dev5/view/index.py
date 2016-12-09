@@ -68,6 +68,7 @@ def index_view():
       </div>
     </nav>
         <div id="left-nav">
+            <input type="text" id="inventorySearchTextBox" onchange="searchInventoryTree(this);"></input>
             <div id="inventory"></div>
             <div id="attributes"></div>
         </div>
