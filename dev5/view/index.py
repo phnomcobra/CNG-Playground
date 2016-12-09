@@ -20,6 +20,8 @@ def index_view():
     <link rel="stylesheet" href="css/jquery-ui.css">
     <link rel="stylesheet" href="css/jsgrid.min.css">
     <link rel="stylesheet" href="css/jsgrid-theme.min.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <!-- <link rel="stylesheet" href="css/bootstrap-theme.min.css"> -->
     <script src="js/jquery.js"></script>
     <script src="js/jquery-ui.js"></script>
     <script src="js/jsgrid.js"></script>
@@ -36,25 +38,39 @@ def index_view():
     <script src="js/controller.js"></script>
     <script src="js/menubar.js"></script>
     <script src="js/console.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    
 </head>
 <body>
     <div id="jqmpage">
-        <header id="opsact">
-            <div id="menuBarStaticLeft">
-                <div class="menuBarItem">Back</div>
-                <div class="menuBarItem">Forward</div>
-                <div class="menuBarItem">Export</div>
-                <div class="menuBarItem">Import</div>
-                <div class="menuBarItem" onclick="setCredentials()">Set Credentials</div>
-            </div>
-            <div id="menuBarDynamic"></div>
-            <div id="menuBarStaticRight">
-            </div>
-        </header>
-        <nav>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">valarie</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="#back">Back</a></li>
+            <li><a href="#forward">Forward</a></li>
+            <li><a href="#import">Import</a></li>
+            <li><a href="#export">Export</a></li>
+            <li><a href=#credentials" class="active" onclick="setCredentials()">
+            Set Credentials</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right" id="menuBarDynamic">
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+        <div id="left-nav">
             <div id="inventory"></div>
             <div id="attributes"></div>
-        </nav>
+        </div>
         <article id="body"></article>
         <footer>
             <div ng-app="inventoryApp" ng-controller="inventoryCtrl">
