@@ -46,7 +46,8 @@ def index_view():
     <nav class="navbar navbar-inverse navbar-fixed-top">
       <div class="container-fluid">
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" 
+            data-target="#navbar" aria-expanded="false" aria-controls="navbar">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
@@ -60,15 +61,15 @@ def index_view():
             <li><a href="#forward">Forward</a></li>
             <li><a href="#import">Import</a></li>
             <li><a href="#export">Export</a></li>
-            <li><a href=#credentials" class="active" onclick="setCredentials()">
-            Set Credentials</a></li>
+            <li><a href="#" data-toggle="modal" data-target="#credModal">
+              Set Credentials</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right" id="menuBarDynamic">
+          </ul>
         </div><!--/.nav-collapse -->
       </div>
     </nav>
         <div id="left-nav">
-            <input type="text" id="inventorySearchTextBox" onchange="searchInventoryTree(this);"></input>
             <div id="inventory"></div>
             <div id="attributes"></div>
         </div>
@@ -79,11 +80,59 @@ def index_view():
             </div>
         </footer>
     </div>
-    <div id="modal-content">
-        <div id="modal-header"></div>
-        <div id="modal-body"></div>
-        <div id="modal-footer"></div>
-    </div>
+ 
+      <!-- modal -->
+      <div class="modal fade" id="credModal" tabindex="-1" role="dialog" 
+        aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h4 class="modal-title" id="myModalLabel">Set Credentials</h4>
+            </div>
+            <div class="modal-body">
+              <form class="form-horizontal">
+                <div class="form-group">
+                  <label class="control-label col-sm-3" for="ssh_id">SSH User:</label>
+                  <div class="col-sm-9">
+                    <input type="text" class="form-control" id="ssh_id"
+                      placeholder="Enter ssh username">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label col-sm-3" for="ssh_pwd">Password:</label>
+                  <div class="col-sm-9"> 
+                    <input type="password" class="form-control" id="ssh_pwd" 
+                      placeholder="Enter ssh password">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label col-sm-3" for="sql_id">MySQL User:</label>
+                  <div class="col-sm-9">
+                    <input type="text" class="form-control" id="sql_id" 
+                      placeholder="Enter SQL username">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="control-label col-sm-3" for="pwd">Password:</label>
+                  <div class="col-sm-9"> 
+                    <input type="password" class="form-control" id="ssh_pwd" 
+                      placeholder="Enter SQL password">
+                  </div>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <button type="button" class="btn btn-primary" onclick="submitCredentials()" 
+                data-dismiss="modal">Submit</button>
+            </div>
+          </div>
+        </div>
+      </div> <!-- End modal --> 
+
     <script src="js/inventory.js"></script>    
 </body>
 
