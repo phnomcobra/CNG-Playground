@@ -46,6 +46,26 @@ var executeController = function() {
     addAttributeText('Controller UUID', 'objuuid');
     addAttributeTextBox('Controller Name', 'name');
     
+    dropdown = document.createElement("ul");
+    dropdown.setAttribute("class", "dropdown-menu");
+    
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.setAttribute("class", "dropdown-toggle");
+    link.setAttribute("data-toggle", "dropdown");
+    link.setAttribute("role", "button");
+    link.setAttribute("aria-haspopup", "true");
+    link.setAttribute("aria-expanded", "false");
+    link.innerHTML = "Related Procedures <span class='caret'></span>";
+    
+    cell = document.createElement("li");
+    cell.setAttribute('class', 'dropdown');
+    cell.setAttribute('id', 'relatedProceduresDropDown');
+    cell.setAttribute('style', 'display:none');
+    cell.appendChild(link);
+    cell.appendChild(dropdown);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
     $.ajax({
         'url' : 'controller/ajax_get_tiles',
         'dataType' : 'json',
@@ -76,6 +96,35 @@ var executeController = function() {
                     
                     cell.style.borderStyle = 'solid';
                     cell.style.borderColor = '#000';
+            
+                    $.ajax({
+                        'url' : 'procedure/ajax_get_related_procedures',
+                        'dataType' : 'json',
+                        'hstuuid' : resp.hosts[x].objuuid,
+                        'hstname' : resp.hosts[x].name,
+                        'hsthost' : resp.hosts[x].host,
+                        'prcuuid' : resp.procedures[y].objuuid,
+                        'data' : {'objuuid' : resp.procedures[y].objuuid},
+                        'success' : function(resp) {
+                            for(var i = 0; i < resp.length; i++) {
+                                link = document.createElement("li");
+                                link.setAttribute('name', 'controller-command-' + this.prcuuid + '-' + this.hstuuid);
+                                link.setAttribute('style', 'display:none');
+                                link.setAttribute('class', 'controllerCommandCell');
+                                dropdown.appendChild(link);
+                                
+                                cell = document.createElement("a");
+                                cell.innerHTML = this.hstname + ' (' + this.hsthost + '):' + resp[i].name;
+                                cell.setAttribute('href', '#');
+                                cell.setAttribute("tabindex", "-1");
+                                cell.setAttribute('data-host-objuuid', this.hstuuid);
+                                cell.setAttribute('data-procedure-objuuid', resp[i].objuuid);
+                                cell.setAttribute('onclick', 'executeRelatedProcedure(this)');
+                                
+                                link.appendChild(cell);
+                            }
+                        }
+                    });
                 }
             }
             
@@ -110,7 +159,7 @@ var executeController = function() {
     
     link = document.createElement("a");
     link.setAttribute("href", "#");
-    link.innerHTML = "Deselect All";
+    link.innerHTML = "Clear Selected";
     cell = document.createElement("li");
     cell.setAttribute('onclick', 'deselectAllProcedures()');
     cell.appendChild(link);
@@ -122,31 +171,23 @@ var cellClick = function(item) {
         item.setAttribute('data-selected', false);
         item.style.borderStyle = 'solid';
         item.style.borderColor = '#000';
+        
+        var commandCells = document.getElementsByName('controller-command-' + item.getAttribute('data-procedure-objuuid') + '-' + item.getAttribute('data-host-objuuid'));
+        for(var i = 0; i < commandCells.length; i++) {
+            commandCells[i].setAttribute('style', 'display:none');
+        }
     } else {
         item.setAttribute('data-selected', true);
         item.style.borderStyle = 'solid';
         item.style.borderColor = '#FFF';
+                  
+        var commandCells = document.getElementsByName('controller-command-' + item.getAttribute('data-procedure-objuuid') + '-' + item.getAttribute('data-host-objuuid'));
+        for(var i = 0; i < commandCells.length; i++) {
+            commandCells[i].setAttribute('style', 'display:block');
+        }
     }
     
-    /*$.ajax({
-        'url' : 'procedure/ajax_get_related_procedures',
-        'dataType' : 'json',
-        'hstuuid' : item.getAttribute('data-host-objuuid'),
-        'hstname' : item.getAttribute('data-host-name'),
-        'hsthost' : item.getAttribute('data-host-host'),
-        'data' : {'objuuid' : item.getAttribute('data-procedure-objuuid')},
-        'success' : function(resp) {
-            for(var i = 0; i < resp.length; i++) {
-                var cell = document.createElement("DIV");
-                cell.innerHTML = resp[i].name;
-                cell.setAttribute('data-host-objuuid', this.hstuuid);
-                cell.setAttribute('data-procedure-objuuid', resp[i].objuuid);
-                cell.setAttribute('class', 'menuBarItem');
-                cell.setAttribute('onclick', 'executeRelatedProcedure(this)');
-                document.getElementById('menuBarDynamic').appendChild(cell);
-            }
-        }
-    });*/
+    toggleRelatedProceduresDropDown();
 }
 
 var executeAllProcedures = function() {
@@ -193,6 +234,29 @@ var selectAllProcedures = function() {
             document.getElementById($(this)[0].id).style.borderColor = '#FFF';
         });
     });
+    
+    var commandCells = document.getElementsByClassName('controllerCommandCell');
+    for(var i = 0; i < commandCells.length; i++) {
+        commandCells[i].setAttribute('style', 'display:block');
+    }
+    
+    toggleRelatedProceduresDropDown();
+}
+
+var toggleRelatedProceduresDropDown = function() {
+    var commandCells = document.getElementsByClassName('controllerCommandCell');
+    
+    var areRelatedProceduresSelected = false;
+    for(var i = 0; i < commandCells.length; i++) {
+        if(commandCells[i].getAttribute('style') == 'display:block')
+            areRelatedProceduresSelected = true;
+    }
+    
+    if(areRelatedProceduresSelected)
+        document.getElementById('relatedProceduresDropDown').style = 'display:block';
+    else
+        document.getElementById('relatedProceduresDropDown').style = 'display:none';
+        
 }
 
 var deselectAllProcedures = function() {
@@ -203,6 +267,13 @@ var deselectAllProcedures = function() {
             document.getElementById($(this)[0].id).style.borderColor = '#000';
         });
     });
+    
+    var commandCells = document.getElementsByClassName('controllerCommandCell');
+    for(var i = 0; i < commandCells.length; i++) {
+        commandCells[i].setAttribute('style', 'display:none');
+    }
+    
+    toggleRelatedProceduresDropDown();
 }
 
 var executeRelatedProcedure = function(item) {
