@@ -1,5 +1,6 @@
 var editHost = function() {
     document.getElementById('body').innerHTML = '';
+    document.getElementById('menuBarDynamic').innerHTML = '';
     
     initAttributes();
     addAttributeText('Host UUID', 'objuuid');
@@ -21,6 +22,8 @@ var editHost = function() {
 
 var loadAndEditHost = function(objuuid) {
     document.getElementById('body').innerHTML = '';
+    document.getElementById('menuBarDynamic').innerHTML = '';
+    
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',

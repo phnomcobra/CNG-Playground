@@ -61,7 +61,6 @@ var executeController = function() {
     cell = document.createElement("li");
     cell.setAttribute('class', 'dropdown');
     cell.setAttribute('id', 'relatedProceduresDropDown');
-    cell.setAttribute('style', 'display:none');
     cell.appendChild(link);
     cell.appendChild(dropdown);
     document.getElementById('menuBarDynamic').appendChild(cell);
@@ -77,6 +76,29 @@ var executeController = function() {
             
             for(var y = 0; y < resp.procedures.length; y++) {
                 row = table.insertRow(-1);
+                
+                $.ajax({
+                    'url' : 'procedure/ajax_get_related_procedures',
+                    'dataType' : 'json',
+                    'data' : {'objuuid' : resp.procedures[y].objuuid},
+                    'success' : function(resp) {
+                        for(var i = 0; i < resp.length; i++) {
+                            link = document.createElement("li");
+                            link.setAttribute('name', 'controller-command-' + resp[i].objuuid);
+                            link.setAttribute('class', 'controllerCommandCell');
+                            dropdown.appendChild(link);
+                                
+                            cell = document.createElement("a");
+                            cell.innerHTML = resp[i].name;
+                            cell.setAttribute('href', '#');
+                            cell.setAttribute("tabindex", "-1");
+                            cell.setAttribute('data-procedure-objuuid', resp[i].objuuid);
+                            cell.setAttribute('onclick', 'executeRelatedProcedure(this)');
+                                
+                            link.appendChild(cell);
+                        }
+                    }
+                });
                 
                 for(var x = 0; x < resp.hosts.length; x++) {
                     cell = row.insertCell(-1);
@@ -96,35 +118,6 @@ var executeController = function() {
                     
                     cell.style.borderStyle = 'solid';
                     cell.style.borderColor = '#000';
-            
-                    $.ajax({
-                        'url' : 'procedure/ajax_get_related_procedures',
-                        'dataType' : 'json',
-                        'hstuuid' : resp.hosts[x].objuuid,
-                        'hstname' : resp.hosts[x].name,
-                        'hsthost' : resp.hosts[x].host,
-                        'prcuuid' : resp.procedures[y].objuuid,
-                        'data' : {'objuuid' : resp.procedures[y].objuuid},
-                        'success' : function(resp) {
-                            for(var i = 0; i < resp.length; i++) {
-                                link = document.createElement("li");
-                                link.setAttribute('name', 'controller-command-' + this.prcuuid + '-' + this.hstuuid);
-                                link.setAttribute('style', 'display:none');
-                                link.setAttribute('class', 'controllerCommandCell');
-                                dropdown.appendChild(link);
-                                
-                                cell = document.createElement("a");
-                                cell.innerHTML = this.hstname + ' (' + this.hsthost + '):' + resp[i].name;
-                                cell.setAttribute('href', '#');
-                                cell.setAttribute("tabindex", "-1");
-                                cell.setAttribute('data-host-objuuid', this.hstuuid);
-                                cell.setAttribute('data-procedure-objuuid', resp[i].objuuid);
-                                cell.setAttribute('onclick', 'executeRelatedProcedure(this)');
-                                
-                                link.appendChild(cell);
-                            }
-                        }
-                    });
                 }
             }
             
@@ -171,23 +164,11 @@ var cellClick = function(item) {
         item.setAttribute('data-selected', false);
         item.style.borderStyle = 'solid';
         item.style.borderColor = '#000';
-        
-        var commandCells = document.getElementsByName('controller-command-' + item.getAttribute('data-procedure-objuuid') + '-' + item.getAttribute('data-host-objuuid'));
-        for(var i = 0; i < commandCells.length; i++) {
-            commandCells[i].setAttribute('style', 'display:none');
-        }
     } else {
         item.setAttribute('data-selected', true);
         item.style.borderStyle = 'solid';
         item.style.borderColor = '#FFF';
-                  
-        var commandCells = document.getElementsByName('controller-command-' + item.getAttribute('data-procedure-objuuid') + '-' + item.getAttribute('data-host-objuuid'));
-        for(var i = 0; i < commandCells.length; i++) {
-            commandCells[i].setAttribute('style', 'display:block');
-        }
     }
-    
-    toggleRelatedProceduresDropDown();
 }
 
 var executeAllProcedures = function() {
@@ -234,29 +215,6 @@ var selectAllProcedures = function() {
             document.getElementById($(this)[0].id).style.borderColor = '#FFF';
         });
     });
-    
-    var commandCells = document.getElementsByClassName('controllerCommandCell');
-    for(var i = 0; i < commandCells.length; i++) {
-        commandCells[i].setAttribute('style', 'display:block');
-    }
-    
-    toggleRelatedProceduresDropDown();
-}
-
-var toggleRelatedProceduresDropDown = function() {
-    var commandCells = document.getElementsByClassName('controllerCommandCell');
-    
-    var areRelatedProceduresSelected = false;
-    for(var i = 0; i < commandCells.length; i++) {
-        if(commandCells[i].getAttribute('style') == 'display:block')
-            areRelatedProceduresSelected = true;
-    }
-    
-    if(areRelatedProceduresSelected)
-        document.getElementById('relatedProceduresDropDown').style = 'display:block';
-    else
-        document.getElementById('relatedProceduresDropDown').style = 'display:none';
-        
 }
 
 var deselectAllProcedures = function() {
@@ -267,21 +225,24 @@ var deselectAllProcedures = function() {
             document.getElementById($(this)[0].id).style.borderColor = '#000';
         });
     });
-    
-    var commandCells = document.getElementsByClassName('controllerCommandCell');
-    for(var i = 0; i < commandCells.length; i++) {
-        commandCells[i].setAttribute('style', 'display:none');
-    }
-    
-    toggleRelatedProceduresDropDown();
 }
 
 var executeRelatedProcedure = function(item) {
     addMessage("executing procedure...");
-    $.ajax({
-        'url' : 'procedure/ajax_execute_procedure',
-        'dataType' : 'json',
-        'data' : {'prcuuid' : item.getAttribute('data-procedure-objuuid'), 'hstuuid' : item.getAttribute('data-host-objuuid')}
+    
+    $('#controllerTable tr').each(function(){
+        $(this).find('td').each(function(){
+            if(document.getElementById($(this)[0].id).getAttribute('data-selected')) {
+                $.ajax({
+                    'url' : 'procedure/ajax_execute_procedure',
+                    'dataType' : 'json',
+                    'data' : {
+                        'prcuuid' : item.getAttribute('data-procedure-objuuid'), 
+                        'hstuuid' : document.getElementById($(this)[0].id).getAttribute('data-host-objuuid')
+                    }
+                });
+            }
+        });
     });
 }
 
@@ -357,6 +318,7 @@ var editController = function() {
     addAttributeTextBox('Controller Name', 'name');
     
     document.getElementById('body').innerHTML = '<div id="procedureGrid" style="padding:10px"></div><div id="hostGrid" style="padding:10px"></div>';
+    document.getElementById('menuBarDynamic').innerHTML = '';
     
     $("#procedureGrid").jsGrid({
         height: "calc(50% - 5px)",

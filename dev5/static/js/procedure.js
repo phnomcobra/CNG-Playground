@@ -60,6 +60,8 @@ var addProcedureRFC = function(objuuid) {
 
 var loadAndEditProcedure = function(objuuid) {
     document.getElementById('body').innerHTML = '';
+    document.getElementById('menuBarDynamic').innerHTML = '';
+    
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
@@ -74,6 +76,7 @@ var loadAndEditProcedure = function(objuuid) {
 var editProcedure = function() {
     populateProcedureAttributes();
     document.getElementById('body').innerHTML = '<div id="taskGrid" style="padding:10px;float:left"></div><div id="hostGrid" style="padding:10px;margin-left:calc(50% - 5px)"></div><div id="RFCGrid" style="padding:10px;float:left"></div><div id="relatedProcedureGrid" style="padding:10px;margin-left:calc(50% - 5px)"></div>';
+    document.getElementById('menuBarDynamic').innerHTML = '';
     
     $("#taskGrid").jsGrid({
         height: "calc(50% - 5px)",
@@ -383,6 +386,7 @@ var executeProcedure = function() {
     populateProcedureAttributes();
     
     document.getElementById('body').innerHTML = '<div id="procedureResultAccordion"></div>';
+    document.getElementById('menuBarDynamic').innerHTML = '';
     
     for(var i = 0; i < inventoryObject.hosts.length; i++) {
         addMessage('executing ' + inventoryObject.name + ' hstuuid: ' + inventoryObject.hosts[i]);
