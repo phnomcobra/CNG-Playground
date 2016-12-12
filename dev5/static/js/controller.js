@@ -232,7 +232,7 @@ var executeRelatedProcedure = function(item) {
     
     $('#controllerTable tr').each(function(){
         $(this).find('td').each(function(){
-            if(document.getElementById($(this)[0].id).getAttribute('data-selected')) {
+            if(document.getElementById($(this)[0].id).getAttribute('data-selected') == 'true') {
                 $.ajax({
                     'url' : 'procedure/ajax_execute_procedure',
                     'dataType' : 'json',
