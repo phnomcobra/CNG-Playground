@@ -39,6 +39,7 @@ def index_view():
     <script src="js/menubar.js"></script>
     <script src="js/console.js"></script>
     <script src="js/bootstrap.min.js"></script>
+    <script src="js/jszip.js"></script>
     
 </head>
 <body>
@@ -58,8 +59,8 @@ def index_view():
           <ul class="nav navbar-nav">
             <li><a href="#back">Back</a></li>
             <li><a href="#forward">Forward</a></li>
-            <li><a href="#import">Import</a></li>
-            <li><a href="#export">Export</a></li>
+            <li><a href="#import" class="active" onclick="$('#importFormInput').trigger('click');">Import</a></li>
+            <li><a href="#export" class="active" onclick="exportFromInventory()">Export</a></li>
             <li><a href=#credentials" class="active" onclick="setCredentials()">
             Set Credentials</a></li>
           </ul>
@@ -83,6 +84,11 @@ def index_view():
         <div id="modal-header"></div>
         <div id="modal-body"></div>
         <div id="modal-footer"></div>
+    </div>
+    <div style="display:none">
+        <form id="importForm" enctype="multipart/form-data">
+            <input id="importFormInput" type="file" onchange="importToInventory(this)"></input>
+        </form>
     </div>
     <script src="js/inventory.js"></script>    
 </body>
