@@ -1,5 +1,6 @@
 var editTask = function() {
     document.getElementById('body').innerHTML = '<div id="aceInstance"></div>';
+    document.getElementById('menuBarDynamic').innerHTML = '';
     
     initAttributes();
     addAttributeText('Task UUID', 'objuuid');
@@ -21,6 +22,8 @@ var editTask = function() {
 
 var loadAndEditTask = function(objuuid) {
     document.getElementById('body').innerHTML = '';
+    document.getElementById('menuBarDynamic').innerHTML = '';
+    
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',

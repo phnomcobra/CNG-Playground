@@ -1,5 +1,6 @@
 var editStatusCode = function() {
     document.getElementById('body').innerHTML = '';
+    document.getElementById('menuBarDynamic').innerHTML = '';
     
     initAttributes();
     addAttributeText('Status UUID', 'objuuid');

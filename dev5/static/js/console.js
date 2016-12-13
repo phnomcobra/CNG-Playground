@@ -1,5 +1,6 @@
 var editConsole = function() {
     document.getElementById('body').innerHTML = '<div id="aceInstance"></div>';
+    document.getElementById('menuBarDynamic').innerHTML = '';
     
     initAttributes();
     addAttributeText('Console UUID', 'objuuid');
@@ -21,6 +22,8 @@ var editConsole = function() {
 
 var loadAndEditConsole = function(objuuid) {
     document.getElementById('body').innerHTML = '';
+    document.getElementById('menuBarDynamic').innerHTML = '';
+    
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',

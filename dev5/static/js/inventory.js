@@ -75,6 +75,39 @@ $(document).on('dnd_stop.vakata', function (e, data) {
     }
 });
 
+var exportFromInventory = function() {
+    var nodes = $('#inventory').jstree().get_selected(true);
+    
+    var objuuids = []
+    for(i in nodes)
+        objuuids.push(nodes[i].id);
+    
+    window.location = 'inventory/export_objects?objuuids=' + objuuids.join(',');
+}
+
+var importToInventory = function(item) {
+    var formData = new FormData();
+    formData.append("file", item.files[0], item.files[0].name);
+    
+    //var xhr = new XMLHttpRequest();
+    //xhr.open('POST', 'inventory/import_objects', true);
+    //xhr.send(formData);
+    
+     
+    $.ajax({
+        url: 'inventory/import_objects',  //Server script to process data
+        type: 'POST',
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function(resp) {
+            touchInventory();
+            $('#inventory').jstree('refresh');
+        }
+    }); 
+}
+
 var createNode = function(object) {
     var parentNode = $('#inventory').find("[id='" + object['parent'] + "']");
     $('#inventory').jstree('create_node', parentNode, {'id' : object['objuuid'], 'parent' : object['parent'], 'text' : object['name'], 'icon' : object['icon']}, 'last', false, false);
