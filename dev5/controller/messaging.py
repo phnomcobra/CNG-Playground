@@ -12,8 +12,28 @@
 import cherrypy
 import json
 
+from threading import Lock
 from time import time
-from random import randrange
+
+global global_messages
+global global_messages_lock
+global_messages = {"messages":[]}
+global_messages_lock = Lock()
+
+def add_message(message, timestamp = None):
+    if not timestamp:
+        timestamp = time()
+    
+    global_messages_lock.acquire()
+    global_messages["messages"] = [{"message" : message, "timestamp" : timestamp}] + \
+                                    global_messages["messages"][:4]
+    global_messages_lock.release()
+
+def get_messages():
+    global_messages_lock.acquire()
+    messages = global_messages
+    global_messages_lock.release()
+    return messages
 
 class Messaging(object):
     def __init__(self):
@@ -21,21 +41,14 @@ class Messaging(object):
     
     @cherrypy.expose
     def ajax_add_message(self, message, timestamp):
-        self.add_message(message, timestamp)
+        add_message(message, timestamp)
         return json.dumps({})
     
     @cherrypy.expose
     def ajax_add_message(self, message):
-        self.add_message(message, time())
+        add_message(message)
         return json.dumps({})
-    
-    def add_message(self, message, timestamp):
-        self.messages["messages"] = [{"message" : message, "timestamp" : timestamp}] + \
-                                    self.messages["messages"][:4]
-    
-    def get_messages(self):
-        return self.messages
     
     @cherrypy.expose
     def ajax_get_messages(self):
-        return json.dumps(self.get_messages())
+        return json.dumps(get_messages())

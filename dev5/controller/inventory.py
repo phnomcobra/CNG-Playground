@@ -11,8 +11,12 @@
 
 import cherrypy
 import json
+import traceback
 
-from time import sleep
+from cherrypy.lib.static import serve_fileobj
+from time import sleep, time
+
+from .messaging import add_message
 
 from ..model.document import Collection
 from ..model.inventory import get_child_nodes, \
@@ -46,7 +50,7 @@ class Inventory(object):
             self.moving = True
             set_parent_objuuid(objuuid, parent_objuuid)
         except Exception as e:
-            pass
+            print traceback.format_exc()
         finally:
             self.moving = False
             
@@ -108,6 +112,10 @@ class Inventory(object):
     @cherrypy.expose
     def ajax_get_status_objects(self):
         return json.dumps(get_status_objects())
+        
+    @cherrypy.expose
+    def ajax_get_status_objects(self):
+        return json.dumps(get_status_objects())
     
     @cherrypy.expose
     def ajax_post_object(self):
@@ -120,3 +128,41 @@ class Inventory(object):
         current.set()
         
         return json.dumps(current.object)
+    
+    @cherrypy.expose
+    def export_objects(self, objuuids):
+        collection = Collection("inventory")
+        
+        inventory = {}
+        
+        for objuuid in objuuids.split(","):
+            inventory[objuuid] = collection.get_object(objuuid).object
+        
+        cherrypy.response.headers['Content-Type'] = "application/x-download"
+        cherrypy.response.headers['Content-Disposition'] = 'attachment; filename=export.{0}.json'.format(time())
+        
+        return serve_fileobj(json.dumps(inventory))
+    
+    @cherrypy.expose
+    def import_objects(self, file):
+        objects = json.loads(file.file.read())
+        collection = Collection("inventory")
+        
+        for objuuid, object in objects.iteritems():
+            current = collection.get_object(objuuid)
+            current.object = object
+            current.set()
+            
+            add_message("imported: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
+        
+        for objuuid, object in objects.iteritems():
+            add_message("inheritance: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
+        
+            parent = collection.get_object(object["parent"])
+            
+            if "children" in parent.object:
+                if objuuid not in parent.object["children"]:
+                    parent.object['children'].append(objuuid)
+                    parent.set()
+        
+        return json.dumps({})
