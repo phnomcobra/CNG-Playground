@@ -19,4 +19,9 @@ var submitCredentials = function() {
         'data' : {'b64str' : window.btoa(document.getElementById('sql_pwd').value)}
     });
 
+    closeModal();
+}
+
+var closeModal = function() {
+    $('#credModal').modal('toggle'); 
 }

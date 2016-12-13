@@ -92,8 +92,8 @@ var editTaskHosts = function() {
     document.getElementById('body').innerHTML = '<div id="hostGrid" style="padding:10px"></div>';
     
     $("#hostGrid").jsGrid({
-        height: "calc(100% - 5px)",
         width: "calc(100% - 5px)",
+        height: "calc(100% - 5px)",
         autoload: true,
         
         deleteButton: true,
