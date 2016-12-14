@@ -149,7 +149,7 @@ def create_container(parent_objuuid, name):
         "accepts" : ["container", "task"]
     }
     if parent_objuuid == "#":
-        del container.object["context"]["delete"]
+        #del container.object["context"]["delete"]
         container.object["icon"] = "images/tree_icon.png"
     else:
         parent = collection.get_object(parent_objuuid)
