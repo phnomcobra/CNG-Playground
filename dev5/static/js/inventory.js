@@ -413,12 +413,12 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
         }
         
         $http.get("messaging/ajax_get_messages").then(function (response) {
-            var messageData = '<code><table>';
+            var messageData = '<table>';
             var responseJSON = angular.fromJson(response)['data']['messages'];
             for(item in responseJSON) {
                 messageData += '<tr><td>' + responseJSON[item]['timestamp'] + '</td><td>' + responseJSON[item]['message'] + '</td></tr>';
             }
-            messageData += '</table></code>'
+            messageData += '</table>'
             
             $scope.messages = $sce.trustAsHtml(messageData);
         });
