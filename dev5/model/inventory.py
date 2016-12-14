@@ -63,7 +63,7 @@ def set_parent_objuuid(objuuid, parent_objuuid):
 def delete_node(objuuid):
     collection = Collection("inventory")
     
-    if collection.get_object(objuuid).object["parent"] != "#"
+    if collection.get_object(objuuid).object["parent"] != "#":
         parent = collection.get_object(collection.get_object(objuuid).object["parent"])
         parent.object["children"].remove(objuuid)
         parent.set()
