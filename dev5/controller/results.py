@@ -11,10 +11,16 @@
 
 import cherrypy
 import json
+import traceback
 
 from ..model.results import get_controller_results
+from .messaging import add_message
 
 class Results(object):
     @cherrypy.expose
     def ajax_get_controller(self, objuuid):
-        return json.dumps(get_controller_results(objuuid))
+        add_message("results controller: get controller results: {0}".format(objuuid))
+        try:
+            return json.dumps(get_controller_results(objuuid))
+        except Exception:
+            add_message(traceback.format_exc())
