@@ -12,6 +12,7 @@
 import traceback
 
 from .document import Collection
+from ..controller.messaging import add_message
 
 from imp import new_module
 from time import time
@@ -42,17 +43,16 @@ def execute(tskuuid, hstuuid, session):
             status_code_body += "{0}=int('{1}')\n".format(status.object["alias"], status.object["code"])
             status_data[int(status.object["code"])] = status.object
         except Exception:
-            print traceback.format_exc()
+            add_message(traceback.format_exc())
     
     host = inventory.get_object(hstuuid)
+    result.object['host'] = host.object
     
     tempmodule = new_module("tempmodule")
     
     try:
         exec inventory.get_object(host.object["console"]).object["body"] in tempmodule.__dict__
         cli = tempmodule.Console(session = session, host = host.object["host"])
-        
-        result.object['host'] = host.object
         
         try:
             result.object['task'] = inventory.get_object(tskuuid).object
@@ -63,16 +63,20 @@ def execute(tskuuid, hstuuid, session):
                 task.execute(cli)
             except Exception:
                 task = TaskError(tskuuid)
+                add_message(traceback.format_exc())
         except Exception:
             task = TaskError(tskuuid)
+            add_message(traceback.format_exc())
     except Exception:
         task = TaskError(tskuuid)
+        add_message(traceback.format_exc())
         
     result.object['output'] = task.output
     
     try:
         result.object['status'] = status_data[task.status]
     except Exception:
+        add_message(traceback.format_exc())
         result.object['status'] = {"code" : task.status}
         
     result.object['stop'] = time()
