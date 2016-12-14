@@ -19,6 +19,15 @@ from ..controller.flags import touch_flag
 from ..controller.messaging import add_message
 from .task import TaskError
 
+class TaskError:
+    def __init__(self, uuid):
+        self.output = ['<font color="red">'] + traceback.format_exc().split("\n") + ["</font>"]
+        self.uuid = uuid
+        self.status = 5 
+
+    def execute(self, cli):
+        return self.status
+
 def get_task_grid(prcuuid):
     collection = Collection("inventory")
     
