@@ -38,7 +38,11 @@ def get_task_grid(prcuuid):
     for tskuuid in procedure.object["tasks"]:
         task = collection.get_object(tskuuid)
         
-        grid_data.append({"name" : task.object["name"], "objuuid" : task.object["objuuid"]})
+        if "type" in task.object:
+            grid_data.append({"name" : task.object["name"], "objuuid" : task.object["objuuid"]})
+        else:
+            add_message("task {0} is missing!".format(tskuuid))
+            grid_data.append({"name" : "MISSING!", "objuuid" : tskuuid})
         
     return grid_data
 
@@ -54,6 +58,12 @@ def get_related_procedure_grid(prcuuid):
         
         grid_data.append({"name" : related_procedure.object["name"], "objuuid" : related_procedure.object["objuuid"]})
         
+        if "type" in related_procedure.object:
+            grid_data.append({"name" : related_procedure.object["name"], "objuuid" : related_procedure.object["objuuid"]})
+        else:
+            add_message("procedure {0} is missing!".format(prcuuid))
+            grid_data.append({"name" : "MISSING!", "objuuid" : prcuuid})
+        
     return grid_data
 
 def get_related_procedures(prcuuid):
@@ -61,7 +71,10 @@ def get_related_procedures(prcuuid):
     
     procedures = []
     for rlpuuid in collection.get_object(prcuuid).object["procedures"]:
-        procedures.append(collection.get_object(rlpuuid).object)
+        related_procedure = collection.get_object(rlpuuid)
+        
+        if "type" in related_procedure.object:
+            procedures.append(related_procedure.object)
         
     return procedures
 
@@ -75,7 +88,11 @@ def get_host_grid(prcuuid):
     for hstuuid in procedure.object["hosts"]:
         host = collection.get_object(hstuuid)
         
-        grid_data.append({"name" : host.object["name"], "host" : host.object["host"], "objuuid" : host.object["objuuid"]})
+        if "type" in host.object:
+            grid_data.append({"name" : host.object["name"], "host" : host.object["host"], "objuuid" : host.object["objuuid"]})
+        else:
+            add_message("host {0} is missing!".format(hstuuid))
+            grid_data.append({"name" : "MISSING!", "host" : "?.?.?.?", "objuuid" : hstuuid})
         
     return grid_data
 

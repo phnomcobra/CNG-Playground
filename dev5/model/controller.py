@@ -23,7 +23,11 @@ def get_procedure_grid(ctruuid):
     for prcuuid in controller.object["procedures"]:
         procedure = collection.get_object(prcuuid)
         
-        grid_data.append({"name" : procedure.object["name"], "objuuid" : procedure.object["objuuid"]})
+        if "type" in procedure.object:
+            grid_data.append({"name" : procedure.object["name"], "objuuid" : procedure.object["objuuid"]})
+        else:
+            add_message("procedure {0} is missing!".format(prcuuid))
+            grid_data.append({"name" : "MISSING!", "objuuid" : prcuuid})
         
     return grid_data
 
@@ -37,7 +41,11 @@ def get_host_grid(ctruuid):
     for hstuuid in controller.object["hosts"]:
         host = collection.get_object(hstuuid)
         
-        grid_data.append({"name" : host.object["name"], "host" : host.object["host"], "objuuid" : host.object["objuuid"]})
+        if "type" in host.object:
+            grid_data.append({"name" : host.object["name"], "host" : host.object["host"], "objuuid" : host.object["objuuid"]})
+        else:
+            add_message("host {0} is missing!".format(hstuuid))
+            grid_data.append({"name" : "MISSING!", "host" : "?.?.?.?", "objuuid" : hstuuid})
         
     return grid_data
 
