@@ -11,10 +11,16 @@
 
 import cherrypy
 import json
+import traceback
 
 from ..model.console import get_consoles
+from .messaging import add_message
 
 class Console(object):
     @cherrypy.expose
     def ajax_get_consoles(self):
-        return json.dumps(get_consoles())
+        add_message("console controller: get console objects...")
+        try:
+            return json.dumps(get_consoles())
+        except Exception:
+            add_message(traceback.format_exc())

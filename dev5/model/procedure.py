@@ -16,6 +16,8 @@ from imp import new_module
 
 from .document import Collection
 from ..controller.flags import touch_flag
+from ..controller.messaging import add_message
+from .task import TaskError
 
 def get_task_grid(prcuuid):
     collection = Collection("inventory")
@@ -85,10 +87,12 @@ def execute(prcuuid, hstuuid, session):
             status_code_body += "{0}=int('{1}')\n".format(status.object["alias"], status.object["code"])
             status_data[int(status.object["code"])] = status.object
         except Exception:
-            print traceback.format_exc()
+            add_message(traceback.format_exc())
     
     host = inventory.get_object(hstuuid)
-    
+    result.object['host'] = host.object
+    result.object['procedure'] = inventory.get_object(prcuuid).object
+        
     tempmodule = new_module("tempmodule")
     
     winning_status = None
@@ -96,16 +100,16 @@ def execute(prcuuid, hstuuid, session):
     
     result.object['tasks'] = []
     
+    result.object['rfcs'] = []
+    for rfcuuid in inventory.get_object(prcuuid).object["rfcs"]:
+        result.object['rfcs'].append(inventory.get_object(rfcuuid).object)
+    
     try:
-        exec inventory.get_object(host.object["console"]).object["body"] in tempmodule.__dict__
-        cli = tempmodule.Console(session = session, host = host.object["host"])
-        
-        result.object['host'] = host.object
-        result.object['procedure'] = inventory.get_object(prcuuid).object
-        
-        result.object['rfcs'] = []
-        for rfcuuid in inventory.get_object(prcuuid).object["rfcs"]:
-            result.object['rfcs'].append(inventory.get_object(rfcuuid).object)
+        try:
+            exec inventory.get_object(host.object["console"]).object["body"] in tempmodule.__dict__
+            cli = tempmodule.Console(session = session, host = host.object["host"])
+        except Exception:
+            add_message(traceback.format_exc())
         
         for tskuuid in inventory.get_object(prcuuid).object["tasks"]:
             task_result = inventory.get_object(tskuuid).object
@@ -121,26 +125,26 @@ def execute(prcuuid, hstuuid, session):
                         task.execute(cli)
                     except Exception:
                         task = TaskError(tskuuid)
-                        print traceback.format_exc()
+                        add_message(traceback.format_exc())
                     
                     task_result["stop"] = time()
             except Exception:
                 task = TaskError(tskuuid)
-                print traceback.format_exc()
+                add_message(traceback.format_exc())
             
             task_result["output"] = task.output
             try:
-                task_result['status'] = status_data[task.status]
+                task_result["status"] = status_data[task.status]
                 try:
                     if not inventory.get_object(prcuuid).object["continue {0}".format(task.status)]:
                         continue_procedure = False
                 except Exception:
                     continue_procedure = False
-                    print traceback.format_exc()
+                    add_message(traceback.format_exc())
             except Exception:
                 task_result['status'] = {"code" : task.status}
                 continue_procedure = False
-                print traceback.format_exc()
+                add_message(traceback.format_exc())
             result.object['tasks'].append(task_result)
             
             if winning_status == None:
@@ -151,7 +155,7 @@ def execute(prcuuid, hstuuid, session):
                 result.object['status'] = task_result['status']
         
     except Exception:
-        print traceback.format_exc()
+        add_message(traceback.format_exc())
         
     result.object['stop'] = time()
 

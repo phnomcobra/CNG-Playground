@@ -395,17 +395,18 @@ var inventoryApp = angular.module('inventoryApp', []);
 inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce) {
     $interval(function () {
         if(inventoryObject['changed'] && !saving) {
+            inventoryObject['changed'] = false;
             saving = true;
             $http.post('inventory/ajax_post_object', JSON.stringify(inventoryObject)
             ).then(function successCallback(response) {
                 addMessage("saving " + inventoryObject['objuuid']);
                 saving = false;
-                inventoryObject['changed'] = false;
                 
                 if(inventoryObject['refreshTree']) {
                     $('#inventory').jstree('refresh');
                     inventoryObject['refreshTree'] = false;
                 }
+                
             }, function errorCallback(response) {
                 addMessage("save failure " + inventoryObject['objuuid']);
                 saving = false;

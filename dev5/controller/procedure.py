@@ -11,6 +11,9 @@
 
 import cherrypy
 import json
+import traceback
+
+from .messaging import add_message
 
 from ..model.procedure import get_task_grid, \
                               get_related_procedure_grid, \
@@ -21,20 +24,40 @@ from ..model.procedure import get_task_grid, \
 class Procedure(object):
     @cherrypy.expose
     def ajax_get_task_grid(self, objuuid):
-        return json.dumps(get_task_grid(objuuid))
+        add_message("procedure controller: get procedure task grid: {0}".format(objuuid))
+        try:
+            return json.dumps(get_task_grid(objuuid))
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_get_host_grid(self, objuuid):
-        return json.dumps(get_host_grid(objuuid))
+        add_message("procedure controller: get procedure host grid: {0}".format(objuuid))
+        try:
+            return json.dumps(get_host_grid(objuuid))
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_get_related_procedure_grid(self, objuuid):
-        return json.dumps(get_related_procedure_grid(objuuid))
+        add_message("procedure controller: get related procedure grid: {0}".format(objuuid))
+        try:
+            return json.dumps(get_related_procedure_grid(objuuid))
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_get_related_procedures(self, objuuid):
-        return json.dumps(get_related_procedures(objuuid))
+        add_message("procedure controller: get procedures: {0}".format(objuuid))
+        try:
+            return json.dumps(get_related_procedures(objuuid))
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_execute_procedure(self, prcuuid, hstuuid):
-        return json.dumps(execute(prcuuid, hstuuid, cherrypy.session))
+        add_message("procedure controller: execute procedure: hstuuid: {0}, prcuuid: {1}".format(hstuuid, prcuuid))
+        try:
+            return json.dumps(execute(prcuuid, hstuuid, cherrypy.session))
+        except Exception:
+            add_message(traceback.format_exc())

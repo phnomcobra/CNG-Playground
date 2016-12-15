@@ -39,10 +39,15 @@ class Inventory(object):
 
     @cherrypy.expose
     def ajax_roots(self, objuuid):
-        return json.dumps(get_child_nodes(objuuid))
+        add_message("inventory controller: load inventory: {0}".format(objuuid))
+        try:
+            return json.dumps(get_child_nodes(objuuid))
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_move(self, objuuid, parent_objuuid):
+        add_message("inventory controller: move inventory object: {0}".format(objuuid))
         while self.moving:
             sleep(.1)
         
@@ -50,7 +55,7 @@ class Inventory(object):
             self.moving = True
             set_parent_objuuid(objuuid, parent_objuuid)
         except Exception as e:
-            print traceback.format_exc()
+            add_message(traceback.format_exc())
         finally:
             self.moving = False
             
@@ -58,111 +63,177 @@ class Inventory(object):
     
     @cherrypy.expose
     def ajax_create_container(self, objuuid):
-        return json.dumps(create_container(objuuid, "New Container"))
+        add_message("inventory controller: create container: {0}".format(objuuid))
+        try:
+            return json.dumps(create_container(objuuid, "New Container"))
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_create_host(self, objuuid):
-        return json.dumps(create_host(objuuid, "New Host"))
+        add_message("inventory controller: create host: {0}".format(objuuid))
+        try:
+            return json.dumps(create_host(objuuid, "New Host"))
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_create_console(self, objuuid):
-        return json.dumps(create_console(objuuid, "New Console"))
+        add_message("inventory controller: create console: {0}".format(objuuid))
+        try:
+            return json.dumps(create_console(objuuid, "New Console"))
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_create_task(self, objuuid):
-        return json.dumps(create_task(objuuid, "New Task"))
+        add_message("inventory controller: create task: {0}".format(objuuid))
+        try:
+            return json.dumps(create_task(objuuid, "New Task"))
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_create_status_code(self, objuuid):
-        return json.dumps(create_status_code(objuuid, "New Status Code"))
+        add_message("inventory controller: create status code: {0}".format(objuuid))
+        try:
+            return json.dumps(create_status_code(objuuid, "New Status Code"))
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_create_procedure(self, objuuid):
-        return json.dumps(create_procedure(objuuid, "New Procedure"))
+        add_message("inventory controller: create procedure: {0}".format(objuuid))
+        try:
+            return json.dumps(create_procedure(objuuid, "New Procedure"))
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_create_controller(self, objuuid):
-        return json.dumps(create_controller(objuuid, "New Controller"))
+        add_message("inventory controller: create controller: {0}".format(objuuid))
+        try:
+            return json.dumps(create_controller(objuuid, "New Controller"))
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_create_rfc(self, objuuid):
-        return json.dumps(create_rfc(objuuid, "New RFC"))
+        add_message("inventory controller: create RFC: {0}".format(objuuid))
+        try:
+            return json.dumps(create_rfc(objuuid, "New RFC"))
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_delete(self, objuuid):
-        while self.moving:
-            sleep(.1)
+        add_message("inventory controller: delete inventory object: {0}".format(objuuid))
+        try:
+            while self.moving:
+                sleep(.1)
             
-        delete_node(objuuid)
-        return json.dumps({"id" : objuuid})
+            delete_node(objuuid)
+            return json.dumps({"id" : objuuid})
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_context(self, objuuid):
-        return json.dumps(get_context_menu(objuuid))
+        add_message("inventory controller: get context menu: {0}".format(objuuid))
+        try:
+            return json.dumps(get_context_menu(objuuid))
+        except Exception:
+            add_message(traceback.format_exc())
     
+    """
     @cherrypy.expose
     def ajax_select(self, objuuid):
         return json.dumps({})
+    """
     
     @cherrypy.expose
     def ajax_get_object(self, objuuid):
-        collection = Collection("inventory")
-        return json.dumps(collection.get_object(objuuid).object)
+        add_message("inventory controller: get inventory object...")
+        try:
+            collection = Collection("inventory")
+            object = collection.get_object(objuuid).object
+            add_message("inventory controller: get: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
+            return json.dumps(object)
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_get_status_objects(self):
-        return json.dumps(get_status_objects())
-        
-    @cherrypy.expose
-    def ajax_get_status_objects(self):
-        return json.dumps(get_status_objects())
+        add_message("inventory controller: get status objects...")
+        try:
+            return json.dumps(get_status_objects())
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_post_object(self):
-        cl = cherrypy.request.headers['Content-Length']
-        object = json.loads(cherrypy.request.body.read(int(cl)))
+        add_message("inventory controller: post inventory object...")
         
-        collection = Collection("inventory")
-        current = collection.get_object(object["objuuid"])
-        current.object = object
-        current.set()
+        try:
+            cl = cherrypy.request.headers['Content-Length']
+            object = json.loads(cherrypy.request.body.read(int(cl)))
         
-        return json.dumps(current.object)
-    
-    @cherrypy.expose
-    def export_objects(self, objuuids):
-        collection = Collection("inventory")
-        
-        inventory = {}
-        
-        for objuuid in objuuids.split(","):
-            inventory[objuuid] = collection.get_object(objuuid).object
-        
-        cherrypy.response.headers['Content-Type'] = "application/x-download"
-        cherrypy.response.headers['Content-Disposition'] = 'attachment; filename=export.{0}.json'.format(time())
-        
-        return serve_fileobj(json.dumps(inventory))
-    
-    @cherrypy.expose
-    def import_objects(self, file):
-        objects = json.loads(file.file.read())
-        collection = Collection("inventory")
-        
-        for objuuid, object in objects.iteritems():
-            current = collection.get_object(objuuid)
+            collection = Collection("inventory")
+            current = collection.get_object(object["objuuid"])
             current.object = object
             current.set()
             
-            add_message("imported: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
+            add_message("inventory controller: set: {0}, type: {1}, name: {2}".format(object["objuuid"], object["type"], object["name"]))
         
-        for objuuid, object in objects.iteritems():
-            add_message("inheritance: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
+            return json.dumps(current.object)
+        except Exception:
+            add_message(traceback.format_exc())
+    
+    @cherrypy.expose
+    def export_objects(self, objuuids):
+        add_message("inventory controller: exporting inventory objects...")
         
-            parent = collection.get_object(object["parent"])
+        try:
+            collection = Collection("inventory")
+        
+            inventory = {}
+        
+            for objuuid in objuuids.split(","):
+                inventory[objuuid] = collection.get_object(objuuid).object
+                add_message("inventory controller: exported: {0}, type: {1}, name: {2}".format(objuuid, inventory[objuuid]["type"], inventory[objuuid]["name"]))
+        
+            cherrypy.response.headers['Content-Type'] = "application/x-download"
+            cherrypy.response.headers['Content-Disposition'] = 'attachment; filename=export.{0}.json'.format(time())
+        
+            return serve_fileobj(json.dumps(inventory))
+        except Exception:
+            add_message(traceback.format_exc())
+    
+    @cherrypy.expose
+    def import_objects(self, file):
+        add_message("inventory controller: importing inventory objects...")
+        
+        try:
+            objects = json.loads(file.file.read())
+            collection = Collection("inventory")
+        
+            for objuuid, object in objects.iteritems():
+                current = collection.get_object(objuuid)
+                current.object = object
+                current.set()
             
-            if "children" in parent.object:
-                if objuuid not in parent.object["children"]:
-                    parent.object['children'].append(objuuid)
-                    parent.set()
+                add_message("inventory controller: imported: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
+        
+            for objuuid, object in objects.iteritems():
+                add_message("inventory controller: inheritance: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
+        
+                parent = collection.get_object(object["parent"])
+            
+                if "children" in parent.object:
+                    if objuuid not in parent.object["children"]:
+                        parent.object['children'].append(objuuid)
+                        parent.set()
+        except Exception:
+            add_message(traceback.format_exc())
         
         return json.dumps({})
