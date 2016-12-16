@@ -373,7 +373,7 @@ var viewProcedureResult = function(result) {
         row.insertCell(-1).innerHTML = '<b>Task Output:</b>';
         cell = row.insertCell(-1);
         for(var j = 0; j < result.tasks[i].output.length; j++)
-            cell.innerHTML += result.tasks[i].output[j];
+            cell.innerHTML += result.tasks[i].output[j] + '<br>';
         
         document.getElementById('section-body-' + result.host.objuuid).innerHTML += '<br>';
     }
