@@ -32,39 +32,30 @@
 </head>
 
 <body>
-
     <!-- nav -->
     {% include '_navbar.html' %}
-    <! -- /nav -->
+    <!-- /nav -->
     
     <div id="wrapper">
         <!-- Sidebar -->
-        <div id="sidebar-wrapper">
-            <ul class="sidebar-nav">
-                  <div id="left-nav">
-                    <!-- <input type="text" id="inventorySearchTextBox" onchange="searchInventoryTree(this);"></input> -->
-                    <div id="inventory"></div>
-                    <div id="attributes"></div>
-                  </div>
-            </ul>
-        </div>
+        <ul id="sidebar-wrapper" class="sidebar-nav">
+            <!-- <input type="text" id="inventorySearchTextBox" onchange="searchInventoryTree(this);"></input> -->
+            <div id="inventory"></div>
+            <div id="attributes"></div>
+        </ul>
         <!-- /#sidebar-wrapper -->
 
         <!-- Page Content -->
-        <div id="page-content-wrapper">
-            <div class="container-fluid">
-                <div class="row">
-                    <div class="col-lg-12 edge-to-edge">
-                        <div id="body"></div>
-                    </div>
-                </div>
-                <div class="row">
-                  <div class="col-lg-12 collapse in" id="console">
+        <div id="page-content-wrapper" class="container-fluid">
+            <div class="row">
+                <div id="body" class="col-lg-12 edge-to-edge"></div>
+            </div>
+            <div class="row">
+                <div class="col-lg-12 collapse in" id="console">
                     <div ng-app="inventoryApp" ng-controller="inventoryCtrl">
-                      <div ng-bind-html="messages"></div>
+                        <div ng-bind-html="messages"></div>
                     </div>
-                  </div> 
-                </div>
+                </div> 
             </div>
         </div>
         <!-- /#page-content-wrapper -->
