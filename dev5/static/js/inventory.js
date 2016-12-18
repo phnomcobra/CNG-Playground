@@ -4,7 +4,7 @@ var saving = false;
 var inventoryStateFlag = null;
 
  $('#inventory').jstree({
-'plugins' : ['contextmenu', 'dnd', 'checkbox', 'search'],
+'plugins' : ['contextmenu', 'dnd', 'checkbox', 'search', 'sort'],
 'contextmenu': {
     'items': 
         function (obj) {

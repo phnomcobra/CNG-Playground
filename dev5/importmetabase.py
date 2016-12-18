@@ -167,6 +167,7 @@ def import_metabase():
             procedure.set()
             print "imported procedure name: {0}".format(procedure.object["name"])
             
+            
             cur.execute("select TSKUUID from PROCSEQ where PRCUUID = ? order by SEQNUM;", (row[0],))
             conn.commit()
             for task_row in cur.fetchall():
@@ -175,4 +176,3 @@ def import_metabase():
                     set_parent_objuuid(task_row[0], row[0])
                 except Exception:
                     print traceback.format_exc()
-        

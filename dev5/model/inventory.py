@@ -43,6 +43,11 @@ def get_child_nodes(objuuid):
     return nodes
     
 def set_parent_objuuid(objuuid, parent_objuuid):
+    if objuuid == parent_objuuid:
+        print "UUID collision detected while attempting to move",
+        print objuuid
+        return None
+        
     collection = Collection("inventory")
 
     current = collection.get_object(objuuid)
@@ -54,7 +59,6 @@ def set_parent_objuuid(objuuid, parent_objuuid):
             parent.set()
         except Exception:
             print traceback.format_exc()
-            print object.object
 
     current.object["parent"] = parent_objuuid
     current.set()
