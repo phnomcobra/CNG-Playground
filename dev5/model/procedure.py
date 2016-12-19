@@ -56,8 +56,6 @@ def get_related_procedure_grid(prcuuid):
     for prcuuid in procedure.object["procedures"]:
         related_procedure = collection.get_object(prcuuid)
         
-        grid_data.append({"name" : related_procedure.object["name"], "objuuid" : related_procedure.object["objuuid"]})
-        
         if "type" in related_procedure.object:
             grid_data.append({"name" : related_procedure.object["name"], "objuuid" : related_procedure.object["objuuid"]})
         else:
@@ -166,7 +164,7 @@ def execute(prcuuid, hstuuid, session):
                         continue_procedure = False
                 except Exception:
                     continue_procedure = False
-                    add_message(traceback.format_exc())
+                    #add_message(traceback.format_exc())
             except Exception:
                 task_result['status'] = {"code" : task.status}
                 continue_procedure = False

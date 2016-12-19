@@ -22,11 +22,6 @@ def get_rfc_grid(prcuuid):
     for rfcuuid in procedure.object["rfcs"]:
         rfc = collection.get_object(rfcuuid)
         
-        grid_data.append({"name" : rfc.object["name"], \
-                          "number" : rfc.object["number"], \
-                          "title" : rfc.object["title"], \
-                          "objuuid" : rfc.object["objuuid"]})
-        
         if "type" in rfc.object:
             grid_data.append({"name" : rfc.object["name"], \
                               "number" : rfc.object["number"], \
