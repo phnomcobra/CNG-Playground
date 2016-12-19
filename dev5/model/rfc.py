@@ -26,4 +26,16 @@ def get_rfc_grid(prcuuid):
                           "number" : rfc.object["number"], \
                           "title" : rfc.object["title"], \
                           "objuuid" : rfc.object["objuuid"]})
+        
+        if "type" in rfc.object:
+            grid_data.append({"name" : rfc.object["name"], \
+                              "number" : rfc.object["number"], \
+                              "title" : rfc.object["title"], \
+                              "objuuid" : rfc.object["objuuid"]})
+        else:
+            add_message("RFC {0} is missing!".format(rfcuuid))
+            grid_data.append({"name" : "????????", \
+                              "number" : "????????", \
+                              "title" : "????????", \
+                              "objuuid" : rfcuuid})
     return grid_data

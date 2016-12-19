@@ -98,6 +98,10 @@ def get_host_grid(tskuuid):
     for hstuuid in task.object["hosts"]:
         host = collection.get_object(hstuuid)
         
-        grid_data.append({"name" : host.object["name"], "host" : host.object["host"], "objuuid" : host.object["objuuid"]})
+        if "type" in host.object:
+            grid_data.append({"name" : host.object["name"], "host" : host.object["host"], "objuuid" : host.object["objuuid"]})
+        else:
+            add_message("host {0} is missing!".format(hstuuid))
+            grid_data.append({"name" : "MISSING!", "host" : "?.?.?.?", "objuuid" : hstuuid})
         
     return grid_data

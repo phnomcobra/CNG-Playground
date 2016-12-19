@@ -43,14 +43,22 @@ def get_child_nodes(objuuid):
     return nodes
     
 def set_parent_objuuid(objuuid, parent_objuuid):
+    if objuuid == parent_objuuid:
+        print "UUID collision detected while attempting to move",
+        print objuuid
+        return None
+        
     collection = Collection("inventory")
 
     current = collection.get_object(objuuid)
     
     if current.object["parent"] != '#':
-        parent = collection.get_object(current.object["parent"])
-        parent.object["children"].remove(objuuid)
-        parent.set()
+        try:
+            parent = collection.get_object(current.object["parent"])
+            parent.object["children"].remove(objuuid)
+            parent.set()
+        except Exception:
+            print traceback.format_exc()
 
     current.object["parent"] = parent_objuuid
     current.set()
@@ -77,9 +85,9 @@ def delete_node(objuuid):
 def get_context_menu(objuuid):
     return Collection("inventory").get_object(objuuid).object["context"]
 
-def create_container(parent_objuuid, name):
+def create_container(parent_objuuid, name, objuuid = None):
     collection = Collection("inventory")
-    container = collection.get_object()
+    container = collection.get_object(objuuid)
     container.object = {
         "type" : "container",
         "parent" : parent_objuuid,
@@ -160,9 +168,9 @@ def create_container(parent_objuuid, name):
     container.set()
     return container.object
 
-def create_task(parent_objuuid, name):
+def create_task(parent_objuuid, name, objuuid = None):
     collection = Collection("inventory")
-    task = collection.get_object()
+    task = collection.get_object(objuuid)
     task.object = {
         "type" : "task",
         "parent" : parent_objuuid,
@@ -207,9 +215,9 @@ def create_task(parent_objuuid, name):
     task.set()
     return task.object
 
-def create_procedure(parent_objuuid, name):
+def create_procedure(parent_objuuid, name, objuuid = None):
     collection = Collection("inventory")
-    procedure = collection.get_object()
+    procedure = collection.get_object(objuuid)
     procedure.object = {
         "type" : "procedure",
         "parent" : parent_objuuid,
@@ -252,9 +260,9 @@ def create_procedure(parent_objuuid, name):
     procedure.set()
     return procedure.object
 
-def create_rfc(parent_objuuid, name):
+def create_rfc(parent_objuuid, name, objuuid = None):
     collection = Collection("inventory")
-    rfc = collection.get_object()
+    rfc = collection.get_object(objuuid)
     rfc.object = {
         "type" : "rfc",
         "parent" : parent_objuuid,
@@ -291,9 +299,9 @@ def create_rfc(parent_objuuid, name):
     rfc.set()
     return rfc.object
 
-def create_controller(parent_objuuid, name):
+def create_controller(parent_objuuid, name, objuuid = None):
     collection = Collection("inventory")
-    controller = collection.get_object()
+    controller = collection.get_object(objuuid)
     controller.object = {
         "type" : "controller",
         "parent" : parent_objuuid,
@@ -332,9 +340,9 @@ def create_controller(parent_objuuid, name):
     controller.set()
     return controller.object
 
-def create_status_code(parent_objuuid, name):
-    status = Collection("inventory")
-    status = collection.get_object()
+def create_status_code(parent_objuuid, name, objuuid = None):
+    collection = Collection("inventory")
+    status = collection.get_object(objuuid)
     status.object = {
         "type" : "status",
         "parent" : parent_objuuid,
@@ -372,9 +380,9 @@ def create_status_code(parent_objuuid, name):
     status.set()
     return status.object
 
-def create_host(parent_objuuid, name):
-    host = Collection("inventory")
-    host = collection.get_object()
+def create_host(parent_objuuid, name, objuuid = None):
+    collection = Collection("inventory")
+    host = collection.get_object(objuuid)
     host.object = {
         "type" : "host",
         "parent" : parent_objuuid,
@@ -407,9 +415,9 @@ def create_host(parent_objuuid, name):
     host.set()
     return host.object
 
-def create_console(parent_objuuid, name):
+def create_console(parent_objuuid, name, objuuid = None):
     collection = Collection("inventory")
-    console = collection.get_object()
+    console = collection.get_object(objuuid)
     console.object = {
         "type" : "console",
         "parent" : parent_objuuid,
