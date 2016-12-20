@@ -312,6 +312,8 @@ class Console:
         
         # Public Members
         self.sftp = None
+        
+        self.connect()
 
     #### Mutation Methods ########################
     def set_username(self, username):
