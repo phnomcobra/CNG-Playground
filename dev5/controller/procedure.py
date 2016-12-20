@@ -16,10 +16,9 @@ import traceback
 from .messaging import add_message
 
 from ..model.procedure import get_task_grid, \
-                              get_related_procedure_grid, \
-                              get_related_procedures, \
                               get_host_grid, \
-                              execute
+                              queue_procedure, \
+                              run_procedure
 
 class Procedure(object):
     @cherrypy.expose
@@ -39,25 +38,24 @@ class Procedure(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
-    def ajax_get_related_procedure_grid(self, objuuid):
-        add_message("procedure controller: get related procedure grid: {0}".format(objuuid))
-        try:
-            return json.dumps(get_related_procedure_grid(objuuid))
-        except Exception:
-            add_message(traceback.format_exc())
-    
-    @cherrypy.expose
-    def ajax_get_related_procedures(self, objuuid):
-        add_message("procedure controller: get procedures: {0}".format(objuuid))
-        try:
-            return json.dumps(get_related_procedures(objuuid))
-        except Exception:
-            add_message(traceback.format_exc())
-    
-    @cherrypy.expose
     def ajax_execute_procedure(self, prcuuid, hstuuid):
         add_message("procedure controller: execute procedure: hstuuid: {0}, prcuuid: {1}".format(hstuuid, prcuuid))
         try:
-            return json.dumps(execute(prcuuid, hstuuid, cherrypy.session))
+            session = {}
+            for key, value in cherrypy.session.items():
+                session[key] = value
+            return json.dumps(run_procedure(hstuuid, prcuuid, session))
+        except Exception:
+            add_message(traceback.format_exc())
+    
+    @cherrypy.expose
+    def ajax_queue_procedure(self, prcuuid, hstuuid):
+        add_message("procedure controller: queuing procedure: hstuuid: {0}, prcuuid: {1}".format(hstuuid, prcuuid))
+        try:
+            session = {}
+            for key, value in cherrypy.session.items():
+                session[key] = value
+            queue_procedure(hstuuid, prcuuid, session)
+            return json.dumps({})
         except Exception:
             add_message(traceback.format_exc())
