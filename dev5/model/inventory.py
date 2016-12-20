@@ -178,7 +178,6 @@ def create_task(parent_objuuid, name, objuuid = None):
         "name" : name,
         "body" : "",
         "icon" : "/images/task_icon.png",
-        "hosts" : [],
         "context" : {
             "delete" : {
                 "label" : "Delete",
@@ -189,18 +188,6 @@ def create_task(parent_objuuid, name, objuuid = None):
             "edit" : {
                 "label" : "Edit",
                 "action" : {"method" : "edit task",
-                            "route" : "inventory/ajax_get_object",
-                            "params" : {"objuuid" : task.objuuid}}
-            },
-            "edit hosts" : {
-                "label" : "Edit Hosts",
-                "action" : {"method" : "edit task hosts",
-                            "route" : "inventory/ajax_get_object",
-                            "params" : {"objuuid" : task.objuuid}}
-            },
-            "run" : {
-                "label" : "Run",
-                "action" : {"method" : "run task",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : task.objuuid}}
             }
@@ -228,7 +215,6 @@ def create_procedure(parent_objuuid, name, objuuid = None):
         "description" : "",
         "rfcs" : [],
         "hosts" : [],
-        "procedures" : [],
         "icon" : "/images/procedure_icon.png",
         "context" : {
             "delete" : {

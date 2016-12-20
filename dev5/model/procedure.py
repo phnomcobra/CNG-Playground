@@ -9,24 +9,23 @@
 # 11/22/2016 Original construction
 ################################################################################
 
+MAX_JOBS = 5
+
 import traceback
 
-from time import time
+from threading import Lock, Thread
+from time import time, sleep
 from imp import new_module
 
 from .document import Collection
+from .utils import sucky_uuid
 from ..controller.flags import touch_flag
 from ..controller.messaging import add_message
-from .task import TaskError
 
-class TaskError:
-    def __init__(self, uuid):
-        self.output = ['<font color="red">'] + traceback.format_exc().split("\n") + ["</font>"]
-        self.uuid = uuid
-        self.status = 5 
-
-    def execute(self, cli):
-        return self.status
+global global_jobs
+global global_jobs_lock
+global_jobs = {}
+global_job_lock = Lock()
 
 def get_task_grid(prcuuid):
     collection = Collection("inventory")
@@ -46,36 +45,6 @@ def get_task_grid(prcuuid):
         
     return grid_data
 
-def get_related_procedure_grid(prcuuid):
-    collection = Collection("inventory")
-    
-    procedure = collection.get_object(prcuuid)
-    
-    grid_data = []
-    
-    for prcuuid in procedure.object["procedures"]:
-        related_procedure = collection.get_object(prcuuid)
-        
-        if "type" in related_procedure.object:
-            grid_data.append({"name" : related_procedure.object["name"], "objuuid" : related_procedure.object["objuuid"]})
-        else:
-            add_message("procedure {0} is missing!".format(prcuuid))
-            grid_data.append({"name" : "MISSING!", "objuuid" : prcuuid})
-        
-    return grid_data
-
-def get_related_procedures(prcuuid):
-    collection = Collection("inventory")
-    
-    procedures = []
-    for rlpuuid in collection.get_object(prcuuid).object["procedures"]:
-        related_procedure = collection.get_object(rlpuuid)
-        
-        if "type" in related_procedure.object:
-            procedures.append(related_procedure.object)
-        
-    return procedures
-
 def get_host_grid(prcuuid):
     collection = Collection("inventory")
     
@@ -94,12 +63,86 @@ def get_host_grid(prcuuid):
         
     return grid_data
 
-def execute(prcuuid, hstuuid, session):
+def set_job(key, value):
+    global_job_lock.acquire()
+    global_jobs[key] = value
+    global_job_lock.release()
+    return value
+
+def get_job(key):
+    try:
+        global_job_lock.acquire()
+        global_jobs[key]
+    except KeyError:
+        global_jobs[key] = None
+    finally:
+        global_job_lock.release()
+        return global_jobs[key]
+
+def del_job(key):
+    try:
+        global_job_lock.acquire()
+        del global_jobs[key]
+    except KeyError:
+        pass
+    finally:
+        global_job_lock.release()
+
+def worker():
+    running_jobs_count = 0
+    
+    global_job_lock.acquire()
+    
+    for key in global_jobs.keys():
+        if global_jobs[key]["process"] != None:
+            if global_jobs[key]["process"].is_alive():
+                running_jobs_count += 1
+            else:
+                del global_jobs[key]
+        
+    for key in global_jobs.keys():
+        if running_jobs_count < MAX_JOBS:
+            if global_jobs[key]["process"] == None:
+                global_jobs[key]["process"] = Thread(target = run_procedure, \
+                                                     args = (global_jobs[key]["hstuuid"], \
+                                                             global_jobs[key]["prcuuid"], \
+                                                             global_jobs[key]["session"]))
+                global_jobs[key]["start time"] = time()
+                global_jobs[key]["process"].start()
+                running_jobs_count += 1
+        
+    global_job_lock.release()
+    
+    sleep(1)
+    
+    Thread(target = worker).start()
+
+def queue_procedure(hstuuid, prcuuid, session):
+    job = {
+        "hstuuid" : hstuuid,
+        "prcuuid" : prcuuid,
+        "session" : session,
+        "process" : None,
+        "queue time" : time(),
+        "start time" : None,
+    }
+    
+    set_job(sucky_uuid(), job)
+
+class TaskError:
+    def __init__(self, uuid):
+        self.output = ['<font color="red">'] + traceback.format_exc().split("\n") + ["</font>"]
+        self.uuid = uuid
+        self.status = 5 
+
+    def execute(self, cli):
+        return self.status
+    
+def run_procedure(hstuuid, prcuuid, session):
     inventory = Collection("inventory")
     results = Collection("results")
     
     result = results.get_object()
-    
     
     result.object['start'] = time()
         
@@ -191,3 +234,5 @@ def execute(prcuuid, hstuuid, session):
     result.set()
     
     return result.object
+
+Thread(target = worker).start()

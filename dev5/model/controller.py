@@ -13,8 +13,6 @@ from threading import Thread
 
 from .document import Collection
 from .utils import sucky_uuid
-from ..controller.flags import touch_flag
-from .procedure import execute as execute_procedure
 
 def get_procedure_grid(ctruuid):
     collection = Collection("inventory")
@@ -67,18 +65,3 @@ def get_tiles(ctruuid):
         hosts.append(collection.get_object(hstuuid).object)
     
     return {"hosts" : hosts, "procedures" : procedures}
-
-def execute(queue, session):
-    hosts = {}
-    for item in queue:
-        if item["hstuuid"] not in hosts:
-            hosts[item["hstuuid"]] = []
-            
-        hosts[item["hstuuid"]].append(item["prcuuid"])
-    
-    for hstuuid, prcuuids in hosts.iteritems():
-        Thread(target = execute_sequence, args = (hstuuid, prcuuids, session)).start()
-    
-def execute_sequence(hstuuid, prcuuids, session):
-    for prcuuid in prcuuids:
-        execute_procedure(prcuuid, hstuuid, session)
