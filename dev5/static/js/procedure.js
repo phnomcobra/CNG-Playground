@@ -36,17 +36,6 @@ var addProcedureTask = function(objuuid) {
     });
 }
 
-var addProcedureRelated = function(objuuid) {
-    $.ajax({
-        'url' : 'inventory/ajax_get_object',
-        'dataType' : 'json',
-        'data' : {'objuuid' : objuuid},
-        'success' : function(resp) {
-            $("#relatedProcedureGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid']});
-        }
-    });
-}
-
 var addProcedureRFC = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
@@ -75,11 +64,11 @@ var loadAndEditProcedure = function(objuuid) {
 
 var editProcedure = function() {
     populateProcedureAttributes();
-    document.getElementById('body').innerHTML = '<div id="taskGrid" style="padding:10px;float:left"></div><div id="hostGrid" style="padding:10px;margin-left:calc(50% - 5px)"></div><div id="RFCGrid" style="padding:10px;float:left"></div><div id="relatedProcedureGrid" style="padding:10px;margin-left:calc(50% - 5px)"></div>';
+    document.getElementById('body').innerHTML = '<div id="taskGrid" style="padding:10px;float:left"></div><div id="hostGrid" style="padding:10px; margin-left:50%"></div><div id="RFCGrid" style="padding:10px;margin-left:50%"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
     
     $("#taskGrid").jsGrid({
-        height: "calc(50% - 5px)",
+        height: "calc(100% - 5px)",
         width: "calc(50% - 5px)",
         autoload: true,
         
@@ -230,48 +219,6 @@ var editProcedure = function() {
             {name : "objuuid", type : "text", visible: false},
             {type : "control" }
         ]
-    });
-    
-    $("#relatedProcedureGrid").jsGrid({
-        height: "calc(50% - 5px)",
-        width: "calc(50% - 5px)",
-        autoload: true,
-        
-        deleteButton: true,
-        confirmDeleting: false,
-        
-        rowClass: function(item, itemIndex) {
-            return "client-" + itemIndex;
-        },
-        
-        rowDoubleClick: function(args) {
-            loadAndEditProcedure(args.item.objuuid);
-        },
- 
-        controller: {
-            loadData: function(filter) {
-                return $.ajax({
-                    type: "GET",
-                    url: "/procedure/ajax_get_related_procedure_grid",
-                    data: {'objuuid' : inventoryObject['objuuid']},
-                    dataType: "JSON"
-                });
-            },
-            insertItem: function(item) {
-                inventoryObject['procedures'].push(item.objuuid);
-                inventoryObject['changed'] = true;
-            },
-            deleteItem: function(item) {
-                inventoryObject['procedures'].splice(inventoryObject['procedures'].indexOf(item.objuuid), 1);
-                inventoryObject['changed'] = true;
-            }
-        },
-        
-        fields: [
-            {name : "name", type : "text", title : "Related Procedure Name"},
-            {name : "objuuid", type : "text", visible: false},
-            {type : "control" }
-        ],
     });
 }
 

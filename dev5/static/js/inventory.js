@@ -62,12 +62,6 @@ $(document).on('dnd_stop.vakata', function (e, data) {
                               inventoryObject['procedures'].indexOf(resp['objuuid']) == -1 &&
                               document.getElementById('procedureGrid')) {
                         addControllerProcedure(resp['objuuid']);
-                    } else if(resp['type'] == 'procedure' &&
-                              inventoryObject['procedures'].indexOf(resp['objuuid']) == -1 &&
-                              document.getElementById('relatedProcedureGrid')) {
-                        if(resp['objuuid'] != inventoryObject['objuuid']) {
-                            addProcedureRelated(resp['objuuid']);
-                        }
                     }
                 }
             });
@@ -232,10 +226,6 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit console success");
                                         inventoryObject = resp;
                                         editConsole();
-                                    } else if(obj.item.method == 'run task') {
-                                        addMessage("run task success");
-                                        inventoryObject = resp;
-                                        executeTask();
                                     } else if(obj.item.method == 'run procedure') {
                                         addMessage("run procedure success");
                                         inventoryObject = resp;
