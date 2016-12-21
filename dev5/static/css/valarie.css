@@ -115,19 +115,61 @@
 }
 
 .controllerCell:hover {
-    background: #999 !important;
+    border-color: #FFF !important;
 }
 
 .controllerCell {
     background: #444;
+    font-size:xx-small;
+    max-width: 40px;
+    border-style:solid;
+    border-width:thin;
+}
+
+.controllerPlaceHolderCell {
+    width: 40px;
+}
+
+
+.controllerHostCell:hover {
+    color: #FFF !important;
+}
+
+.controllerHostCell {
+    color: #999;
+    font-size:x-small;
+  
+    -ms-transform: rotate(315deg);
+    -moz-transform: rotate(315deg);
+    -webkit-transform: rotate(315deg);
+    -o-transform: rotate(315deg);
+    transform: rotate(315deg);
+    
+    max-width: 40px;  
+    height: 100px;
+    overflow: hidden;
+
+}
+
+.controllerProcedureCell:hover {
+    color: #FFF !important;
+}
+
+.controllerProcedureCell {
+    color: #999;
+    font-size:x-small;
+    text-align: right;
+    width: 200px;
+    padding-right: 10px;
 }
 
 #controllerTable {
     width: inherit;
     height: inherit;
     background: #000;
+    border-spacing: 1px;
+    border-collapse: separate;
 }
-
 
 .sidebar-nav > .sidebar-brand {
     height: 65px;
