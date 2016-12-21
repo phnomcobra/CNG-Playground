@@ -9,7 +9,7 @@
 # 11/22/2016 Original construction
 ################################################################################
 
-MAX_JOBS = 5
+MAX_JOBS = 10
 
 import traceback
 
