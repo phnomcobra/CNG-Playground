@@ -4,34 +4,41 @@ var saving = false;
 var inventoryStateFlag = null;
 
  $('#inventory').jstree({
-'plugins' : ['contextmenu', 'dnd', 'checkbox', 'search', 'sort'],
-'contextmenu': {
-    'items': 
-        function (obj) {
-            return contextMenu;
+    'contextmenu': {
+        'items': 
+            function (obj) {
+                return contextMenu;
         }
-},
-'core' : {
-  'check_callback' : true,
-  'data' : {
-    'url' : function (node) {
-      return node.id === '#' ?
-        'inventory/ajax_roots' :
-        'ajax_children';
     },
-    'data' : function (node) {
-      return { 'objuuid' : node.id };
+    'core' : {
+        'check_callback' : true,
+        'data' : {
+            'url' : function (node) {
+                return node.id === '#' ?
+                'inventory/ajax_roots' :
+                'ajax_children';
+            },
+            'data' : function (node) {
+                return { 'objuuid' : node.id };
+            },
+            'dataType' : "json",
+        }
     },
-    'dataType' : "json",
-  },
-'themes': {
-        'theme': 'apple',
-        'dots' : true,
-        'icons': true,
-        'url': "css/style.min.css"
-    }
-}
+    'search': {
+        'case_insensitive': true,
+        'show_only_matches' : true
+    },
+    'plugins' : ['contextmenu', 'dnd', 'checkbox', 'search', 'sort']
 });
+
+var to = false;
+ $('#inventorySearchTextBox').keyup(function () {
+            if(to) { clearTimeout(to); }
+            to = setTimeout(function () {
+                var v = $('#inventorySearchTextBox').val();
+                $('#inventory').jstree(true).search(v);
+            }, 500);
+        });
 
 var searchInventoryTree = function(item) {
     $('#inventory').jstree(true).search(item.value);

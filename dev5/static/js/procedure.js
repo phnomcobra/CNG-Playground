@@ -223,11 +223,11 @@ var editProcedure = function() {
 }
 
 var viewProcedureResult = function(result) {
-    document.getElementById('section-header-' + result.host.objuuid).innerHTML = result.host.name + '<br>' + result.host.host + '<br>' + result.status.name;
+    document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML = result.procedure.name + '<br>' + result.host.name + ' ' + result.host.host + ' <br>' + new Date(result.stop * 1000) + ' [' + result.status.name + ']';
     
-    document.getElementById('section-body-' + result.host.objuuid).innerHTML = '<table id="section-body-procedure-header-' + result.host.objuuid + '"></table>';
+    document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML = '<table id="section-body-procedure-header-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
     
-    var table = document.getElementById('section-body-procedure-header-' + result.host.objuuid);
+    var table = document.getElementById('section-body-procedure-header-' + result.host.objuuid + '-' + result.procedure.objuuid);
     var row;
     var cell;
     
@@ -245,18 +245,24 @@ var viewProcedureResult = function(result) {
     
     row = table.insertRow(-1);
     row.insertCell(-1).innerHTML = '<b>Procedure Start:</b>';
-    row.insertCell(-1).innerHTML = result.start;
+    row.insertCell(-1).innerHTML = new Date(result.start * 1000);
     
     row = table.insertRow(-1);
     row.insertCell(-1).innerHTML = '<b>Procedure Stop:</b>';
-    row.insertCell(-1).innerHTML = result.stop;
+    row.insertCell(-1).innerHTML = new Date(result.stop * 1000);
     
     row = table.insertRow(-1);
     row.insertCell(-1).innerHTML = '<b>Procedure Status:</b>';
     row.insertCell(-1).innerHTML = result.status.name;
     
-    document.getElementById('section-body-' + result.host.objuuid).innerHTML += '<br><br><table id="section-body-rfcs-' + result.host.objuuid + '"></table>';
-    table = document.getElementById('section-body-rfcs-' + result.host.objuuid);
+    row = table.insertRow(-1);
+    row.insertCell(-1).innerHTML = '<b>Procedure Output:</b>';
+    cell = row.insertCell(-1);
+    for(var j = 0; j < result.output.length; j++)
+        cell.innerHTML += result.output[j] + '<br>';
+    
+    document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br><br><table id="section-body-rfcs-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
+    table = document.getElementById('section-body-rfcs-' + result.host.objuuid + '-' + result.procedure.objuuid);
     for(var i = 0; i < result.rfcs.length; i++) {
         row = table.insertRow(-1);
         row.insertCell(-1).innerHTML = '<b>RFC Name:</b>';
@@ -287,8 +293,8 @@ var viewProcedureResult = function(result) {
     }
     
     for(var i = 0; i < result.tasks.length; i++) {
-        document.getElementById('section-body-' + result.host.objuuid).innerHTML += '<br><br><table id="section-body-task-header-' + i + '-' + result.host.objuuid + '"></table>';
-        table = document.getElementById('section-body-task-header-' + i + '-' + result.host.objuuid);
+        document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br><br><table id="section-body-task-header-' + i + '-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
+        table = document.getElementById('section-body-task-header-' + i + '-' + result.host.objuuid + '-' + result.procedure.objuuid);
     
         row = table.insertRow(-1);
         cell = row.insertCell(-1);
@@ -306,11 +312,11 @@ var viewProcedureResult = function(result) {
         
         row = table.insertRow(-1);
         row.insertCell(-1).innerHTML = '<b>Task Start:</b>';
-        row.insertCell(-1).innerHTML = result.tasks[i].start;
+        row.insertCell(-1).innerHTML = new Date(result.tasks[i].start * 1000);
         
         row = table.insertRow(-1);
         row.insertCell(-1).innerHTML = '<b>Task Stop:</b>';
-        row.insertCell(-1).innerHTML = result.tasks[i].stop;
+        row.insertCell(-1).innerHTML = new Date(result.tasks[i].stop * 1000);
         
         row = table.insertRow(-1);
         row.insertCell(-1).innerHTML = '<b>Task Status:</b>';
@@ -322,11 +328,11 @@ var viewProcedureResult = function(result) {
         for(var j = 0; j < result.tasks[i].output.length; j++)
             cell.innerHTML += result.tasks[i].output[j] + '<br>';
         
-        document.getElementById('section-body-' + result.host.objuuid).innerHTML += '<br>';
+        document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br>';
     }
     
-    document.getElementById('section-header-' + result.host.objuuid).style.color = '#' + result.status.cfg;
-    document.getElementById('section-header-' + result.host.objuuid).style.backgroundColor = '#' + result.status.cbg;
+    document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).style.color = '#' + result.status.cfg;
+    document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).style.backgroundColor = '#' + result.status.cbg;
 }
 
 var executeProcedure = function() {
@@ -338,8 +344,8 @@ var executeProcedure = function() {
     for(var i = 0; i < inventoryObject.hosts.length; i++) {
         addMessage('executing ' + inventoryObject.name + ' hstuuid: ' + inventoryObject.hosts[i]);
         
-        document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + inventoryObject.hosts[i] + '"></div>';
-        document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + inventoryObject.hosts[i] + '"></code></pre>';
+        document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + inventoryObject.hosts[i] + '-' + inventoryObject.objuuid + '"></div>';
+        document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + inventoryObject.hosts[i] + '-' + inventoryObject.objuuid + '"></code></pre>';
         
         $.ajax({
             'url' : 'procedure/ajax_execute_procedure',

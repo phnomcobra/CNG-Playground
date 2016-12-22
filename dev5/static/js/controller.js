@@ -315,7 +315,7 @@ var drawCells = function(resultItems) {
         cell = document.getElementById('controller-cell-' + resultItems[i].host.objuuid + '-' + resultItems[i].procedure.objuuid);
 
         if(resultItems[i].stop) {
-            if(currentTime - resultItems[i].stop > 60) {
+            if(currentTime - resultItems[i].stop > 3600) {
                 cell.style.color = '#' + resultItems[i].status.sfg;
                 cell.style.backgroundColor = '#' + resultItems[i].status.sbg;
             } else {
@@ -347,11 +347,11 @@ var updateControllerTimer = function() {
                 if(controllerStateFlag != resp.value) {
                     controllerStateFlag = resp.value;
                     updateControllerStateData();
-                } else {
+                } /* else {
                     if(controllerStateData)
                         drawCells(controllerStateData);
-                }
-                setTimeout(updateControllerTimer, 2000);
+                } */
+                setTimeout(updateControllerTimer, 5000);
             },
         });
     }
@@ -511,111 +511,4 @@ var editController = function() {
             });
         }
     });
-}
-
-var viewProcedureResult = function(result) {
-    document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML = result.procedure.name + '<br>' + result.host.name + '<br>' + result.host.host + '<br>' + result.status.name;
-    
-    document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML = '<table id="section-body-procedure-header-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
-    
-    var table = document.getElementById('section-body-procedure-header-' + result.host.objuuid + '-' + result.procedure.objuuid);
-    var row;
-    var cell;
-    
-    row = table.insertRow(-1);
-    row.insertCell(-1).innerHTML = '<b>Procedure Name:</b>';
-    row.insertCell(-1).innerHTML = result.procedure.name;
-    
-    row = table.insertRow(-1);
-    row.insertCell(-1).innerHTML = '<b>Procedure Title:</b>';
-    row.insertCell(-1).innerHTML = result.procedure.title;
-    
-    row = table.insertRow(-1);
-    row.insertCell(-1).innerHTML = '<b>Procedure Description:</b>';
-    row.insertCell(-1).innerHTML = result.procedure.description;
-    
-    row = table.insertRow(-1);
-    row.insertCell(-1).innerHTML = '<b>Procedure Start:</b>';
-    row.insertCell(-1).innerHTML = result.start;
-    
-    row = table.insertRow(-1);
-    row.insertCell(-1).innerHTML = '<b>Procedure Stop:</b>';
-    row.insertCell(-1).innerHTML = result.stop;
-    
-    row = table.insertRow(-1);
-    row.insertCell(-1).innerHTML = '<b>Procedure Status:</b>';
-    row.insertCell(-1).innerHTML = result.status.name;
-    
-    document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br><br><table id="section-body-rfcs-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
-    table = document.getElementById('section-body-rfcs-' + result.host.objuuid + '-' + result.procedure.objuuid);
-    for(var i = 0; i < result.rfcs.length; i++) {
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>RFC Name:</b>';
-        row.insertCell(-1).innerHTML = result.rfcs[i].name;
-        
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>RFC Number:</b>';
-        row.insertCell(-1).innerHTML = result.rfcs[i].number;
-        
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>RFC Description:</b>';
-        row.insertCell(-1).innerHTML = result.rfcs[i].description;
-        
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>POC Name:</b>';
-        row.insertCell(-1).innerHTML = result.rfcs[i]['poc name'];
-        
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>POC Email:</b>';
-        row.insertCell(-1).innerHTML = result.rfcs[i]['poc email'];
-        
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>POC Phone:</b>';
-        row.insertCell(-1).innerHTML = result.rfcs[i]['poc phone'];
-        
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = ' ';
-    }
-    
-    for(var i = 0; i < result.tasks.length; i++) {
-        document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br><br><table id="section-body-task-header-' + i + '-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
-        table = document.getElementById('section-body-task-header-' + i + '-' + result.host.objuuid + '-' + result.procedure.objuuid);
-    
-        row = table.insertRow(-1);
-        cell = row.insertCell(-1);
-        cell.innerHTML = '<b>' + result.tasks[i].status.abbreviation + '</b>';
-        cell.style.color = '#' + result.tasks[i].status.cfg;
-        cell.style.backgroundColor = '#' + result.tasks[i].status.cbg;
-        
-        cell = row.insertCell(-1);
-        cell.style.color = '#' + result.tasks[i].status.cfg;
-        cell.style.backgroundColor = '#' + result.tasks[i].status.cbg;
-    
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>Task Name:</b>';
-        row.insertCell(-1).innerHTML = result.tasks[i].name;
-        
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>Task Start:</b>';
-        row.insertCell(-1).innerHTML = result.tasks[i].start;
-        
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>Task Stop:</b>';
-        row.insertCell(-1).innerHTML = result.tasks[i].stop;
-        
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>Task Status:</b>';
-        row.insertCell(-1).innerHTML = result.tasks[i].status.name;
-        
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>Task Output:</b>';
-        cell = row.insertCell(-1);
-        for(var j = 0; j < result.tasks[i].output.length; j++)
-            cell.innerHTML += result.tasks[i].output[j] + '<br>';
-        
-        document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br>';
-    }
-    
-    document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).style.color = '#' + result.status.cfg;
-    document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).style.backgroundColor = '#' + result.status.cbg;
 }
