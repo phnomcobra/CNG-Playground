@@ -9,7 +9,7 @@
 # 11/22/2016 Original construction
 ################################################################################
 
-MAX_JOBS = 10
+MAX_JOBS = 5
 
 import traceback
 
@@ -118,6 +118,8 @@ def worker():
     Thread(target = worker).start()
 
 def queue_procedure(hstuuid, prcuuid, session):
+    add_message("Queued host: {0}, procedure {1}...".format(hstuuid, prcuuid))
+    
     job = {
         "hstuuid" : hstuuid,
         "prcuuid" : prcuuid,
@@ -139,22 +141,26 @@ class TaskError:
         return self.status
     
 def run_procedure(hstuuid, prcuuid, session):
+    add_message("Executing host: {0}, procedure {1}...".format(hstuuid, prcuuid))
+    
     inventory = Collection("inventory")
     results = Collection("results")
     
     result = results.get_object()
     
     result.object['start'] = time()
-        
+    result.object["output"] = []
+    
     status_code_body = ""
     status_data = {}
     
+    result.object["output"].append("importing status codes...")
     for status in inventory.find(type = "status"):
         try:
             status_code_body += "{0}=int('{1}')\n".format(status.object["alias"], status.object["code"])
             status_data[int(status.object["code"])] = status.object
         except Exception:
-            add_message(traceback.format_exc())
+            result.object["output"] += traceback.format_exc().split("\n")
     
     host = inventory.get_object(hstuuid)
     result.object['host'] = host.object
@@ -165,7 +171,7 @@ def run_procedure(hstuuid, prcuuid, session):
     winning_status = None
     continue_procedure = True
     
-    result.object['tasks'] = []
+    result.object["tasks"] = []
     
     result.object['rfcs'] = []
     for rfcuuid in inventory.get_object(prcuuid).object["rfcs"]:
@@ -173,15 +179,17 @@ def run_procedure(hstuuid, prcuuid, session):
     
     try:
         try:
+            result.object["output"].append("importing console...")
             exec inventory.get_object(host.object["console"]).object["body"] in tempmodule.__dict__
             cli = tempmodule.Console(session = session, host = host.object["host"])
         except Exception:
-            add_message(traceback.format_exc())
+            result.object["output"] += traceback.format_exc().split("\n")
         
         for tskuuid in inventory.get_object(prcuuid).object["tasks"]:
             task_result = inventory.get_object(tskuuid).object
             
             try:
+                result.object["output"].append("importing task {0}...".format(inventory.get_object(tskuuid).object["name"]))
                 exec status_code_body + inventory.get_object(tskuuid).object["body"] in tempmodule.__dict__
                 task = tempmodule.Task()
                 
@@ -192,12 +200,11 @@ def run_procedure(hstuuid, prcuuid, session):
                         task.execute(cli)
                     except Exception:
                         task = TaskError(tskuuid)
-                        add_message(traceback.format_exc())
                     
                     task_result["stop"] = time()
             except Exception:
                 task = TaskError(tskuuid)
-                add_message(traceback.format_exc())
+                result.object["output"] += traceback.format_exc().split("\n")
             
             task_result["output"] = task.output
             try:
@@ -207,11 +214,10 @@ def run_procedure(hstuuid, prcuuid, session):
                         continue_procedure = False
                 except Exception:
                     continue_procedure = False
-                    #add_message(traceback.format_exc())
             except Exception:
                 task_result['status'] = {"code" : task.status}
                 continue_procedure = False
-                add_message(traceback.format_exc())
+                
             result.object['tasks'].append(task_result)
             
             if winning_status == None:
@@ -220,18 +226,13 @@ def run_procedure(hstuuid, prcuuid, session):
             elif task.status < winning_status:
                 winning_status = task.status
                 result.object['status'] = task_result['status']
-        
     except Exception:
         add_message(traceback.format_exc())
         
     result.object['stop'] = time()
 
-    touch_flag("results")
-    
-    #for line in dir(tempmodule):
-    #    print "module: ", line
-    
     result.set()
+    touch_flag("results")
     
     return result.object
 
