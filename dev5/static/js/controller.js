@@ -351,7 +351,7 @@ var updateControllerTimer = function() {
                     if(controllerStateData)
                         drawCells(controllerStateData);
                 } */
-                setTimeout(updateControllerTimer, 5000);
+                setTimeout(updateControllerTimer, 1000);
             },
         });
     }
