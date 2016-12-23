@@ -12,14 +12,15 @@
 import traceback
 
 from .document import Collection
+from .ramdocument import Collection as RAMCollection
 from .utils import sucky_uuid
 
 def delete(objuuid):
-    collection = Collection("results")
+    collection = RAMCollection("results")
     collection.get_object(objuuid).destroy()
 
 def get_controller_results(ctruuid):
-    results = Collection("results")
+    results = RAMCollection("results")
     inventory = Collection("inventory")
     
     controller = inventory.get_object(ctruuid)
@@ -48,9 +49,9 @@ def get_controller_results(ctruuid):
     
     return controller_results
 
-Collection("results").destroy()
+RAMCollection("results").destroy()
     
-collection = Collection("results")
+collection = RAMCollection("results")
 collection.create_attribute("start", "['start']")
 collection.create_attribute("stop", "['stop']")
 collection.create_attribute("tskuuid", "['task']['objuuid']")

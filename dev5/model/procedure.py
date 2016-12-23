@@ -9,7 +9,7 @@
 # 11/22/2016 Original construction
 ################################################################################
 
-MAX_JOBS = 5
+MAX_JOBS = 10
 
 import traceback
 
@@ -18,6 +18,7 @@ from time import time, sleep
 from imp import new_module
 
 from .document import Collection
+from .ramdocument import Collection as RAMCollection
 from .utils import sucky_uuid
 from ..controller.flags import touch_flag
 from ..controller.messaging import add_message
@@ -144,7 +145,7 @@ def run_procedure(hstuuid, prcuuid, session):
     add_message("Executing host: {0}, procedure {1}...".format(hstuuid, prcuuid))
     
     inventory = Collection("inventory")
-    results = Collection("results")
+    results = RAMCollection("results")
     
     result = results.get_object()
     

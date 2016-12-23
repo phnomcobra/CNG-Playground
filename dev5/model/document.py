@@ -100,8 +100,9 @@ class Document:
                                          str(attribute_name), \
                                          str(eval("str(self.get_object(objuuid)" + attributes[attribute_name] + ")"))))
                     self.connection.commit()
-                except Exception as e:
-                    print traceback.format_exc()
+                except Exception:
+                    #print traceback.format_exc()
+                    pass
         except Exception:
             print traceback.format_exc()
         finally:
