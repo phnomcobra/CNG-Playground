@@ -120,7 +120,8 @@
 }
 
 .controllerCell:hover {
-    border-color: #FFF !important;
+    background-color: #999 !important;
+    color: #FFF !important;
 }
 
 .controllerCell {
@@ -129,6 +130,7 @@
     max-width: 40px;
     border-style:solid;
     border-width:thin;
+    text-align: center;
 }
 
 .controllerPlaceHolderCell {
