@@ -244,7 +244,11 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                     } else if(obj.item.method == 'view task result') {
                                         addMessage("view task success");
                                         inventoryObject = resp;
-                                        viewTaskResult();                                    
+                                        viewTaskResult();
+                                    } else if(obj.item.method == 'run task') {
+                                        addMessage("run task success");
+                                        inventoryObject = resp;
+                                        executeTask();
                                     } else if(obj.item.method == 'delete node') {
                                         addMessage("delete success");
                                         deleteNode(resp['id']);

@@ -177,6 +177,7 @@ def create_task(parent_objuuid, name, objuuid = None):
         "children" : [],
         "name" : name,
         "body" : "",
+        "hosts" : [],
         "icon" : "/images/task_icon.png",
         "context" : {
             "delete" : {
@@ -190,7 +191,19 @@ def create_task(parent_objuuid, name, objuuid = None):
                 "action" : {"method" : "edit task",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : task.objuuid}}
-            }
+            },
+            "edit hosts" : {
+                "label" : "Edit Hosts",
+                "action" : {"method" : "edit task hosts",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : task.objuuid}}
+            },
+            "run" : {
+                "label" : "Run",
+                "action" : {"method" : "run task",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : task.objuuid}}
+              }
         },
         "accepts" : []
     }
