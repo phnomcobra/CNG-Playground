@@ -64,29 +64,36 @@ def get_host_grid(prcuuid):
         
     return grid_data
 
-def set_job(key, value):
+def update_job(jobuuid, key, value):
     global_job_lock.acquire()
-    global_jobs[key] = value
+    global_jobs[jobuuid][key] = value
     global_job_lock.release()
-    return value
+    touch_flag("queueState")
+    
+def set_job(jobuuid, value):
+    global_job_lock.acquire()
+    global_jobs[jobuuid] = value
+    global_job_lock.release()
+    touch_flag("queueState")
 
-def get_job(key):
+def get_job(jobuuid):
     try:
         global_job_lock.acquire()
-        global_jobs[key]
+        global_jobs[jobuuid]
     except KeyError:
-        global_jobs[key] = None
+        global_jobs[jobuuid] = None
     finally:
         global_job_lock.release()
-        return global_jobs[key]
+        return global_jobs[jobuuid]
 
-def del_job(key):
+def del_job(jobuuid):
     try:
         global_job_lock.acquire()
-        del global_jobs[key]
+        del global_jobs[jobuuid]
     except KeyError:
         pass
     finally:
+        touch_flag("queueState")
         global_job_lock.release()
 
 def worker():
@@ -100,17 +107,20 @@ def worker():
                 running_jobs_count += 1
             else:
                 del global_jobs[key]
+                touch_flag("queueState")
         
     for key in global_jobs.keys():
         if running_jobs_count < MAX_JOBS:
             if global_jobs[key]["process"] == None:
                 global_jobs[key]["process"] = Thread(target = run_procedure, \
-                                                     args = (global_jobs[key]["hstuuid"], \
-                                                             global_jobs[key]["prcuuid"], \
-                                                             global_jobs[key]["session"]))
+                                                     args = (global_jobs[key]["host"]["objuuid"], \
+                                                             global_jobs[key]["procedure"]["objuuid"], \
+                                                             global_jobs[key]["session"], \
+                                                             global_jobs[key]["jobuuid"]))
                 global_jobs[key]["start time"] = time()
                 global_jobs[key]["process"].start()
                 running_jobs_count += 1
+                touch_flag("queueState")
         
     global_job_lock.release()
     
@@ -118,19 +128,48 @@ def worker():
     
     Thread(target = worker).start()
 
+def get_jobs_grid():
+    grid_data = {}
+    global_job_lock.acquire()
+    
+    for jobuuid, dict in global_jobs.iteritems():
+        grid_data[jobuuid] = {}
+        grid_data[jobuuid]["name"] = dict["procedure"].name
+        grid_data[jobuuid]["host"] = dict["host"].name
+        grid_data[jobuuid]["progress"] = dict["progress"]
+        grid_data[jobuuid]["message"] = dict["message"]
+        grid_data[jobuuid]["start time"] = dict["start time"]
+        grid_data[jobuuid]["queue time"] = dict["queue time"]
+        
+        if dict["start time"]:
+            grid_data[jobuuid]["duration"] = time() - dict["start time"]
+        else:
+            grid_data[jobuuid]["duration"] = 0
+    
+    global_job_lock.release()
+    
+    return grid_data
+
 def queue_procedure(hstuuid, prcuuid, session):
     add_message("Queued host: {0}, procedure {1}...".format(hstuuid, prcuuid))
     
+    inventory = Collection("inventory")
+    
+    jobuuid = sucky_uuid()
+    
     job = {
-        "hstuuid" : hstuuid,
-        "prcuuid" : prcuuid,
+        "jobuuid" : jobuuid,
+        "host" : inventory.get_object(hstuuid).object,
+        "procedure" : inventory.get_object(prcuuid).object,
         "session" : session,
         "process" : None,
         "queue time" : time(),
         "start time" : None,
+        "progress" : 0,
+        "message" : "Queued",
     }
     
-    set_job(sucky_uuid(), job)
+    set_job(jobuuid, job)
 
 class TaskError:
     def __init__(self, uuid):
@@ -141,8 +180,11 @@ class TaskError:
     def execute(self, cli):
         return self.status
     
-def run_procedure(hstuuid, prcuuid, session):
+def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
     add_message("Executing host: {0}, procedure {1}...".format(hstuuid, prcuuid))
+    
+    if jobuuid:
+        update_job(jobuuid, "message", "Executing")
     
     inventory = Collection("inventory")
     results = RAMCollection("results")
@@ -156,6 +198,7 @@ def run_procedure(hstuuid, prcuuid, session):
     status_data = {}
     
     result.object["output"].append("importing status codes...")
+    
     for status in inventory.find(type = "status"):
         try:
             status_code_body += "{0}=int('{1}')\n".format(status.object["alias"], status.object["code"])
@@ -186,11 +229,16 @@ def run_procedure(hstuuid, prcuuid, session):
         except Exception:
             result.object["output"] += traceback.format_exc().split("\n")
         
-        for tskuuid in inventory.get_object(prcuuid).object["tasks"]:
+        tskuuids = inventory.get_object(prcuuid).object["tasks"]
+        for tskuuid in tskuuids:
             task_result = inventory.get_object(tskuuid).object
             
             try:
                 result.object["output"].append("importing task {0}...".format(inventory.get_object(tskuuid).object["name"]))
+                
+                if jobuuid:
+                    update_job(jobuuid, "message", inventory.get_object(tskuuid).object["name"])
+                
                 exec status_code_body + inventory.get_object(tskuuid).object["body"] in tempmodule.__dict__
                 task = tempmodule.Task()
                 
@@ -227,6 +275,9 @@ def run_procedure(hstuuid, prcuuid, session):
             elif task.status < winning_status:
                 winning_status = task.status
                 result.object['status'] = task_result['status']
+            
+            if jobuuid:
+                update_job(jobuuid, "progress", float(tskuuids.index(tskuuid) + 1) / float(tskuuids.length()))
     except Exception:
         add_message(traceback.format_exc())
         

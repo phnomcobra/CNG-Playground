@@ -2,6 +2,7 @@ var contextMenu = {};
 var inventoryObject = {};
 var saving = false;
 var inventoryStateFlag = null;
+var queueStateFlag = null;
 
  $('#inventory').jstree({
     'contextmenu': {
@@ -435,6 +436,20 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
                 if(inventoryStateFlag != resp.value) {
                     inventoryStateFlag = resp.value;
                     $('#inventory').jstree('refresh');
+                }
+            },
+        });
+        
+        $.ajax({
+            'url' : 'flags/ajax_get',
+            'dataType' : 'json',
+            'data' : {
+                'key' : 'queueState'
+            },
+            'success' : function(resp) {
+                if(queueStateFlag != resp.value) {
+                    queueStateFlag = resp.value;
+                    //updateQueueState();
                 }
             },
         });

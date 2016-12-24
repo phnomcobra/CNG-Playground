@@ -17,6 +17,7 @@ from .messaging import add_message
 
 from ..model.procedure import get_task_grid, \
                               get_host_grid, \
+                              get_jobs_grid, \
                               queue_procedure, \
                               run_procedure
 
@@ -57,5 +58,12 @@ class Procedure(object):
                 session[key] = value
             queue_procedure(hstuuid, prcuuid, session)
             return json.dumps({})
+        except Exception:
+            add_message(traceback.format_exc())
+    
+    @cherrypy.expose
+    def ajax_get_queue_grid(self):
+        try:
+            return json.dumps(get_jobs_grid())
         except Exception:
             add_message(traceback.format_exc())

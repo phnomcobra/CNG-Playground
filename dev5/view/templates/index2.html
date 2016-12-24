@@ -39,9 +39,28 @@
     <div id="wrapper">
         <!-- Sidebar -->
         <ul id="sidebar-wrapper" class="sidebar-nav">
-            <input type="text" id="inventorySearchTextBox"></input>
-            <div id="inventory"></div>
-            <div id="attributes"></div>
+            <ul class="nav nav-tabs">
+                <li class="active"><a data-toggle="tab" href="#inventoryContainer">Inventory</a></li>
+                <li><a data-toggle="tab" href="#attributes">Attributes</a></li>
+                <li><a data-toggle="tab" href="#queue">Queue</a></li>
+            </ul>
+            
+            <div class="tab-content">
+                <div id="inventoryContainer" class="tab-pane fade in active">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search" id="inventorySearchTextBox"></input>
+                        <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" onclick="document.getElementById('inventorySearchTextBox').value='';$('#inventory').jstree(true).search('');" >Clear</button>
+                            <button class="btn btn-default" type="button" onclick="$('#importFormInput').trigger('click');" >Import</button>
+                            <button class="btn btn-default" type="button" onclick="exportFromInventory()" >Export</button>
+                        </span>
+                    </div>
+                    <div id="inventory"></div>
+                </div>
+                <div id="attributes" class="tab-pane fade"></div>
+                <div id="queue" class="tab-pane fade"></div>
+            </div>
+
         </ul>
         <!-- /#sidebar-wrapper -->
 
