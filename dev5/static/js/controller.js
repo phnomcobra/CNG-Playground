@@ -246,6 +246,7 @@ var procedureClick = function(item) {
 }
 
 var executeAllProcedures = function() {
+    $('.nav-tabs a[href="#queue"]').tab('show');
     $('#controllerTable tr').each(function(){
         $(this).find('td').each(function(){
             if($(this)[0].id) {
@@ -265,6 +266,7 @@ var executeAllProcedures = function() {
 }
 
 var executeSelectedProcedures = function() {
+    $('.nav-tabs a[href="#queue"]').tab('show');
     $('#controllerTable tr').each(function(){
         $(this).find('td').each(function(){
             if($(this)[0].id) {

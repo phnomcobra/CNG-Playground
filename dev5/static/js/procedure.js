@@ -19,7 +19,7 @@ var populateProcedureAttributes = function() {
                     inventoryObject[continueKey] = false;
                 }
                 
-                addAttributeCheckBox('Continue on ' + resp[i].name, continueKey);
+                addAttributeCheckBox('Continue on <br>' + resp[i].name, continueKey);
             }
         }
     });
@@ -225,7 +225,7 @@ var editProcedure = function() {
 var viewProcedureResult = function(result) {
     document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML = result.procedure.name + '<br>' + result.host.name + ' ' + result.host.host + ' <br>' + new Date(result.stop * 1000) + ' [' + result.status.name + ']';
     
-    document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML = '<table id="section-body-procedure-header-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
+    document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML = '<table class="table" id="section-body-procedure-header-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
     
     var table = document.getElementById('section-body-procedure-header-' + result.host.objuuid + '-' + result.procedure.objuuid);
     var row;
@@ -261,7 +261,7 @@ var viewProcedureResult = function(result) {
     for(var j = 0; j < result.output.length; j++)
         cell.innerHTML += result.output[j] + '<br>';
     
-    document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br><br><table id="section-body-rfcs-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
+    document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br><br><table class="table" id="section-body-rfcs-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
     table = document.getElementById('section-body-rfcs-' + result.host.objuuid + '-' + result.procedure.objuuid);
     for(var i = 0; i < result.rfcs.length; i++) {
         row = table.insertRow(-1);
@@ -293,7 +293,7 @@ var viewProcedureResult = function(result) {
     }
     
     for(var i = 0; i < result.tasks.length; i++) {
-        document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br><br><table id="section-body-task-header-' + i + '-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
+        document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br><br><table class="table" id="section-body-task-header-' + i + '-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
         table = document.getElementById('section-body-task-header-' + i + '-' + result.host.objuuid + '-' + result.procedure.objuuid);
     
         row = table.insertRow(-1);
