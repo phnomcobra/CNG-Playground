@@ -133,18 +133,13 @@ def get_jobs_grid():
     global_job_lock.acquire()
     
     for jobuuid, dict in global_jobs.iteritems():
-        grid_data[jobuuid] = {}
-        grid_data[jobuuid]["name"] = dict["procedure"].name
-        grid_data[jobuuid]["host"] = dict["host"].name
-        grid_data[jobuuid]["progress"] = dict["progress"]
-        grid_data[jobuuid]["message"] = dict["message"]
-        grid_data[jobuuid]["start time"] = dict["start time"]
-        grid_data[jobuuid]["queue time"] = dict["queue time"]
-        
         if dict["start time"]:
-            grid_data[jobuuid]["duration"] = time() - dict["start time"]
-        else:
-            grid_data[jobuuid]["duration"] = 0
+            grid_data[jobuuid] = {}
+            grid_data[jobuuid]["name"] = dict["procedure"]["name"]
+            grid_data[jobuuid]["host"] = dict["host"]["name"]
+            grid_data[jobuuid]["progress"] = dict["progress"]
+            grid_data[jobuuid]["message"] = dict["message"]
+            grid_data[jobuuid]["start time"] = dict["start time"]
     
     global_job_lock.release()
     
@@ -230,14 +225,14 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
             result.object["output"] += traceback.format_exc().split("\n")
         
         tskuuids = inventory.get_object(prcuuid).object["tasks"]
-        for tskuuid in tskuuids:
+        for seq_num, tskuuid in enumerate(tskuuids):
             task_result = inventory.get_object(tskuuid).object
             
             try:
                 result.object["output"].append("importing task {0}...".format(inventory.get_object(tskuuid).object["name"]))
                 
                 if jobuuid:
-                    update_job(jobuuid, "message", inventory.get_object(tskuuid).object["name"])
+                    update_job(jobuuid, "message", "Executing Task: " + inventory.get_object(tskuuid).object["name"])
                 
                 exec status_code_body + inventory.get_object(tskuuid).object["body"] in tempmodule.__dict__
                 task = tempmodule.Task()
@@ -277,7 +272,7 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
                 result.object['status'] = task_result['status']
             
             if jobuuid:
-                update_job(jobuuid, "progress", float(tskuuids.index(tskuuid) + 1) / float(tskuuids.length()))
+                update_job(jobuuid, "progress", float(seq_num + 1) / float(len(tskuuids)))
     except Exception:
         add_message(traceback.format_exc())
         
