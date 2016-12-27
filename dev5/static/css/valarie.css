@@ -7,6 +7,24 @@
  
 /* Toggle Styles */
 
+#procedureResultAccordion td {
+  min-width: 150px;
+}
+
+.panel-heading {
+  padding: 5px;
+}
+
+.panel-default {
+  padding-bottom: 0px;
+}
+
+.panel-body {
+  padding: 10px;
+  font-size: small;
+  padding-bottom: 0px;
+}
+
 #wrapper {
     -webkit-transition: all 0.5s ease;
     -moz-transition: all 0.5s ease;
@@ -27,8 +45,8 @@
     position: fixed;
     left: 400px;
     width: 0;
-    height: 100%;
-    padding-top: 50px;
+    height: calc(100% - 25px);
+    padding-top: 60px;
     margin-left: -400px;
     overflow: hidden;
     background: white;
@@ -91,30 +109,29 @@
   width: inherit;
 }
 
+#queue {
+  height: inherit;
+  width: inherit;
+  overflow: auto;
+  padding: 10px;
+}
+
 #inventoryContainer {
   height: inherit;
   width: inherit;
+  padding: 10px;
 }
 
 #inventory {
-  height: calc(100% - 30px);
+  height: inherit;
   overflow: auto;
-  border: #999;
-  border-radius: 1px;
-  border-style: solid;
-  border-width: 1px;
-  border-bottom: 0px;
 }
 
 #attributes {
   height: inherit; 
-  padding-top: 15px;
-  border: #999;
-  border-radius: 1px;
-  border-style: solid;
-  border-width: 1px;
   overflow: auto;
   font-size: small;
+  padding: 10px;
 }
 
 /* Sidebar Styles */
@@ -125,8 +142,6 @@
     width: 400px;
     margin: 0;
     padding: 0;
-    list-style: none;
-    height: 100%;
 }
 
 .controllerCell:hover {
