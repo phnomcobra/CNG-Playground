@@ -65,7 +65,7 @@ class Inventory(object):
     def ajax_create_container(self, objuuid):
         add_message("inventory controller: create container: {0}".format(objuuid))
         try:
-            return json.dumps(create_container(objuuid, "New Container"))
+            return json.dumps(create_container(objuuid, "New Container").object)
         except Exception:
             add_message(traceback.format_exc())
     
@@ -73,7 +73,7 @@ class Inventory(object):
     def ajax_create_host(self, objuuid):
         add_message("inventory controller: create host: {0}".format(objuuid))
         try:
-            return json.dumps(create_host(objuuid, "New Host"))
+            return json.dumps(create_host(objuuid, "New Host").object)
         except Exception:
             add_message(traceback.format_exc())
     
@@ -81,7 +81,7 @@ class Inventory(object):
     def ajax_create_console(self, objuuid):
         add_message("inventory controller: create console: {0}".format(objuuid))
         try:
-            return json.dumps(create_console(objuuid, "New Console"))
+            return json.dumps(create_console(objuuid, "New Console").object)
         except Exception:
             add_message(traceback.format_exc())
     
@@ -89,7 +89,7 @@ class Inventory(object):
     def ajax_create_task(self, objuuid):
         add_message("inventory controller: create task: {0}".format(objuuid))
         try:
-            return json.dumps(create_task(objuuid, "New Task"))
+            return json.dumps(create_task(objuuid, "New Task").object)
         except Exception:
             add_message(traceback.format_exc())
     
@@ -97,7 +97,7 @@ class Inventory(object):
     def ajax_create_status_code(self, objuuid):
         add_message("inventory controller: create status code: {0}".format(objuuid))
         try:
-            return json.dumps(create_status_code(objuuid, "New Status Code"))
+            return json.dumps(create_status_code(objuuid, "New Status Code").object)
         except Exception:
             add_message(traceback.format_exc())
     
@@ -105,7 +105,7 @@ class Inventory(object):
     def ajax_create_procedure(self, objuuid):
         add_message("inventory controller: create procedure: {0}".format(objuuid))
         try:
-            return json.dumps(create_procedure(objuuid, "New Procedure"))
+            return json.dumps(create_procedure(objuuid, "New Procedure").object)
         except Exception:
             add_message(traceback.format_exc())
     
@@ -113,7 +113,7 @@ class Inventory(object):
     def ajax_create_controller(self, objuuid):
         add_message("inventory controller: create controller: {0}".format(objuuid))
         try:
-            return json.dumps(create_controller(objuuid, "New Controller"))
+            return json.dumps(create_controller(objuuid, "New Controller").object)
         except Exception:
             add_message(traceback.format_exc())
     
@@ -121,7 +121,7 @@ class Inventory(object):
     def ajax_create_rfc(self, objuuid):
         add_message("inventory controller: create RFC: {0}".format(objuuid))
         try:
-            return json.dumps(create_rfc(objuuid, "New RFC"))
+            return json.dumps(create_rfc(objuuid, "New RFC").object)
         except Exception:
             add_message(traceback.format_exc())
     
