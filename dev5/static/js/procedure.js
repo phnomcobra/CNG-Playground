@@ -1,3 +1,5 @@
+var procedureStateFlag = null;
+
 var populateProcedureAttributes = function() {
     initAttributes();
     
@@ -66,6 +68,14 @@ var editProcedure = function() {
     populateProcedureAttributes();
     document.getElementById('body').innerHTML = '<div id="taskGrid" style="padding:10px;float:left"></div><div id="hostGrid" style="padding:10px; margin-left:50%"></div><div id="RFCGrid" style="padding:10px;margin-left:50%"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
+    
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.innerHTML = "Execute Procedure";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', 'executeProcedure()');
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
     
     $("#taskGrid").jsGrid({
         height: "calc(100% - 5px)",
@@ -342,20 +352,8 @@ var executeProcedure = function() {
     document.getElementById('menuBarDynamic').innerHTML = '';
     
     for(var i = 0; i < inventoryObject.hosts.length; i++) {
-        addMessage('executing ' + inventoryObject.name + ' hstuuid: ' + inventoryObject.hosts[i]);
-        
         document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + inventoryObject.hosts[i] + '-' + inventoryObject.objuuid + '"></div>';
         document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + inventoryObject.hosts[i] + '-' + inventoryObject.objuuid + '"></code></pre>';
-        
-        $.ajax({
-            'url' : 'procedure/ajax_execute_procedure',
-            'dataType' : 'json',
-            'data' : {'prcuuid' : inventoryObject.objuuid, 'hstuuid' : inventoryObject.hosts[i]},
-            'success' : function(resp) {
-                //console.log(resp);
-                viewProcedureResult(resp);
-            }
-        });
     }
     
     $("#procedureResultAccordion").accordion({
@@ -363,4 +361,73 @@ var executeProcedure = function() {
         heightStyle: "content",
         active: false
     });
+    
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.innerHTML = "Run Procedure";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', 'runProcedure()');
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.innerHTML = "Edit Procedure";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', 'editProcedure()');
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    updateProcedureTimer();
+    updateProcedureStateData();
+}
+
+var runProcedure = function () {
+    $('.nav-tabs a[href="#queue"]').tab('show');
+    for(var i = 0; i < inventoryObject.hosts.length; i++) {
+        $.ajax({
+            'url' : 'procedure/ajax_queue_procedure',
+            'dataType' : 'json',
+            'data' : {
+                'prcuuid' : inventoryObject.objuuid, 
+                'hstuuid' : inventoryObject.hosts[i]
+            }
+        });
+    }
+}
+
+var updateProcedureTimer = function() {
+    if(document.getElementById('procedureResultAccordion')) {
+        $.ajax({
+            'url' : 'flags/ajax_get',
+            'dataType' : 'json',
+            'data' : {
+                //'key' : 'controller-' + inventoryObject.objuuid
+                'key' : 'results'
+            },
+            'success' : function(resp) {
+                if(procedureStateFlag != resp.value) {
+                    procedureStateFlag = resp.value;
+                    updateProcedureStateData();
+                }
+                setTimeout(updateProcedureTimer, 1000);
+            },
+        });
+    }
+}
+
+var updateProcedureStateData = function() {
+    for(var i = 0; i < inventoryObject.hosts.length; i++) {
+        $.ajax({
+            'url' : 'results/ajax_get_procedure',
+            'dataType' : 'json',
+            'data' : {
+                'prcuuid' : inventoryObject.objuuid,
+                'hstuuid' : inventoryObject.hosts[i]
+            },
+            'success' : function(resp) {
+                viewProcedureResult(resp);
+            }
+        });
+    }
 }

@@ -112,6 +112,14 @@ var executeController = function() {
     
     link = document.createElement("a");
     link.setAttribute("href", "#");
+    link.innerHTML = "Edit Controller";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', 'editController()');
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
     link.innerHTML = "Details";
     cell = document.createElement("li");
     cell.setAttribute('onclick', 'toggleControllerDetails()');
@@ -378,6 +386,14 @@ var editController = function() {
     
     document.getElementById('body').innerHTML = '<div id="procedureGrid" style="padding:10px"></div><div id="hostGrid" style="padding:10px"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
+    
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.innerHTML = "Run Controller";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', 'executeController()');
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
     
     $("#procedureGrid").jsGrid({
         height: "calc(50% - 5px)",
