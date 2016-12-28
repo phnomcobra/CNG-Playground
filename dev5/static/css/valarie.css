@@ -11,6 +11,10 @@
   min-width: 150px;
 }
 
+#procedureResultAccordion {
+  padding: 10px;
+}
+
 .panel-heading {
   padding: 5px;
 }
