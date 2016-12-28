@@ -85,7 +85,7 @@ def delete_node(objuuid):
 def get_context_menu(objuuid):
     return Collection("inventory").get_object(objuuid).object["context"]
 
-def create_container(parent_objuuid, name, objuuid = None):
+def create_container(parent_objuuid, name = "New Container", objuuid = None):
     collection = Collection("inventory")
     container = collection.get_object(objuuid)
     container.object = {
@@ -166,9 +166,9 @@ def create_container(parent_objuuid, name, objuuid = None):
         parent.set()
     
     container.set()
-    return container.object
+    return container
 
-def create_task(parent_objuuid, name, objuuid = None):
+def create_task(parent_objuuid, name = "New Task", objuuid = None):
     collection = Collection("inventory")
     task = collection.get_object(objuuid)
     task.object = {
@@ -213,9 +213,9 @@ def create_task(parent_objuuid, name, objuuid = None):
     parent.set()
     
     task.set()
-    return task.object
+    return task
 
-def create_procedure(parent_objuuid, name, objuuid = None):
+def create_procedure(parent_objuuid, name = "New Procedure", objuuid = None):
     collection = Collection("inventory")
     procedure = collection.get_object(objuuid)
     procedure.object = {
@@ -257,9 +257,9 @@ def create_procedure(parent_objuuid, name, objuuid = None):
     parent.set()
     
     procedure.set()
-    return procedure.object
+    return procedure
 
-def create_rfc(parent_objuuid, name, objuuid = None):
+def create_rfc(parent_objuuid, name = "New RFC", objuuid = None):
     collection = Collection("inventory")
     rfc = collection.get_object(objuuid)
     rfc.object = {
@@ -296,9 +296,9 @@ def create_rfc(parent_objuuid, name, objuuid = None):
     parent.set()
     
     rfc.set()
-    return rfc.object
+    return rfc
 
-def create_controller(parent_objuuid, name, objuuid = None):
+def create_controller(parent_objuuid, name = "New Controller", objuuid = None):
     collection = Collection("inventory")
     controller = collection.get_object(objuuid)
     controller.object = {
@@ -337,9 +337,9 @@ def create_controller(parent_objuuid, name, objuuid = None):
     parent.set()
     
     controller.set()
-    return controller.object
+    return controller
 
-def create_status_code(parent_objuuid, name, objuuid = None):
+def create_status_code(parent_objuuid, name = "New Status Code", objuuid = None):
     collection = Collection("inventory")
     status = collection.get_object(objuuid)
     status.object = {
@@ -377,9 +377,9 @@ def create_status_code(parent_objuuid, name, objuuid = None):
     parent.set()
     
     status.set()
-    return status.object
+    return status
 
-def create_host(parent_objuuid, name, objuuid = None):
+def create_host(parent_objuuid, name = "New Host", objuuid = None):
     collection = Collection("inventory")
     host = collection.get_object(objuuid)
     host.object = {
@@ -412,9 +412,9 @@ def create_host(parent_objuuid, name, objuuid = None):
     parent.set()
     
     host.set()
-    return host.object
+    return host
 
-def create_console(parent_objuuid, name, objuuid = None):
+def create_console(parent_objuuid, name = "New Console", objuuid = None):
     collection = Collection("inventory")
     console = collection.get_object(objuuid)
     console.object = {
@@ -446,7 +446,7 @@ def create_console(parent_objuuid, name, objuuid = None):
     parent.set()
     
     console.set()
-    return console.object
+    return console
 
 def get(objuuid, **kargs):
     collection = Collection("inventory")

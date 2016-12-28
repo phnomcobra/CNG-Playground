@@ -49,6 +49,26 @@ def get_controller_results(ctruuid):
     
     return controller_results
 
+def get_procedure_result(prcuuid, hstuuid):
+    results = RAMCollection("results")
+    
+    stop_time = None
+            
+    procedure_result = None
+            
+    for result in results.find(hstuuid = hstuuid, prcuuid = prcuuid):
+        if result.object["stop"]:
+            if stop_time == None:
+                stop_time = int(result.object["stop"])
+                procedure_result = result.object
+            elif int(result.object["stop"]) > stop_time:
+                stop_time = int(result.object["stop"])
+                procedure_result = result.object
+        elif stop_time == None:
+            procedure_result = result.object
+    
+    return procedure_result
+
 RAMCollection("results").destroy()
     
 collection = RAMCollection("results")

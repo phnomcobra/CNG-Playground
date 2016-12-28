@@ -116,14 +116,21 @@ class Document:
         try:
             RAM_DOCUMENT_LOCK.acquire()
             
+            keys = []
             for key, value in RAM_DOCUMENT["TBL_JSON_OBJ"].iteritems():
                 if objuuid in key:
-                    del RAM_DOCUMENT["TBL_JSON_OBJ"][key]
+                    keys.append(key)
             
+            for key in keys:
+                del RAM_DOCUMENT["TBL_JSON_OBJ"][key]
+            
+            keys = []
             for key, value in RAM_DOCUMENT["TBL_JSON_IDX"].iteritems():
                 if objuuid in key:
-                    del RAM_DOCUMENT["TBL_JSON_IDX"][key]
+                    keys.append(key)
             
+            for key in keys:
+                del RAM_DOCUMENT["TBL_JSON_IDX"][key]
         except Exception:
             print traceback.format_exc()
         finally:
@@ -160,13 +167,22 @@ class Document:
         try:
             RAM_DOCUMENT_LOCK.acquire()
             
+            keys = []
+            
             for key, value in RAM_DOCUMENT["TBL_JSON_ATTR"].iteritems():
                 if value["attribute_name"] == attribute and value["coluuid"] == coluuid:
-                    del RAM_DOCUMENT["TBL_JSON_ATTR"][key]
+                    keys.append(key)
             
+            for key in keys:
+                del RAM_DOCUMENT["TBL_JSON_ATTR"][key]
+            
+            keys = []
             for key, value in RAM_DOCUMENT["TBL_JSON_IDX"].iteritems():
                 if value["attribute_name"] == attribute and value["coluuid"] == coluuid:
-                    del RAM_DOCUMENT["TBL_JSON_IDX"][key]
+                    keys.append(key)
+            
+            for key in keys:
+                del RAM_DOCUMENT["TBL_JSON_IDX"][key]
         except Exception:
             print traceback.format_exc()
         finally:
@@ -202,17 +218,29 @@ class Document:
             
             del RAM_DOCUMENT["TBL_JSON_COL"][uuid]
             
+            keys = []
             for key in RAM_DOCUMENT["TBL_JSON_OBJ"]:
                 if uuid in key:
-                    del RAM_DOCUMENT["TBL_JSON_OBJ"][key]
+                    keys.append(key)
             
+            for key in keys:
+                del RAM_DOCUMENT["TBL_JSON_OBJ"][key]
+            
+            keys = []
             for key in RAM_DOCUMENT["TBL_JSON_ATTR"]:
                 if uuid in key:
-                    del RAM_DOCUMENT["TBL_JSON_ATTR"][key]
+                    keys.append(key)
+                    
+            for key in keys:
+                del RAM_DOCUMENT["TBL_JSON_ATTR"][key]
             
+            keys = []
             for key in RAM_DOCUMENT["TBL_JSON_IDX"]:
                 if uuid in key:
-                    del RAM_DOCUMENT["TBL_JSON_IDX"][key]
+                    keys.append(key)
+            
+            for key in keys:
+                del RAM_DOCUMENT["TBL_JSON_IDX"][key]
         except Exception:
             print traceback.format_exc()
         finally:
