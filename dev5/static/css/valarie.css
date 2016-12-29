@@ -61,20 +61,20 @@
 }
 
 #page-content-wrapper {
-    width: 100%;
+    height: calc(100% - 120px);
+    padding: 10px;
+    overflow: hidden;
+    position: fixed;
 }
 
 #console {
-  bottom: 0px;
-  display: inline-block;
+  height: calc(100vh - 120px);
   width: 100%;
-  height: 15%;
-  background-color: lightgray;
-  position: fixed;
-  overflow-y: auto;
-  z-index: 5;
+  overflow: hidden;
+  font-size: small;
+  padding: 10px;  
+  //background-color: lightgray;
   font-family: monospace;
-  padding-top: 10px;
 }
 
 #console td {
@@ -90,8 +90,9 @@
 
 /* ACE */ 
 #body {
-        height: calc(100vh - 60px);
+        height: calc(100vh - 120px);
         width: 100%;
+        overflow: auto;
 }
 
 .ace_editor {
@@ -132,7 +133,8 @@
 }
 
 #attributes {
-  height: inherit; 
+  height: calc(100vh - 120px);
+  width: 100%;
   overflow: auto;
   font-size: small;
   padding: 10px;
