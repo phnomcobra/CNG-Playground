@@ -116,22 +116,17 @@ def load():
 # 09/07/2016 Added SSH forwarding for MySQL.
 # 09/12/2016 Added SSH tunnel methods.
 ################################################################################
-
 import paramiko
 import pymysql
 import select
-
 from time import time
 from threading import Thread
 from random import randrange
-
 import socket
 import SocketServer
-
 class ForwardServer (SocketServer.ThreadingTCPServer):
     daemon_threads = True
     allow_reuse_address = True
-
 def verbose(text):
     #print text
     pass
@@ -151,7 +146,6 @@ class Handler (SocketServer.BaseRequestHandler):
             verbose('Incoming request to %s:%d was rejected by the SSH server.' %
                     (self.chain_host, self.chain_port))
             return
-
         verbose('Connected!  Tunnel open %r -> %r -> %r' % (self.request.getpeername(),
                                                             chan.getpeername(), (self.chain_host, self.chain_port)))
         while True:
@@ -171,7 +165,6 @@ class Handler (SocketServer.BaseRequestHandler):
         chan.close()
         self.request.close()
         verbose('Tunnel closed from %r' % (peername,))
-
 class Console:
     def __init__(self, **kargs):
         # Private Members
@@ -190,7 +183,6 @@ class Console:
         self.sftp = None
         
         self.connect()
-
     #### Mutation Methods ########################
     def set_username(self, username):
         self.__username = username
@@ -200,7 +192,6 @@ class Console:
     
     def set_private_key(self, key_filename, password = None):
         self.__private_key = paramiko.RSAKey.from_private_key_file(key_filename, password = password)
-
     def set_remote_host(self, remote):
         self.__remote = remote
     
@@ -283,7 +274,6 @@ class Console:
     # Return channel object for an interactive shell
     def get_shell(self):
         return self.__ssh.invoke_shell()
-
     #### System Command ##########################
     # Execute command on SSHClient. If the credentials has a user other than root
     # append the command into a sudo command. If redirection is used with sudo,
@@ -303,7 +293,6 @@ class Console:
                 stdin, stdout, stderr = self.__ssh.exec_command('sudo -S ' + command)
             stdin.write(self.__password + '\n')
             stdin.flush()
-
         # Lossy ascii character set conversion
         output_buffer = ""
         for c in stdout.read().replace("[sudo] password for {0}:".format(self.__username), ""):
@@ -311,7 +300,6 @@ class Console:
                 output_buffer += c.encode("ascii", "ignore")
             except Exception:
                 pass
-
         # Lossy ascii character set conversion
         stderr_buffer = ""
         for c in stderr.read().replace("[sudo] password for {0}:".format(self.__username), ""):
@@ -362,13 +350,10 @@ class Console:
               return_tuple = False):
         if not password:
             password = self.__mysql_password
-
         if not username:
             username = self.__mysql_username
-
         if not mysql_remote:
             mysql_remote = self.__mysql_remote
-
         if not username or not password:
             raise Exception('MySQL query attempted without credentials set.')
         
@@ -378,7 +363,6 @@ class Console:
             
             conn = pymysql.connect(host = "127.0.0.1", port = local_port, user = username, passwd = password)
             cur = conn.cursor()
-
             try:
                 cur.execute(query)
                 conn.commit()
@@ -415,7 +399,6 @@ class Console:
         
     def cmp_mysql_password(self, password):
         return password == self.__mysql_password
-
     def cmp_mysql_username(self, username):
         return username == self.__mysql_username'''
     
