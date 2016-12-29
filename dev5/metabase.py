@@ -32,7 +32,7 @@ conn = sqlite3.connect("metabase.db", 300)
 cur = conn.cursor()
 
 rfc_num_to_uuid = {}
-
+tskuuids = []
 
 def load():
     metabase_container = create_container("#", "metabase")
@@ -477,6 +477,7 @@ class Console:
     conn.commit()
     
     controllers_container = create_container(metabase_container.objuuid, "Controllers")
+    tasks_container = create_container(metabase_container.objuuid, "Tasks")
     
     for row in cur.fetchall():
         if row[0] in current_objuuids:
@@ -485,7 +486,6 @@ class Console:
         else:
             
             controller_container = create_container(controllers_container.objuuid, row[1])
-            controller_tasks_container = create_container(controller_container.objuuid, "Tasks")
             controller_procedures_container = create_container(controller_container.objuuid, "Procedures")
             controller_related_container = create_container(controller_container.objuuid, "Related Procedures")
             
@@ -500,9 +500,7 @@ class Console:
             conn.commit()
             for procedure_row in cur.fetchall():
                 try:
-                    controller.object["procedures"].append(load_procedure(procedure_row[0], \
-                                                                          controller_procedures_container.objuuid, \
-                                                                          controller_tasks_container).objuuid)
+                    controller.object["procedures"].append(load_procedure(procedure_row[0], controller_procedures_container.objuuid, tasks_container).objuuid)
                 except Exception:
                     print traceback.format_exc()
                 
@@ -510,9 +508,7 @@ class Console:
                 conn.commit()
                 for rel_procedure_row in cur.fetchall():
                     try:
-                        load_procedure(rel_procedure_row[0], \
-                                       controller_related_container.objuuid, \
-                                       controller_tasks_container)
+                        load_procedure(rel_procedure_row[0], controller_related_container.objuuid, tasks_container)
                     except Exception:
                         print traceback.format_exc()
             controller.set()
@@ -538,7 +534,10 @@ def load_procedure(prcuuid, parent_objuuid, tasks_container):
     cur.execute("select TSKUUID from PROCSEQ where PRCUUID = ? order by SEQNUM;", (prcuuid,))
     conn.commit()
     for task_row in cur.fetchall():
-        procedure.object["tasks"].append(load_task(task_row[0], tasks_container.objuuid).objuuid)
+        procedure.object["tasks"].append(task_row[0])
+        if task_row[0] not in tskuuids:
+            tskuuids.append(task_row[0])
+            load_task(task_row[0], tasks_container.objuuid)
     
     cur.execute("select distinct RFCNUM from RFC2PRCUUID where PRCUUID = ?;", (prcuuid,))
     conn.commit()
@@ -559,7 +558,7 @@ def load_task(tskuuid, parent_objuuid):
     conn.commit()
     row = cur.fetchall()[0]
     
-    task = create_task(parent_objuuid, row[1])
+    task = create_task(parent_objuuid, row[1], tskuuid)
         
     task.object["body"] = str(row[0]).replace("from globals import *", "")
         
