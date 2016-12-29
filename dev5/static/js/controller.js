@@ -254,7 +254,6 @@ var procedureClick = function(item) {
 }
 
 var executeAllProcedures = function() {
-    $('.nav-tabs a[href="#queue"]').tab('show');
     $('#controllerTable tr').each(function(){
         $(this).find('td').each(function(){
             if($(this)[0].id) {
@@ -267,6 +266,12 @@ var executeAllProcedures = function() {
                         'prcuuid' : $(this)[0].attributes['data-procedure-objuuid'].value, 
                         'hstuuid' : $(this)[0].attributes['data-host-objuuid'].value
                     },
+                    'success' : function(resp){
+                        $('.nav-tabs a[href="#queue"]').tab('show');
+                    },
+                    'failure' : function(resp){
+                        $('.nav-tabs a[href="#console"]').tab('show');
+                    }
                 });
             }
         });
@@ -274,7 +279,6 @@ var executeAllProcedures = function() {
 }
 
 var executeSelectedProcedures = function() {
-    $('.nav-tabs a[href="#queue"]').tab('show');
     $('#controllerTable tr').each(function(){
         $(this).find('td').each(function(){
             if($(this)[0].id) {
@@ -288,6 +292,12 @@ var executeSelectedProcedures = function() {
                             'prcuuid' : $(this)[0].attributes['data-procedure-objuuid'].value, 
                             'hstuuid' : $(this)[0].attributes['data-host-objuuid'].value
                         },
+                        'success' : function(resp){
+                            $('.nav-tabs a[href="#queue"]').tab('show');
+                        },
+                        'failure' : function(resp){
+                            $('.nav-tabs a[href="#console"]').tab('show');
+                        }
                     });
                 }
             }

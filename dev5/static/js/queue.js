@@ -2,7 +2,10 @@ var drawQueue = function(resp) {
     queue = document.getElementById('queue');
     queue.innerHTML = '';
     
+    var count = 0;
     for(var jobuuid in resp) {
+        count++;
+        
         queueItem = document.createElement('div');
         queueItem.setAttribute('id', 'jobuuid-' + jobuuid);
         queueItem.setAttribute('data-jobuuid', jobuuid);
@@ -48,6 +51,9 @@ var drawQueue = function(resp) {
 
         queue.appendChild(queueItem);
     }
+    
+    if(count == 0)
+        $('.nav-tabs a[href="#inventoryContainer"]').tab('show');
 }
 
 var updateQueueState = function() {

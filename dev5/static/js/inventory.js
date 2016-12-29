@@ -78,6 +78,8 @@ $(document).on('dnd_stop.vakata', function (e, data) {
 });
 
 var exportFromInventory = function() {
+    $('.nav-tabs a[href="#console"]').tab('show');
+    
     var nodes = $('#inventory').jstree().get_selected(true);
     
     var objuuids = []
@@ -88,6 +90,8 @@ var exportFromInventory = function() {
 }
 
 var importToInventory = function(item) {
+    $('.nav-tabs a[href="#console"]').tab('show');
+    
     var formData = new FormData();
     formData.append("file", item.files[0], item.files[0].name);
     
@@ -117,6 +121,7 @@ var createNode = function(object) {
 }
 
 var deleteNode = function(objuuid) {
+    $('.nav-tabs a[href="#console"]').tab('show');
     var node = $('#inventory').find("[id='" + objuuid + "']");
     $('#inventory').jstree('delete_node', node);
     if(inventoryObject['objuuid'] == objuuid) {
@@ -205,17 +210,17 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         createNode(resp);
                                         editController();
                                         touchInventory();
-                                        $('.nav-tabs a[href="#attributes"]').tab('show');
+                                        $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'edit task') {
                                         addMessage("edit task success");
                                         inventoryObject = resp;
                                         editTask();
-                                        $('.nav-tabs a[href="#attributes"]').tab('show');
+                                        $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'edit task hosts') {
                                         addMessage("edit task success");
                                         inventoryObject = resp;
                                         editTaskHosts();
-                                        $('.nav-tabs a[href="#attributes"]').tab('show');
+                                        $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'edit container') {
                                         addMessage("edit container success");
                                         inventoryObject = resp;
@@ -225,7 +230,7 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit procedure success");
                                         inventoryObject = resp;
                                         editProcedure();
-                                        $('.nav-tabs a[href="#attributes"]').tab('show');
+                                        $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'edit rfc') {
                                         addMessage("edit rfc success");
                                         inventoryObject = resp;
@@ -245,35 +250,38 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit controller success");
                                         inventoryObject = resp;
                                         editController();
-                                        $('.nav-tabs a[href="#attributes"]').tab('show');
+                                        $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'edit console') {
                                         addMessage("edit console success");
                                         inventoryObject = resp;
                                         editConsole();
-                                        $('.nav-tabs a[href="#attributes"]').tab('show');
+                                        $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'run procedure') {
                                         addMessage("run procedure success");
                                         inventoryObject = resp;
                                         executeProcedure();
+                                        $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'run controller') {
                                         addMessage("run controller success");
                                         inventoryObject = resp;
                                         executeController();
-                                    } else if(obj.item.method == 'view task result') {
-                                        addMessage("view task success");
-                                        inventoryObject = resp;
-                                        viewTaskResult();
+                                        $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'run task') {
                                         addMessage("run task success");
                                         inventoryObject = resp;
                                         executeTask();
+                                        $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'delete node') {
                                         addMessage("delete success");
                                         deleteNode(resp['id']);
                                         touchInventory();
+                                        $('.nav-tabs a[href="#console"]').tab('show');
                                     }
+                                    
+                                    document.getElementById('bodyTab').innerHTML = inventoryObject.name;
                                 },
                                 'error' : function(resp, status, error) {
+                                    $('.nav-tabs a[href="#console"]').tab('show');
                                     addMessage("console select failure " + resp);
                                 }
                             });
@@ -282,6 +290,7 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                 }
             },
             'error' : function(resp, status, error) {
+                $('.nav-tabs a[href="#console"]').tab('show');
                 addMessage("context failure " + resp);
             }
         });
@@ -298,11 +307,13 @@ $('#inventory').on("move_node.jstree", function(event, data) {
                 'parent_objuuid' : data.node.parent
             },
             'success' : function(resp) {
+                $('.nav-tabs a[href="#console"]').tab('show');
                 addMessage('move success');
                 touchInventory();
             },
             'error' : function(resp, status, error) {
                 addMessage('move failure');
+                $('.nav-tabs a[href="#console"]').tab('show');
                 $('#inventory').jstree('refresh');
             }
         });
@@ -427,6 +438,7 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
                 }
                 
             }, function errorCallback(response) {
+                $('.nav-tabs a[href="#console"]').tab('show');
                 addMessage("save failure " + inventoryObject['objuuid']);
                 saving = false;
             });
@@ -489,6 +501,7 @@ var setInventoryKey = function (key, div) {
     
     if(key == 'name') {
         $("#inventory").jstree('rename_node', inventoryObject['objuuid'] , inventoryObject[key]);
+        document.getElementById('bodyTab').innerHTML = inventoryObject[key];
         touchInventory();
     }
 }

@@ -7,21 +7,10 @@ var editRFC = function() {
     addAttributeTextBox('RFC Name', 'name');
     addAttributeTextBox('RFC Title', 'title');
     addAttributeTextBox('RFC Number', 'number');
+    addAttributeTextArea('Description', 'description');
     addAttributeTextBox('POC Name', 'poc name');
     addAttributeTextBox('POC Email', 'poc email');
     addAttributeTextBox('POC Phone', 'poc phone');
-    
-    var editor = new ace.edit(document.getElementById('aceInstance'));
-    
-    editor.setTheme("ace/theme/twilight");
-    editor.setValue(inventoryObject['description']);
-    editor.selection.moveTo(0, 0);
-    editor['inventoryObject'] = inventoryObject;
-                                        
-    editor.on('change', function(e, f) {
-        f.inventoryObject['description'] = f.getValue();
-        f.inventoryObject['changed'] = true;
-    });
 }
 
 var loadAndEditRFC = function(objuuid) {

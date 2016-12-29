@@ -21,7 +21,7 @@ var populateProcedureAttributes = function() {
                     inventoryObject[continueKey] = false;
                 }
                 
-                addAttributeCheckBox('Continue on <br>' + resp[i].name, continueKey);
+                addAttributeCheckBox('Continue on ' + resp[i].name, continueKey);
             }
         }
     });
@@ -383,7 +383,6 @@ var executeProcedure = function() {
 }
 
 var runProcedure = function () {
-    $('.nav-tabs a[href="#queue"]').tab('show');
     for(var i = 0; i < inventoryObject.hosts.length; i++) {
         $.ajax({
             'url' : 'procedure/ajax_queue_procedure',
@@ -391,6 +390,12 @@ var runProcedure = function () {
             'data' : {
                 'prcuuid' : inventoryObject.objuuid, 
                 'hstuuid' : inventoryObject.hosts[i]
+            },
+            'success' : function(resp){
+                $('.nav-tabs a[href="#queue"]').tab('show');
+            },
+            'failure' : function(resp){
+                $('.nav-tabs a[href="#console"]').tab('show');
             }
         });
     }
