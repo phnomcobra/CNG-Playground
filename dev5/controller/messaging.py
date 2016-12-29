@@ -26,7 +26,7 @@ def add_message(message, timestamp = None):
     
     global_messages_lock.acquire()
     global_messages["messages"] = [{"message" : message, "timestamp" : timestamp}] + \
-                                    global_messages["messages"][:4]
+                                    global_messages["messages"][:49]
     global_messages_lock.release()
 
 def get_messages():
