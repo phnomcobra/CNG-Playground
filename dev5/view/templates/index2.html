@@ -46,12 +46,16 @@
             
             <div class="tab-content">
                 <div id="inventoryContainer" class="tab-pane fade in active">
+                    <div class="btn-group">
+                        <button class="btn btn-default" type="button" onclick="$('#importFormInput').trigger('click');" >Import</button>
+                        <button class="btn btn-default" type="button" onclick="exportFromInventory()" >Export</button>
+                        <button class="btn btn-default" type="button" onclick="selectDependencies()" >Select Dependencies</button>
+                        <button class="btn btn-default" type="button" onclick="$('#inventory').jstree('deselect_all')" >Deselect</button>
+                    </div>
                     <div class="input-group">
                         <input type="text" class="form-control" placeholder="Search" id="inventorySearchTextBox"></input>
                         <span class="input-group-btn">
                             <button class="btn btn-default" type="button" onclick="document.getElementById('inventorySearchTextBox').value='';$('#inventory').jstree(true).search('');" >Clear</button>
-                            <button class="btn btn-default" type="button" onclick="$('#importFormInput').trigger('click');" >Import</button>
-                            <button class="btn btn-default" type="button" onclick="exportFromInventory()" >Export</button>
                         </span>
                     </div>
                     <div id="inventory"></div>
@@ -66,7 +70,7 @@
         <div id="page-content-wrapper" class="container-fluid">
             <ul class="nav nav-tabs">
                 <li><a data-toggle="tab" href="#attributes">Attributes</a></li>
-                <li><a data-toggle="tab" href="#body" id="bodyTab">Body</a></li>
+                <li><a data-toggle="tab" href="#body">Body</a></li>
                 <li class="active"><a data-toggle="tab" href="#console">Console</a></li>
             </ul>
             <div class="tab-content">
