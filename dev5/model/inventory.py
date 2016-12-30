@@ -469,6 +469,44 @@ def set(objuuid, **kargs):
     
     object.set()
 
+def __get_dependencies(objuuid, objuuids, collection):
+    if objuuid not in objuuids:
+        objuuids.append(objuuid)
+    
+    current = collection.get_object(objuuid)
+    
+    if "type" in current.object:
+        if current.object["type"] == "controller":
+            for hstuuid in current.object["hosts"]:
+                __get_dependencies(hstuuid, objuuids, collection)
+        
+            for prcuuid in current.object["procedures"]:
+                __get_dependencies(prcuuid, objuuids, collection)
+        elif current.object["type"] == "procedure":
+            for hstuuid in current.object["hosts"]:
+                __get_dependencies(hstuuid, objuuids, collection)
+        
+            for tskuuid in current.object["tasks"]:
+                __get_dependencies(tskuuid, objuuids, collection)
+        
+            for rfcuuid in current.object["rfcs"]:
+                __get_dependencies(rfcuuid, objuuids, collection)
+        elif current.object["type"] == "task":
+            for hstuuid in current.object["hosts"]:
+                __get_dependencies(hstuuid, objuuids, collection)
+        elif current.object["type"] == "host":
+            if current.object["console"] != None:
+                __get_dependencies(current.object["console"], objuuids, collection)
+    
+def get_dependencies(selected_objuuids):
+    collection = Collection("inventory")
+    objuuids = []
+    
+    for objuuid in selected_objuuids:
+        __get_dependencies(objuuid, objuuids, collection)
+    
+    return objuuids
+    
 def get_status_objects():
     collection = Collection("inventory")
     
