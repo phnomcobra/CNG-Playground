@@ -31,7 +31,8 @@ from ..model.inventory import get_child_nodes, \
                               create_rfc, \
                               create_status_code, \
                               create_host, \
-                              create_console
+                              create_console, \
+                              get_dependencies
 
 class Inventory(object):
     def __init__(self):
@@ -145,11 +146,15 @@ class Inventory(object):
         except Exception:
             add_message(traceback.format_exc())
     
-    """
     @cherrypy.expose
-    def ajax_select(self, objuuid):
-        return json.dumps({})
-    """
+    def ajax_get_dependencies(self):
+        add_message("inventory controller: get dependencies...")
+        try:
+            cl = cherrypy.request.headers['Content-Length']
+            objuuids = json.loads(cherrypy.request.body.read(int(cl)))
+            return json.dumps(get_dependencies(objuuids))
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     def ajax_get_object(self, objuuid):
