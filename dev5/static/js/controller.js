@@ -89,14 +89,11 @@ var executeController = function() {
                     cell.setAttribute('onclick', 'cellClick(this)');
                     cell.setAttribute('class', 'controllerCell');
                     
-                    cell.style.borderColor = '#000';
+                    cell.style.borderColor = '#CCC';
                    
                     document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + resp.hosts[x].objuuid + '-' + resp.procedures[y].objuuid + '"></div>';
                     document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + resp.hosts[x].objuuid + '-' + resp.procedures[y].objuuid + '"></code></pre>';
                 }
-                
-                cell = row.insertCell(-1);
-                cell.setAttribute('class', 'controllerPlaceHolderCell');
             }
             
             updateControllerStateData();
@@ -186,10 +183,10 @@ var toggleControllerDetails = function(item) {
 var cellClick = function(item) {
     if(item.getAttribute('data-selected') == 'true') {
         item.setAttribute('data-selected', false);
-        item.style.borderColor = '#000';
+        item.style.borderColor = '#CCC';
     } else {
         item.setAttribute('data-selected', true);
-        item.style.borderColor = '#FFF';
+        item.style.borderColor = '#000';
     }
 }
 
@@ -202,7 +199,7 @@ var hostClick = function(item) {
                 if($(this)[0].id) {
                     if($(this)[0].attributes['data-host-objuuid'].value == item.getAttribute('data-host-objuuid')) {
                         $(this)[0].setAttribute('data-selected', false);
-                        $(this)[0].style.borderColor = '#000';
+                        $(this)[0].style.borderColor = '#CCC';
                     }
                 }
             });
@@ -215,7 +212,7 @@ var hostClick = function(item) {
                 if($(this)[0].id) {
                     if($(this)[0].attributes['data-host-objuuid'].value == item.getAttribute('data-host-objuuid')) {
                         $(this)[0].setAttribute('data-selected', true);
-                        $(this)[0].style.borderColor = '#FFF';
+                        $(this)[0].style.borderColor = '#000';
                     }
                 }
             });
@@ -232,7 +229,7 @@ var procedureClick = function(item) {
                 if($(this)[0].id) {
                     if($(this)[0].attributes['data-procedure-objuuid'].value == item.getAttribute('data-procedure-objuuid')) {
                         $(this)[0].setAttribute('data-selected', false);
-                        $(this)[0].style.borderColor = '#000';
+                        $(this)[0].style.borderColor = '#CCC';
                     }
                 }
             });
@@ -245,7 +242,7 @@ var procedureClick = function(item) {
                 if($(this)[0].id) {
                     if($(this)[0].attributes['data-procedure-objuuid'].value == item.getAttribute('data-procedure-objuuid')) {
                         $(this)[0].setAttribute('data-selected', true);
-                        $(this)[0].style.borderColor = '#FFF';
+                        $(this)[0].style.borderColor = '#000';
                     }
                 }
             });
@@ -310,7 +307,7 @@ var selectAllProcedures = function() {
         $(this).find('td').each(function(){
             if($(this)[0].id) {
                 document.getElementById($(this)[0].id).setAttribute('data-selected', true);
-                document.getElementById($(this)[0].id).style.borderColor = '#FFF';
+                document.getElementById($(this)[0].id).style.borderColor = '#000';
             }
         });
     });
@@ -321,7 +318,7 @@ var deselectAllProcedures = function() {
         $(this).find('td').each(function(){
             if($(this)[0].id) {
                 document.getElementById($(this)[0].id).setAttribute('data-selected', false);
-                document.getElementById($(this)[0].id).style.borderColor = '#000';
+                document.getElementById($(this)[0].id).style.borderColor = '#CCC';
             }
         });
     });

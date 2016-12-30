@@ -220,6 +220,7 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit task success");
                                         inventoryObject = resp;
                                         editTaskHosts();
+                                        setTimeout(refreshJSGrids, 2000);
                                         $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'edit container') {
                                         addMessage("edit container success");
@@ -230,6 +231,7 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit procedure success");
                                         inventoryObject = resp;
                                         editProcedure();
+                                        setTimeout(refreshJSGrids, 2000);
                                         $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'edit rfc') {
                                         addMessage("edit rfc success");
@@ -250,6 +252,7 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit controller success");
                                         inventoryObject = resp;
                                         editController();
+                                        setTimeout(refreshJSGrids, 2000);
                                         $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'edit console') {
                                         addMessage("edit console success");
@@ -277,8 +280,6 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         touchInventory();
                                         $('.nav-tabs a[href="#console"]').tab('show');
                                     }
-                                    
-                                    document.getElementById('bodyTab').innerHTML = inventoryObject.name;
                                 },
                                 'error' : function(resp, status, error) {
                                     $('.nav-tabs a[href="#console"]').tab('show');
@@ -501,7 +502,6 @@ var setInventoryKey = function (key, div) {
     
     if(key == 'name') {
         $("#inventory").jstree('rename_node', inventoryObject['objuuid'] , inventoryObject[key]);
-        document.getElementById('bodyTab').innerHTML = inventoryObject[key];
         touchInventory();
     }
 }
@@ -517,4 +517,40 @@ var touchInventory = function() {
             inventoryStateFlag = resp.value;
         },
     });
+}
+
+/* Exists to mitigate css race condition 
+between BS transitions and jsgrid instantiation. */
+var refreshJSGrids = function() {
+    $('.jsgrid').each(function(){
+        $(this).jsGrid('refresh');
+    });
+}
+
+var selectDependencies = function() {
+    //$('#inventory').jstree("deselect_all");
+    
+    var nodes = $('#inventory').jstree().get_selected(true);
+    
+    var objuuids = []
+    for(i in nodes)
+        objuuids.push(nodes[i].id);
+    
+    $.ajax({
+        'type' : 'POST',
+        'url' : 'inventory/ajax_get_dependencies',
+        'dataType' : 'json',
+        'contentType' : 'application/json',
+        'data' : JSON.stringify(objuuids),
+        'success' : function(objuuids) {
+            for(var i in objuuids) {
+                $('#inventory').jstree(true).select_node(objuuids[i]);
+            }
+        },
+    });
+}
+
+var expandToNode = function(nodeID) {
+    $('#inventory').jstree("deselect_all");
+    $('#inventory').jstree(true).select_node(nodeID);
 }

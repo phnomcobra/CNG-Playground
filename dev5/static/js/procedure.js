@@ -60,6 +60,7 @@ var loadAndEditProcedure = function(objuuid) {
         'success' : function(resp) {
             inventoryObject = resp;
             editProcedure();
+            expandToNode(inventoryObject.objuuid);
         }
     });
 }

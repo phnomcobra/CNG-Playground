@@ -31,6 +31,7 @@ var loadAndEditHost = function(objuuid) {
         'success' : function(resp) {
             inventoryObject = resp;
             editHost();
+            expandToNode(inventoryObject.objuuid);
         }
     });
 }

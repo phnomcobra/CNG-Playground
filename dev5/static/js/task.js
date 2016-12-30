@@ -8,7 +8,7 @@ var editTask = function() {
 
     var editor = new ace.edit(document.getElementById('aceInstance'));
     
-    editor.setTheme("ace/theme/twilight");
+    //editor.setTheme("ace/theme/twilight");
     editor.session.setMode("ace/mode/python");
     editor.setValue(inventoryObject['body']);
     editor.selection.moveTo(0, 0);
@@ -31,6 +31,7 @@ var loadAndEditTask = function(objuuid) {
         'success' : function(resp) {
             inventoryObject = resp;
             editTask();
+            expandToNode(inventoryObject.objuuid);
         }
     });
 }

@@ -24,6 +24,7 @@ var loadAndEditRFC = function(objuuid) {
         'success' : function(resp) {
             inventoryObject = resp;
             editRFC();
+            expandToNode(inventoryObject.objuuid);
         }
     });
 }
