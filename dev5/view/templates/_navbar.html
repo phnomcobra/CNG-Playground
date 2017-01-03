@@ -11,8 +11,23 @@
     </div>
     <div id="navbar" class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
+        
+        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Inventory<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="#" onclick="$('#importFormInput').trigger('click');">Import</a></li>
+                <li><a href="#" onclick="exportFromInventory()">Export</a></li>
+                <li><a href="#" onclick="selectDependencies()">Select Dependencies</a></li>
+                <li><a href="#" onclick="$('#inventory').jstree('deselect_all')">Clear Selected</a></li>
+            </ul>
+        </li>
+        
+        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">View<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="#menu-toggle" id="menu-toggle">Toggle Menu</a></li>
+            </ul>
+        </li>
+        
         <li><a href="#credModal" class="active" data-toggle="modal">Set Credentials</a></li>
-        <li><a href="#menu-toggle" id="menu-toggle">Toggle Menu</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right" id="menuBarDynamic">
       </ul>
