@@ -46,16 +46,12 @@
             
             <div class="tab-content">
                 <div id="inventoryContainer" class="tab-pane fade in active">
-                    <div class="btn-group">
-                        <button class="btn btn-default" type="button" onclick="$('#importFormInput').trigger('click');" >Import</button>
-                        <button class="btn btn-default" type="button" onclick="exportFromInventory()" >Export</button>
-                        <button class="btn btn-default" type="button" onclick="selectDependencies()" >Select Dependencies</button>
-                        <button class="btn btn-default" type="button" onclick="$('#inventory').jstree('deselect_all')" >Deselect</button>
-                    </div>
                     <div class="input-group">
                         <input type="text" class="form-control" placeholder="Search" id="inventorySearchTextBox"></input>
                         <span class="input-group-btn">
-                            <button class="btn btn-default" type="button" onclick="document.getElementById('inventorySearchTextBox').value='';$('#inventory').jstree(true).search('');" >Clear</button>
+                            <button class="btn btn-default" type="button" onclick="$('#importFormInput').trigger('click');" >Import</button>
+                            <button class="btn btn-default" type="button" onclick="exportFromInventory()" >Export</button>
+                            <button class="btn btn-default" type="button" onclick="document.getElementById('inventorySearchTextBox').value='';$('#inventory').jstree(true).search('');$('#inventory').jstree('deselect_all');" >Clear</button>
                         </span>
                     </div>
                     <div id="inventory"></div>

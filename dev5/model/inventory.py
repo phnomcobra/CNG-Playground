@@ -505,6 +505,9 @@ def get_dependencies(selected_objuuids):
     for objuuid in selected_objuuids:
         __get_dependencies(objuuid, objuuids, collection)
     
+    for status in collection.find(type = "status"):
+        objuuids.append(status.objuuid)
+    
     return objuuids
     
 def get_status_objects():
