@@ -18,6 +18,7 @@ from time import sleep, time
 
 from .messaging import add_message
 
+from .auth import require
 from ..model.document import Collection
 from ..model.inventory import get_child_nodes, \
                               get_status_objects, \
@@ -39,6 +40,7 @@ class Inventory(object):
         self.moving = False
 
     @cherrypy.expose
+    @require()
     def ajax_roots(self, objuuid):
         add_message("inventory controller: load inventory: {0}".format(objuuid))
         try:
@@ -47,6 +49,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def ajax_move(self, objuuid, parent_objuuid):
         add_message("inventory controller: move inventory object: {0}".format(objuuid))
         while self.moving:
@@ -63,6 +66,7 @@ class Inventory(object):
         return json.dumps({})
     
     @cherrypy.expose
+    @require()
     def ajax_create_container(self, objuuid):
         add_message("inventory controller: create container: {0}".format(objuuid))
         try:
@@ -71,6 +75,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def ajax_create_host(self, objuuid):
         add_message("inventory controller: create host: {0}".format(objuuid))
         try:
@@ -79,6 +84,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def ajax_create_console(self, objuuid):
         add_message("inventory controller: create console: {0}".format(objuuid))
         try:
@@ -87,6 +93,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def ajax_create_task(self, objuuid):
         add_message("inventory controller: create task: {0}".format(objuuid))
         try:
@@ -95,6 +102,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def ajax_create_status_code(self, objuuid):
         add_message("inventory controller: create status code: {0}".format(objuuid))
         try:
@@ -103,6 +111,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def ajax_create_procedure(self, objuuid):
         add_message("inventory controller: create procedure: {0}".format(objuuid))
         try:
@@ -111,6 +120,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def ajax_create_controller(self, objuuid):
         add_message("inventory controller: create controller: {0}".format(objuuid))
         try:
@@ -119,6 +129,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def ajax_create_rfc(self, objuuid):
         add_message("inventory controller: create RFC: {0}".format(objuuid))
         try:
@@ -127,6 +138,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def ajax_delete(self, objuuid):
         add_message("inventory controller: delete inventory object: {0}".format(objuuid))
         try:
@@ -139,6 +151,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def ajax_context(self, objuuid):
         add_message("inventory controller: get context menu: {0}".format(objuuid))
         try:
@@ -147,6 +160,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def ajax_get_dependencies(self):
         add_message("inventory controller: get dependencies...")
         try:
@@ -157,6 +171,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def ajax_get_object(self, objuuid):
         add_message("inventory controller: get inventory object...")
         try:
@@ -168,6 +183,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def ajax_get_status_objects(self):
         add_message("inventory controller: get status objects...")
         try:
@@ -176,6 +192,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def ajax_post_object(self):
         add_message("inventory controller: post inventory object...")
         
@@ -195,6 +212,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def export_objects(self, objuuids):
         add_message("inventory controller: exporting inventory objects...")
         
@@ -215,6 +233,7 @@ class Inventory(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require()
     def import_objects(self, file):
         add_message("inventory controller: importing inventory objects...")
         
