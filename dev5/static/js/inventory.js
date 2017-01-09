@@ -279,11 +279,19 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         deleteNode(resp['id']);
                                         touchInventory();
                                         $('.nav-tabs a[href="#console"]').tab('show');
+                                    } else if(obj.item.method == 'create terminal') {
+                                        addMessage("start terminal success");
+                                        inventoryObject = resp;
+                                        launchTerminal();
+                                        $('.nav-tabs a[href="#body"]').tab('show');
                                     }
                                 },
                                 'error' : function(resp, status, error) {
                                     $('.nav-tabs a[href="#console"]').tab('show');
                                     addMessage("console select failure " + resp);
+                                    console.log(resp);
+                                    console.log(status);
+                                    console.log(error);
                                 }
                             });
                         }
