@@ -10,15 +10,16 @@
 ################################################################################
 
 import jinja2
+import cherrypy
 
 def admin_view():
     templateLoader = jinja2.FileSystemLoader(searchpath = "./dev5/view/templates")
     templateEnv = jinja2.Environment(loader = templateLoader )
     template = templateEnv.get_template('auth.html')
-    return template.render()
+    return template.render(sessionID = cherrypy.session.id)
 
 def login_view(username, msg="Enter login information", from_page="/"):
     templateLoader = jinja2.FileSystemLoader(searchpath = "./dev5/view/templates")
     templateEnv = jinja2.Environment(loader = templateLoader)
     template = templateEnv.get_template('login.html')
-    return template.render(username = username, msg = msg, from_page = from_page)
+    return template.render(username = username, msg = msg, from_page = from_page, sessionID = cherrypy.session.id)

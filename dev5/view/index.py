@@ -8,8 +8,9 @@
 #
 # 10/25/2016 Original construction
 ################################################################################
-import jinja2
 
+import jinja2
+import cherrypy
     
 def index_view():
 
@@ -17,5 +18,5 @@ def index_view():
     templateEnv = jinja2.Environment( loader=templateLoader )
     template = templateEnv.get_template('index2.html')
     
-    return template.render()
+    return template.render(sessionID = cherrypy.session.id)
     
