@@ -402,6 +402,12 @@ def create_host(parent_objuuid, name = "New Host", objuuid = None):
                 "action" : {"method" : "edit host",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : host.objuuid}}
+            },
+            "terminal" : {
+                "label" : "Terminal",
+                "action" : {"method" : "create terminal",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : host.objuuid}}
             }
         },
         "accepts" : []
