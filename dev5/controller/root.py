@@ -24,6 +24,7 @@ from .rfc import RFC
 from .results import Results
 from .flags import Flags
 from .task import Task
+from .terminal import Terminal
 from .auth import Auth, require, member_of
 
 class Root(object):
@@ -38,6 +39,7 @@ class Root(object):
     flags = Flags()
     task = Task()
     auth = Auth()
+    terminal = Terminal()
     
     @cherrypy.expose
     @require()
