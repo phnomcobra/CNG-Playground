@@ -7,6 +7,10 @@
  
 /* Toggle Styles */
 
+.terminal {
+  padding: 10px;
+}
+
 #procedureResultAccordion td {
   min-width: 200px;
 }
