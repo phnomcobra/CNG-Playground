@@ -115,18 +115,24 @@ def load():
 # 05/23/2016 Added password inspection methods
 # 09/07/2016 Added SSH forwarding for MySQL.
 # 09/12/2016 Added SSH tunnel methods.
+# 01/10/2016 Added Terminal send/recv methods
 ################################################################################
+
 import paramiko
 import pymysql
 import select
+import ldap
+import socket
+import SocketServer
+
 from time import time
 from threading import Thread
 from random import randrange
-import socket
-import SocketServer
+
 class ForwardServer (SocketServer.ThreadingTCPServer):
     daemon_threads = True
     allow_reuse_address = True
+
 def verbose(text):
     #print text
     pass
@@ -146,6 +152,7 @@ class Handler (SocketServer.BaseRequestHandler):
             verbose('Incoming request to %s:%d was rejected by the SSH server.' %
                     (self.chain_host, self.chain_port))
             return
+
         verbose('Connected!  Tunnel open %r -> %r -> %r' % (self.request.getpeername(),
                                                             chan.getpeername(), (self.chain_host, self.chain_port)))
         while True:
@@ -165,6 +172,7 @@ class Handler (SocketServer.BaseRequestHandler):
         chan.close()
         self.request.close()
         verbose('Tunnel closed from %r' % (peername,))
+
 class Console:
     def __init__(self, **kargs):
         # Private Members
@@ -183,6 +191,9 @@ class Console:
         self.sftp = None
         
         self.connect()
+        
+        self.__chan = self.__ssh.invoke_shell()
+
     #### Mutation Methods ########################
     def set_username(self, username):
         self.__username = username
@@ -192,6 +203,7 @@ class Console:
     
     def set_private_key(self, key_filename, password = None):
         self.__private_key = paramiko.RSAKey.from_private_key_file(key_filename, password = password)
+
     def set_remote_host(self, remote):
         self.__remote = remote
     
@@ -274,6 +286,7 @@ class Console:
     # Return channel object for an interactive shell
     def get_shell(self):
         return self.__ssh.invoke_shell()
+
     #### System Command ##########################
     # Execute command on SSHClient. If the credentials has a user other than root
     # append the command into a sudo command. If redirection is used with sudo,
@@ -293,6 +306,7 @@ class Console:
                 stdin, stdout, stderr = self.__ssh.exec_command('sudo -S ' + command)
             stdin.write(self.__password + '\n')
             stdin.flush()
+
         # Lossy ascii character set conversion
         output_buffer = ""
         for c in stdout.read().replace("[sudo] password for {0}:".format(self.__username), ""):
@@ -300,6 +314,7 @@ class Console:
                 output_buffer += c.encode("ascii", "ignore")
             except Exception:
                 pass
+
         # Lossy ascii character set conversion
         stderr_buffer = ""
         for c in stderr.read().replace("[sudo] password for {0}:".format(self.__username), ""):
@@ -350,10 +365,13 @@ class Console:
               return_tuple = False):
         if not password:
             password = self.__mysql_password
+
         if not username:
             username = self.__mysql_username
+
         if not mysql_remote:
             mysql_remote = self.__mysql_remote
+
         if not username or not password:
             raise Exception('MySQL query attempted without credentials set.')
         
@@ -363,6 +381,7 @@ class Console:
             
             conn = pymysql.connect(host = "127.0.0.1", port = local_port, user = username, passwd = password)
             cur = conn.cursor()
+
             try:
                 cur.execute(query)
                 conn.commit()
@@ -399,8 +418,114 @@ class Console:
         
     def cmp_mysql_password(self, password):
         return password == self.__mysql_password
+
     def cmp_mysql_username(self, username):
-        return username == self.__mysql_username'''
+        return username == self.__mysql_username
+
+    #### LDAP Query ##############################
+    def ldap(self, ldap_remote, dn, pw, base_dn, return_tuple = False):
+        try:
+            output_buffer = ""
+            
+            local_port = randrange(0, 1000, 1) + 50000
+            self.start_tunnel(local_port, ldap_remote, 636)
+            output_buffer += "Tunnel localhost:{0} > {1}:636\n".format(local_port, ldap_remote)
+            
+            conn = ldap.initialize('ldaps://127.0.0.1:{0}'.format(local_port))
+            output_buffer += "Initialized ldaps://127.0.0.1:{0}\n".format(local_port)
+            
+            conn.protocol_version = ldap.VERSION3
+            conn.set_option(ldap.OPT_REFERRALS, 0)
+            
+            #conn.start_tls_s
+            
+            conn.simple_bind(dn, pw)
+            output_buffer += "Binding...\n"
+            output_buffer += dn + "\n"
+            
+            try:
+                filter = '(objectclass=person)'
+                attrs = ['sn']
+                
+                output_buffer += "Query...\n"
+                
+                for row in conn.search_s(base_dn, ldap.SCOPE_SUBTREE, filter, attrs):
+                    output_buffer += "{0}\n".format(str(row))
+                
+                
+                stderr_buffer = ""
+                status = 0
+            except Exception as e:
+                stderr_buffer = str(e)
+                status = 1
+            
+            conn.unbind()
+        except Exception as e:
+            stderr_buffer = str(e)
+            status = 1
+        finally:
+            #pass
+            self.stop_tunnel(local_port)
+        
+        if return_tuple:
+            return status, output_buffer, stderr_buffer
+        elif 0 != int(status):
+            return '{0}<font color="red"><br>{1}</font><br>'.format(output_buffer, stderr_buffer)
+        else:
+            return output_buffer
+    
+    #### Tunnel Scan #############################
+    def tscan(self, remote_host, remote_port, return_tuple = False):
+        try:
+            output_buffer = ""
+            stderr_buffer = ""
+            status = 1
+            
+            local_port = randrange(0, 1000, 1) + 50000
+            self.start_tunnel(local_port, remote_host, remote_port)
+            output_buffer += "Tunnel localhost:{0} > {1}:{2}\n".format(local_port, remote_host, remote_port)
+            
+            try:
+                s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                s.settimeout(1)
+                s.connect(('localhost', local_port))
+                s.send(b'\n\n')
+                s.recv(1)
+                status = 0
+            except Exception as e:
+                stderr_buffer = str(e)
+            finally:
+                s.close()
+            
+            if status == 0:
+                output_buffer += "{0}:{1} open.\n".format(remote_host, remote_port)
+            else:
+                output_buffer += "{0}:{1} closed.\n".format(remote_host, remote_port)
+
+        except Exception as e:
+            stderr_buffer = str(e)
+        finally:
+            #pass
+            self.stop_tunnel(local_port)
+        
+        if return_tuple:
+            return status, output_buffer, stderr_buffer
+        elif 0 != int(status):
+            return '{0}<font color="red"><br>{1}</font><br>'.format(output_buffer, stderr_buffer)
+        else:
+            return output_buffer
+    
+    def send(self, input_buffer):
+        for c in input_buffer:
+            self.__chan.send(c)
+    
+    def recv(self):
+        if self.__chan.recv_ready():
+            return self.__chan.recv(9999)
+        elif self.__chan.recv_stderr_ready():
+            return self.__chan.recv_stderr(9999)
+        else:
+            return '' '''
     
     ssh_console.set()
     
@@ -461,6 +586,7 @@ class Console:
     
     controllers_container = create_container(metabase_container.objuuid, "Controllers")
     tasks_container = create_container(metabase_container.objuuid, "Tasks")
+    procedures_container = create_container(metabase_container.objuuid, "Procedures")
     
     for row in cur.fetchall():
         if row[0] in current_objuuids:
@@ -469,21 +595,21 @@ class Console:
         else:
             
             controller_container = create_container(controllers_container.objuuid, row[1])
-            controller_procedures_container = create_container(controller_container.objuuid, "Procedures")
-            controller_related_container = create_container(controller_container.objuuid, "Related Procedures")
             
-            controller = create_controller(controller_container.objuuid, row[1], row[0])
+            check_controller = create_controller(controller_container.objuuid, "Check")
+            change_controller = create_controller(controller_container.objuuid, "Change")
             
             cur.execute("select distinct HSTUUID from CONTHST where CTRUUID = ?;", (row[0],))
             conn.commit()
             for host_row in cur.fetchall():
-                controller.object["hosts"].append(host_row[0])
+                check_controller.object["hosts"].append(host_row[0])
+                change_controller.object["hosts"].append(host_row[0])
             
             cur.execute("select distinct PRCUUID from CONTSEQ where CTRUUID = ?;", (row[0],))
             conn.commit()
             for procedure_row in cur.fetchall():
                 try:
-                    controller.object["procedures"].append(load_procedure(procedure_row[0], controller_procedures_container.objuuid, tasks_container).objuuid)
+                    check_controller.object["procedures"].append(load_procedure(procedure_row[0], procedures_container.objuuid, tasks_container).objuuid)
                 except Exception:
                     print traceback.format_exc()
                 
@@ -491,19 +617,21 @@ class Console:
                 conn.commit()
                 for rel_procedure_row in cur.fetchall():
                     try:
-                        load_procedure(rel_procedure_row[0], controller_related_container.objuuid, tasks_container)
+                        change_controller.object["procedures"].append(load_procedure(rel_procedure_row[0], procedures_container.objuuid, tasks_container).objuuid)
                     except Exception:
                         print traceback.format_exc()
-            controller.set()
+            
+            change_controller.set()
+            check_controller.set()
         
-            print "imported controller: {0}".format(controller.object["name"])
+            print "imported controller: {0}".format(row[1])
 
 def load_procedure(prcuuid, parent_objuuid, tasks_container):
     cur.execute("select NAME, TSKCONTINUE, TITLE, DISCUSSION from TBL_PROCEDURE where PRCUUID = ?;", (prcuuid,))
     conn.commit()
     row = cur.fetchall()[0]
 
-    procedure = create_procedure(parent_objuuid, row[0])
+    procedure = create_procedure(parent_objuuid, row[0], prcuuid)
         
     procedure.object["title"] = row[2]
     procedure.object["description"] = row[3]
