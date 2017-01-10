@@ -33,7 +33,8 @@ from ..model.inventory import get_child_nodes, \
                               create_status_code, \
                               create_host, \
                               create_console, \
-                              get_dependencies
+                              get_dependencies, \
+                              copy_object
 
 class Inventory(object):
     def __init__(self):
@@ -64,6 +65,19 @@ class Inventory(object):
             self.moving = False
             
         return json.dumps({})
+    
+    @cherrypy.expose
+    @require()
+    def ajax_copy_object(self, objuuid):
+        add_message("inventory controller: copy: {0}".format(objuuid))
+
+        try:
+            while self.moving:
+                sleep(.1)
+            
+            return json.dumps(copy_object(objuuid).object)
+        except Exception:
+            add_message(traceback.format_exc())
     
     @cherrypy.expose
     @require()

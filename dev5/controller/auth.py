@@ -24,6 +24,8 @@ def check_credentials(username, password):
     users = Collection("users")
     
     for user in users.find(name = username):
+        if user.object["enabled"] == 'false':
+            return "User {0} is disabled!".format(username)
         if user.object["password"] == password:
             return None
         else:
