@@ -137,4 +137,6 @@ var editTaskHosts = function() {
             {type : "control" }
         ],
     });
+    
+    setTimeout(refreshJSGrids, 1000);
 }

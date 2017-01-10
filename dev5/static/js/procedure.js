@@ -231,6 +231,8 @@ var editProcedure = function() {
             {type : "control" }
         ]
     });
+    
+    setTimeout(refreshJSGrids, 1000);
 }
 
 var viewProcedureResult = function(result) {

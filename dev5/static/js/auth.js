@@ -10,7 +10,7 @@ var loadUserAttributes = function() {
     addAttributeTextBox('Last Name', 'last name');
     addAttributeTextBox('Phone', 'phone');
     addAttributeTextBox('Email', 'email');
-    addAttributeTextBox('User Password', 'password');
+    addAttributePassword('User Password', 'password');
     addAttributeCheckBox('User Enabled', 'enabled');
     addAttributeRadioGroup('Role', 'role', [
         {'name' : 'admin', 'value' : 'admin'},
@@ -206,6 +206,20 @@ var addAttributeTextBox = function(fieldName, userKey) {
     attributeCell = attributeRow.insertCell(-1);
     var id = 'inventory-obj-key-' + userKey;
     attributeCell.innerHTML = '<input type="text" id="' + id + '" onchange="setUserKey(&quot;' + userKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
+    document.getElementById(id).value = userObject[userKey];
+}
+
+var addAttributePassword = function(fieldName, userKey) {
+    var attributeTable = document.getElementById("attributesTable");
+    var attributeRow = attributeTable.insertRow(-1);
+    var attributeCell;
+    
+    attributeCell = attributeRow.insertCell(-1);
+    attributeCell.innerHTML = fieldName;
+    
+    attributeCell = attributeRow.insertCell(-1);
+    var id = 'inventory-obj-key-' + userKey;
+    attributeCell.innerHTML = '<input type="password" id="' + id + '" onchange="setUserKey(&quot;' + userKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
     document.getElementById(id).value = userObject[userKey];
 }
 

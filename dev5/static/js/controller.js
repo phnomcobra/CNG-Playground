@@ -109,7 +109,7 @@ var executeController = function() {
     
     link = document.createElement("a");
     link.setAttribute("href", "#");
-    link.innerHTML = "Edit Controller";
+    link.innerHTML = "Edit";
     cell = document.createElement("li");
     cell.setAttribute('onclick', 'editController()');
     cell.appendChild(link);
@@ -125,15 +125,7 @@ var executeController = function() {
     
     link = document.createElement("a");
     link.setAttribute("href", "#");
-    link.innerHTML = "Run All";
-    cell = document.createElement("li");
-    cell.setAttribute('onclick', 'executeAllProcedures()');
-    cell.appendChild(link);
-    document.getElementById('menuBarDynamic').appendChild(cell);
-    
-    link = document.createElement("a");
-    link.setAttribute("href", "#");
-    link.innerHTML = "Run Selected";
+    link.innerHTML = "Run";
     cell = document.createElement("li");
     cell.setAttribute('onclick', 'executeSelectedProcedures()');
     cell.appendChild(link);
@@ -248,31 +240,6 @@ var procedureClick = function(item) {
             });
         });
     }
-}
-
-var executeAllProcedures = function() {
-    $('#controllerTable tr').each(function(){
-        $(this).find('td').each(function(){
-            if($(this)[0].id) {
-                addMessage("queuing " + $(this)[0].attributes['data-procedure-name'].value + " on " + $(this)[0].attributes['data-host-name'].value + "...");
-            
-                $.ajax({
-                    'url' : 'procedure/ajax_queue_procedure',
-                    'dataType' : 'json',
-                    'data' : {
-                        'prcuuid' : $(this)[0].attributes['data-procedure-objuuid'].value, 
-                        'hstuuid' : $(this)[0].attributes['data-host-objuuid'].value
-                    },
-                    'success' : function(resp){
-                        $('.nav-tabs a[href="#queue"]').tab('show');
-                    },
-                    'failure' : function(resp){
-                        $('.nav-tabs a[href="#console"]').tab('show');
-                    }
-                });
-            }
-        });
-    });
 }
 
 var executeSelectedProcedures = function() {
@@ -396,7 +363,7 @@ var editController = function() {
     
     link = document.createElement("a");
     link.setAttribute("href", "#");
-    link.innerHTML = "Run Controller";
+    link.innerHTML = "Run";
     cell = document.createElement("li");
     cell.setAttribute('onclick', 'executeController()');
     cell.appendChild(link);
@@ -536,4 +503,6 @@ var editController = function() {
             });
         }
     });
+    
+    setTimeout(refreshJSGrids, 1000);
 }
