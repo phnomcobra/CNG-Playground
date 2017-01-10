@@ -153,6 +153,12 @@ def create_container(parent_objuuid, name = "New Container", objuuid = None):
                 "action" : {"method" : "edit container",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : container.objuuid}}
+            },
+            "copy" : {
+                "label" : "Copy",
+                "action" : {"method" : "copy node",
+                            "route" : "inventory/ajax_copy_object",
+                            "params" : {"objuuid" : container.objuuid}}
             }
         },
         "accepts" : ["container", "task"]
@@ -203,7 +209,13 @@ def create_task(parent_objuuid, name = "New Task", objuuid = None):
                 "action" : {"method" : "run task",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : task.objuuid}}
-              }
+            },
+            "copy" : {
+                "label" : "Copy",
+                "action" : {"method" : "copy node",
+                            "route" : "inventory/ajax_copy_object",
+                            "params" : {"objuuid" : task.objuuid}}
+            }
         },
         "accepts" : []
     }
@@ -247,6 +259,12 @@ def create_procedure(parent_objuuid, name = "New Procedure", objuuid = None):
                 "action" : {"method" : "run procedure",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : procedure.objuuid}}
+            },
+            "copy" : {
+                "label" : "Copy",
+                "action" : {"method" : "copy node",
+                            "route" : "inventory/ajax_copy_object",
+                            "params" : {"objuuid" : procedure.objuuid}}
             }
         },
         "accepts" : []
@@ -285,6 +303,12 @@ def create_rfc(parent_objuuid, name = "New RFC", objuuid = None):
                 "label" : "Edit",
                 "action" : {"method" : "edit rfc",
                             "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : rfc.objuuid}}
+            },
+            "copy" : {
+                "label" : "Copy",
+                "action" : {"method" : "copy node",
+                            "route" : "inventory/ajax_copy_object",
                             "params" : {"objuuid" : rfc.objuuid}}
             }
         },
@@ -327,6 +351,12 @@ def create_controller(parent_objuuid, name = "New Controller", objuuid = None):
                 "action" : {"method" : "run controller",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : controller.objuuid}}
+            },
+            "copy" : {
+                "label" : "Copy",
+                "action" : {"method" : "copy node",
+                            "route" : "inventory/ajax_copy_object",
+                            "params" : {"objuuid" : controller.objuuid}}
             }
         },
         "accepts" : []
@@ -366,6 +396,12 @@ def create_status_code(parent_objuuid, name = "New Status Code", objuuid = None)
                 "label" : "Edit",
                 "action" : {"method" : "edit status code",
                             "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : status.objuuid}}
+            },
+            "copy" : {
+                "label" : "Copy",
+                "action" : {"method" : "copy node",
+                            "route" : "inventory/ajax_copy_object",
                             "params" : {"objuuid" : status.objuuid}}
             }
         },
@@ -408,6 +444,12 @@ def create_host(parent_objuuid, name = "New Host", objuuid = None):
                 "action" : {"method" : "create terminal",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : host.objuuid}}
+            },
+            "copy" : {
+                "label" : "Copy",
+                "action" : {"method" : "copy node",
+                            "route" : "inventory/ajax_copy_object",
+                            "params" : {"objuuid" : host.objuuid}}
             }
         },
         "accepts" : []
@@ -442,6 +484,12 @@ def create_console(parent_objuuid, name = "New Console", objuuid = None):
                 "action" : {"method" : "edit console",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : console.objuuid}}
+            },
+            "copy" : {
+                "label" : "Copy",
+                "action" : {"method" : "copy node",
+                            "route" : "inventory/ajax_copy_object",
+                            "params" : {"objuuid" : console.objuuid}}
             }
         },
         "accepts" : []
@@ -453,6 +501,45 @@ def create_console(parent_objuuid, name = "New Console", objuuid = None):
     
     console.set()
     return console
+
+def recstrrepl(object, find, replace):
+    if isinstance(object, dict):
+        for key, value in object.iteritems():
+            if isinstance(value, dict) or isinstance(value, list):
+                recstrrepl(object[key], find, replace)
+            elif isinstance(value, str):
+                if object[key] == find:
+                    object[key] = replace
+    elif isinstance(object, list):
+        for i, value in enumerate(object):
+            if isinstance(value, dict) or isinstance(value, list):
+                recstrrepl(object[i], find, replace)
+            elif isinstance(value, str):
+                if object[i] == find:
+                    object[i] = replace
+    elif isinstance(object, str):
+        if object == find:
+            object = replace
+
+def copy_object(objuuid):
+    collection = Collection("inventory")
+    current_object = collection.get_object(objuuid)
+    
+    new_object = collection.get_object()
+    new_objuuid = new_object.object["objuuid"]
+    
+    new_object.object = current_object.object
+    new_object.object["children"] = []
+    recstrrepl(new_object.object, objuuid, new_objuuid)
+    new_object.object["name"] = new_object.object["name"] + " (Copy)"
+    
+    parent = collection.get_object(new_object.object["parent"])
+    parent.object["children"].append(new_objuuid)
+    parent.set()
+    
+    new_object.set()
+    return new_object
+    
 
 def get(objuuid, **kargs):
     collection = Collection("inventory")
