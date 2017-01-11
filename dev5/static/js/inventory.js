@@ -56,6 +56,7 @@ $(document).on('dnd_stop.vakata', function (e, data) {
                 'data' : {'objuuid' : nodes[i].id},
                 'success' : function(resp) {
                     $('#inventory').jstree("deselect_all");
+                    
                     if(resp['type'] == 'task' && document.getElementById('taskGrid')) {
                         addProcedureTask(resp['objuuid']);
                     } else if(resp['type'] == 'rfc' &&
@@ -70,6 +71,24 @@ $(document).on('dnd_stop.vakata', function (e, data) {
                               inventoryObject['procedures'].indexOf(resp['objuuid']) == -1 &&
                               document.getElementById('procedureGrid')) {
                         addControllerProcedure(resp['objuuid']);
+                    }
+                    
+                    if(resp['type'] == 'link') {
+                        if(resp['target type'] == 'task' && document.getElementById('taskGrid')) {
+                            addProcedureTask(resp['target']);
+                        } else if(resp['target type'] == 'rfc' &&
+                                  inventoryObject['rfcs'].indexOf(resp['target']) == -1 &&
+                                  document.getElementById('RFCGrid')) {
+                            addProcedureRFC(resp['target']);
+                        } else if(resp['target type'] == 'host' &&
+                                  inventoryObject['hosts'].indexOf(resp['target']) == -1 &&
+                                  document.getElementById('hostGrid')) {
+                            addControllerHost(resp['target']);
+                        } else if(resp['target type'] == 'procedure' &&
+                                  inventoryObject['procedures'].indexOf(resp['target']) == -1 &&
+                                  document.getElementById('procedureGrid')) {
+                            addControllerProcedure(resp['target']);
+                        }
                     }
                 }
             });
@@ -304,12 +323,16 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("copy success");
                                         createNode(resp);
                                         touchInventory();
+                                    } else if(obj.item.method == 'create link') {
+                                        addMessage("create link success");
+                                        createNode(resp);
+                                        touchInventory();
                                     } else if(obj.item.method == 'create terminal') {
                                         document.title = "terminal: " + resp.name;
                                         addMessage("start terminal success");
                                         inventoryObject = resp;
-                                        launchTerminal();
                                         $('.nav-tabs a[href="#body"]').tab('show');
+                                        launchTerminal();
                                     }
                                 },
                                 'error' : function(resp, status, error) {

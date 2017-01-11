@@ -72,9 +72,17 @@ var editProcedure = function() {
     
     link = document.createElement("a");
     link.setAttribute("href", "#");
-    link.innerHTML = "Execute Procedure";
+    link.innerHTML = "Run";
     cell = document.createElement("li");
-    cell.setAttribute('onclick', 'executeProcedure()');
+    cell.setAttribute('onclick', 'executeProcedure(); runProcedure();');
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.innerHTML = "Details";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', 'executeProcedure();');
     cell.appendChild(link);
     document.getElementById('menuBarDynamic').appendChild(cell);
     
@@ -367,7 +375,7 @@ var executeProcedure = function() {
     
     link = document.createElement("a");
     link.setAttribute("href", "#");
-    link.innerHTML = "Run Procedure";
+    link.innerHTML = "Run";
     cell = document.createElement("li");
     cell.setAttribute('onclick', 'runProcedure()');
     cell.appendChild(link);
@@ -375,7 +383,7 @@ var executeProcedure = function() {
     
     link = document.createElement("a");
     link.setAttribute("href", "#");
-    link.innerHTML = "Edit Procedure";
+    link.innerHTML = "Edit";
     cell = document.createElement("li");
     cell.setAttribute('onclick', 'editProcedure()');
     cell.appendChild(link);

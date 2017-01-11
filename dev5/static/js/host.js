@@ -99,7 +99,9 @@ var recvTerminalData = function() {
             'hstuuid' : inventoryObject.objuuid
         },
         'success' : function(resp) {
-            term.write(resp);
+            if(resp != '') {
+                term.write(resp);
+            }
         }
     });
 }
@@ -135,5 +137,13 @@ var terminalTimer = function() {
         sendTerminalData();
         
         setTimeout(terminalTimer, 1000);
+    } else {
+        $.ajax({
+            'url' : 'terminal/ajax_destroy_session',
+            'dataType' : 'json',
+            'data' : {
+                'hstuuid' : inventoryObject.objuuid
+            }
+        });
     }
 }
