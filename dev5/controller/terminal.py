@@ -37,7 +37,7 @@ class Terminal(object):
     def ajax_destroy_session(self, hstuuid):
         add_message("terminal controller: destroy session: {0}".format(hstuuid))
         try:
-            create_session(cherrypy.session.id, hstuuid)
+            destroy_session(cherrypy.session.id, hstuuid)
         except Exception:
             add_message(traceback.format_exc())
     

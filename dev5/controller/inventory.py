@@ -27,6 +27,7 @@ from ..model.inventory import get_child_nodes, \
                               delete_node, \
                               create_container, \
                               create_task, \
+                              create_link, \
                               create_procedure, \
                               create_controller, \
                               create_rfc, \
@@ -148,6 +149,15 @@ class Inventory(object):
         add_message("inventory controller: create RFC: {0}".format(objuuid))
         try:
             return json.dumps(create_rfc(objuuid, "New RFC").object)
+        except Exception:
+            add_message(traceback.format_exc())
+    
+    @cherrypy.expose
+    @require()
+    def ajax_create_link(self, objuuid):
+        add_message("inventory controller: create link to {0}".format(objuuid))
+        try:
+            return json.dumps(create_link(objuuid).object)
         except Exception:
             add_message(traceback.format_exc())
     
