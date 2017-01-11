@@ -215,6 +215,12 @@ def create_task(parent_objuuid, name = "New Task", objuuid = None):
                 "action" : {"method" : "copy node",
                             "route" : "inventory/ajax_copy_object",
                             "params" : {"objuuid" : task.objuuid}}
+            },
+            "create link" : {
+                "label" : "Create Link",
+                "action" : {"method" : "create link",
+                            "route" : "inventory/ajax_create_link",
+                            "params" : {"objuuid" : task.objuuid}}
             }
         },
         "accepts" : []
@@ -265,6 +271,12 @@ def create_procedure(parent_objuuid, name = "New Procedure", objuuid = None):
                 "action" : {"method" : "copy node",
                             "route" : "inventory/ajax_copy_object",
                             "params" : {"objuuid" : procedure.objuuid}}
+            },
+            "create link" : {
+                "label" : "Create Link",
+                "action" : {"method" : "create link",
+                            "route" : "inventory/ajax_create_link",
+                            "params" : {"objuuid" : procedure.objuuid}}
             }
         },
         "accepts" : []
@@ -309,6 +321,12 @@ def create_rfc(parent_objuuid, name = "New RFC", objuuid = None):
                 "label" : "Copy",
                 "action" : {"method" : "copy node",
                             "route" : "inventory/ajax_copy_object",
+                            "params" : {"objuuid" : rfc.objuuid}}
+            },
+            "create link" : {
+                "label" : "Create Link",
+                "action" : {"method" : "create link",
+                            "route" : "inventory/ajax_create_link",
                             "params" : {"objuuid" : rfc.objuuid}}
             }
         },
@@ -356,6 +374,12 @@ def create_controller(parent_objuuid, name = "New Controller", objuuid = None):
                 "label" : "Copy",
                 "action" : {"method" : "copy node",
                             "route" : "inventory/ajax_copy_object",
+                            "params" : {"objuuid" : controller.objuuid}}
+            },
+            "create link" : {
+                "label" : "Create Link",
+                "action" : {"method" : "create link",
+                            "route" : "inventory/ajax_create_link",
                             "params" : {"objuuid" : controller.objuuid}}
             }
         },
@@ -450,6 +474,12 @@ def create_host(parent_objuuid, name = "New Host", objuuid = None):
                 "action" : {"method" : "copy node",
                             "route" : "inventory/ajax_copy_object",
                             "params" : {"objuuid" : host.objuuid}}
+            },
+            "create link" : {
+                "label" : "Create Link",
+                "action" : {"method" : "create link",
+                            "route" : "inventory/ajax_create_link",
+                            "params" : {"objuuid" : host.objuuid}}
             }
         },
         "accepts" : []
@@ -501,6 +531,43 @@ def create_console(parent_objuuid, name = "New Console", objuuid = None):
     
     console.set()
     return console
+
+def create_link(target_objuuid, parent_objuuid = None, objuuid = None):
+    collection = Collection("inventory")
+    
+    target = collection.get_object(target_objuuid)
+    
+    if parent_objuuid == None:
+        parent_objuuid = target.object["parent"]
+    
+    link = collection.get_object(objuuid)
+    link.object = {
+        "type" : "link",
+        "target" : target_objuuid,
+        "target type" : target.object["type"],
+        "parent" : parent_objuuid,
+        "children" : [],
+        "name" : target.object["name"],
+        "icon" : "/images/link_icon.png",
+        "context" : target.object["context"],
+        "accepts" : []
+    }
+    
+    link.object["context"]["delete"] = {
+        "label" : "Delete Link",
+        "action" : {
+            "method" : "delete node",
+            "route" : "inventory/ajax_delete",
+            "params" : {"objuuid" : link.objuuid}
+        }
+    }
+    
+    parent = collection.get_object(parent_objuuid)
+    parent.object["children"].append(link.objuuid)
+    parent.set()
+    
+    link.set()
+    return link
 
 def recstrrepl(object, find, replace):
     if isinstance(object, dict):

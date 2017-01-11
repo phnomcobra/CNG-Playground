@@ -23,6 +23,18 @@ global cli_sessions_lock
 cli_sessions = {}
 cli_sessions_lock = Lock()
 
+class ErrorConsole:
+    def __init__(self, message):
+        self.__buffer = message
+    
+    def send(self, input_buffer):
+        pass
+    
+    def recv(self):
+        output_buffer = self.__buffer
+        self.__buffer = ''
+        return output_buffer
+
 def send(sessionID, hstuuid, buffer):
     cli_id = sessionID + '-' + hstuuid
     try:
@@ -68,6 +80,7 @@ def create_session(sessionID, hstuuid, session):
         
         cli_sessions[cli_id] = tempmodule.Console(session = session, host = host.object["host"])
     except Exception:
+        cli_sessions[cli_id] = ErrorConsole(traceback.format_exc())
         add_message(traceback.format_exc())
     finally:
         cli_sessions_lock.release()
