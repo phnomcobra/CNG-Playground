@@ -21,7 +21,8 @@ from .model.inventory import create_status_code, \
                              set_parent_objuuid, \
                              create_host, \
                              create_controller, \
-                             create_console
+                             create_console, \
+                             create_link
                              
 from .model.document import Collection
 
@@ -33,6 +34,7 @@ cur = conn.cursor()
 
 rfc_num_to_uuid = {}
 tskuuids = []
+prcuuids = []
 
 def load():
     metabase_container = create_container("#", "metabase")
@@ -593,23 +595,25 @@ class Console:
             #delete_node(row[0])
             pass
         else:
-            
             controller_container = create_container(controllers_container.objuuid, row[1])
+            host_links_container = create_container(controller_container.objuuid, "Host Links")
+            procedure_links_container = create_container(controller_container.objuuid, "Procedure Links")
             
-            check_controller = create_controller(controller_container.objuuid, "Check")
-            change_controller = create_controller(controller_container.objuuid, "Change")
+            controller = create_controller(controller_container.objuuid, row[1], row[0])
+            
             
             cur.execute("select distinct HSTUUID from CONTHST where CTRUUID = ?;", (row[0],))
             conn.commit()
             for host_row in cur.fetchall():
-                check_controller.object["hosts"].append(host_row[0])
-                change_controller.object["hosts"].append(host_row[0])
+                controller.object["hosts"].append(host_row[0])
+                create_link(host_row[0], host_links_container.objuuid)
             
             cur.execute("select distinct PRCUUID from CONTSEQ where CTRUUID = ?;", (row[0],))
             conn.commit()
             for procedure_row in cur.fetchall():
                 try:
-                    check_controller.object["procedures"].append(load_procedure(procedure_row[0], procedures_container.objuuid, tasks_container).objuuid)
+                    controller.object["procedures"].append(load_procedure(procedure_row[0], procedures_container.objuuid, tasks_container).objuuid)
+                    create_link(procedure_row[0], procedure_links_container.objuuid)
                 except Exception:
                     print traceback.format_exc()
                 
@@ -617,12 +621,12 @@ class Console:
                 conn.commit()
                 for rel_procedure_row in cur.fetchall():
                     try:
-                        change_controller.object["procedures"].append(load_procedure(rel_procedure_row[0], procedures_container.objuuid, tasks_container).objuuid)
+                        load_procedure(rel_procedure_row[0], procedures_container.objuuid, tasks_container)
+                        create_link(rel_procedure_row[0], procedure_links_container.objuuid)
                     except Exception:
                         print traceback.format_exc()
             
-            change_controller.set()
-            check_controller.set()
+            controller.set()
         
             print "imported controller: {0}".format(row[1])
 
@@ -631,38 +635,42 @@ def load_procedure(prcuuid, parent_objuuid, tasks_container):
     conn.commit()
     row = cur.fetchall()[0]
 
-    procedure = create_procedure(parent_objuuid, row[0], prcuuid)
+    if prcuuid not in prcuuids:
+        prcuuids.append(prcuuid)
+        procedure = create_procedure(parent_objuuid, row[0], prcuuid)
         
-    procedure.object["title"] = row[2]
-    procedure.object["description"] = row[3]
+        procedure.object["title"] = row[2]
+        procedure.object["description"] = row[3]
             
-    for continue_code_str in row[1].split(","):
-        try:
-            procedure.object["continue {0}".format(continue_code_str)] = "true"
-        except Exception:
-            print traceback.format_exc()
+        for continue_code_str in row[1].split(","):
+            try:
+                procedure.object["continue {0}".format(continue_code_str)] = "true"
+            except Exception:
+                print traceback.format_exc()
             
-    cur.execute("select TSKUUID from PROCSEQ where PRCUUID = ? order by SEQNUM;", (prcuuid,))
-    conn.commit()
-    for task_row in cur.fetchall():
-        procedure.object["tasks"].append(task_row[0])
-        if task_row[0] not in tskuuids:
-            tskuuids.append(task_row[0])
-            load_task(task_row[0], tasks_container.objuuid)
+        cur.execute("select TSKUUID from PROCSEQ where PRCUUID = ? order by SEQNUM;", (prcuuid,))
+        conn.commit()
+        for task_row in cur.fetchall():
+            procedure.object["tasks"].append(task_row[0])
+            if task_row[0] not in tskuuids:
+                tskuuids.append(task_row[0])
+                load_task(task_row[0], tasks_container.objuuid)
     
-    cur.execute("select distinct RFCNUM from RFC2PRCUUID where PRCUUID = ?;", (prcuuid,))
-    conn.commit()
-    for rfc_row in cur.fetchall():
-        try:
-            if rfc_num_to_uuid[int(rfc_row[0])] not in procedure.object["rfcs"]:
-                procedure.object["rfcs"].append(rfc_num_to_uuid[int(rfc_row[0])])
-        except Exception:
-            print traceback.format_exc()
+        cur.execute("select distinct RFCNUM from RFC2PRCUUID where PRCUUID = ?;", (prcuuid,))
+        conn.commit()
+        for rfc_row in cur.fetchall():
+            try:
+                if rfc_num_to_uuid[int(rfc_row[0])] not in procedure.object["rfcs"]:
+                    procedure.object["rfcs"].append(rfc_num_to_uuid[int(rfc_row[0])])
+            except Exception:
+                print traceback.format_exc()
         
-    procedure.set()
-    print "imported procedure name: {0}".format(procedure.object["name"])
+        procedure.set()
+        print "imported procedure name: {0}".format(procedure.object["name"])
     
-    return procedure
+        return procedure
+    else:
+        return inventory.get_object(prcuuid)
 
 def load_task(tskuuid, parent_objuuid):
     cur.execute("select BODY, NAME from TASK where TSKUUID = ?;", (tskuuid,))
