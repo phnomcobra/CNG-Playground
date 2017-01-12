@@ -36,29 +36,18 @@ class ErrorConsole:
         return output_buffer
 
 def send(sessionID, hstuuid, buffer):
-    cli_id = sessionID + '-' + hstuuid
     try:
-        cli_sessions_lock.acquire()
-        cli_sessions[cli_id].send(buffer)
+        cli_sessions[sessionID + '-' + hstuuid].send(buffer)
     except Exception:
         add_message(traceback.format_exc())
-    finally:
-        cli_sessions_lock.release()
 
 def recv(sessionID, hstuuid):
-    cli_id = sessionID + '-' + hstuuid
-    buffer = ''
-    
     try:
-        cli_sessions_lock.acquire()
-        buffer = cli_sessions[cli_id].recv()
+        return cli_sessions[sessionID + '-' + hstuuid].recv()
     except Exception:
         add_message(traceback.format_exc())
-    finally:
-        cli_sessions_lock.release()
+        return traceback.format_exc()
     
-    return buffer
-
 def create_session(sessionID, hstuuid, session):
     inventory = Collection("inventory")
     
@@ -70,6 +59,8 @@ def create_session(sessionID, hstuuid, session):
     
     try:
         cli_sessions_lock.acquire()
+        cli_sessions[cli_id] = ErrorConsole("Connecting to {0}...".format(host.object["host"]))
+        
         exec inventory.get_object(host.object["console"]).object["body"] in tempmodule.__dict__
         
         if "send" not in dir(tempmodule.Console):
