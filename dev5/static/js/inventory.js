@@ -513,6 +513,8 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
             $scope.messages = $sce.trustAsHtml(messageData);
         });
         
+        // Auto updating turned off do to load storms on the webserver
+        /* 
         $.ajax({
             'url' : 'flags/ajax_get',
             'dataType' : 'json',
@@ -526,6 +528,7 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
                 }
             },
         });
+        */
         
         $.ajax({
             'url' : 'flags/ajax_get',

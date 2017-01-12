@@ -1,6 +1,7 @@
 var term;
 var outputBuffer = '';
 var sending = false;
+var receiving = false;
 
 var editHost = function() {
     document.getElementById('body').innerHTML = '';
@@ -71,8 +72,6 @@ var launchTerminal = function() {
 
     term.on('data', function(data) {
         outputBuffer += data;
-        sendTerminalData();
-        
     });
 
     term.on('title', function(title) {
@@ -93,21 +92,26 @@ var launchTerminal = function() {
 }
 
 var recvTerminalData = function() {
-    $.ajax({
-        'url' : 'terminal/ajax_recv',
-        'data' : {
-            'hstuuid' : inventoryObject.objuuid
-        },
-        'success' : function(resp) {
-            if(resp != '') {
-                term.write(resp);
+    if(!(receiving)) {
+        receiving = true;
+        $.ajax({
+            'url' : 'terminal/ajax_recv',
+            'data' : {
+                'hstuuid' : inventoryObject.objuuid
+            },
+            'success' : function(resp) {
+                receiving = false;
+                if(resp != '') term.write(resp);
+            },
+            'error' : function() {
+                receiving = false;
             }
-        }
-    });
+        });
+    }
 }
 
 var sendTerminalData = function() {
-    if(outputBuffer != '' || sending) {
+    if(outputBuffer != '' && !(sending)) {
         sending = true;
         var buffer = outputBuffer;
         outputBuffer = '';
@@ -121,11 +125,9 @@ var sendTerminalData = function() {
             },
             'success' : function() {
                 sending = false;
-                setTimeout(recvTerminalData, 100);
             },
             'error' : function() {
                 sending = false;
-                setTimeout(recvTerminalData, 100);
             }
         });
     }
@@ -135,7 +137,6 @@ var terminalTimer = function() {
     if(document.getElementById('terminal')) {
         recvTerminalData();
         sendTerminalData();
-        
         setTimeout(terminalTimer, 1000);
     } else {
         $.ajax({
