@@ -246,8 +246,13 @@ class Inventory(object):
             inventory = {}
         
             for objuuid in objuuids.split(","):
-                inventory[objuuid] = collection.get_object(objuuid).object
-                add_message("inventory controller: exported: {0}, type: {1}, name: {2}".format(objuuid, inventory[objuuid]["type"], inventory[objuuid]["name"]))
+                object = collection.get_object(objuuid).object
+                
+                if object["type"] != "container" and object["type"] != "link":
+                    object["children"] = []
+                    object["parent"] = '#'
+                    inventory[objuuid] = object
+                    add_message("inventory controller: exported: {0}, type: {1}, name: {2}".format(objuuid, inventory[objuuid]["type"], inventory[objuuid]["name"]))
         
             cherrypy.response.headers['Content-Type'] = "application/x-download"
             cherrypy.response.headers['Content-Disposition'] = 'attachment; filename=export.{0}.json'.format(time())
