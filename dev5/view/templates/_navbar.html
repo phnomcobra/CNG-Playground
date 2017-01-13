@@ -16,8 +16,19 @@
             <ul class="dropdown-menu">
                 <li><a href="#" onclick="$('#importFormInput').trigger('click');">Import</a></li>
                 <li><a href="#" onclick="exportFromInventory()">Export</a></li>
+                <li role="separator" class="divider"></li>
                 <li><a href="#" onclick="selectDependencies()">Select Dependencies</a></li>
                 <li><a href="#" onclick="$('#inventory').jstree('deselect_all')">Clear Selected</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="#" onclick="filterSelectionByType('controller')">Filter Controllers</a></li>
+                <li><a href="#" onclick="filterSelectionByType('procedure')">Filter Procedures</a></li>
+                <li><a href="#" onclick="filterSelectionByType('rfc')">Filter RFCs</a></li>
+                <li><a href="#" onclick="filterSelectionByType('task')">Filter Tasks</a></li>
+                <li><a href="#" onclick="filterSelectionByType('host')">Filter Hosts</a></li>
+                <li><a href="#" onclick="filterSelectionByType('console')">Filter Consoles</a></li>
+                <li><a href="#" onclick="filterSelectionByType('status')">Filter Status Codes</a></li>
+                <li><a href="#" onclick="filterSelectionByType('link')">Filter Links</a></li>
+                <li role="separator" class="divider"></li>
                 <li><a href="#" onclick="$('#inventory').jstree('refresh')">Refresh</a></li>
             </ul>
         </li>
@@ -32,8 +43,13 @@
         <li><a href="/auth/admin" class="active" data-toggle="modal">Admin</a></li>
         <li><a href="/auth/logout" class="active" data-toggle="modal">Logout</a></li>
       </ul>
-      <ul class="nav navbar-nav navbar-right" id="menuBarDynamic">
+      
+      <ul class="nav navbar-nav navbar-right">
+        <li><p class="navbar-text" id="connectionStatus"></p></li>
       </ul>
+      
+      <ul class="nav navbar-nav navbar-right" id="menuBarDynamic"></ul>
+      
     </div><!--/.nav-collapse -->
   </div>
 </nav>
