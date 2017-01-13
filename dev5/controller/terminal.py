@@ -13,10 +13,12 @@ import cherrypy
 import json
 import traceback
 
-from .messaging import add_message
+from cherrypy.lib.static import serve_fileobj
 
+from .messaging import add_message
 from ..model.terminal import create_session, \
                              destroy_session, \
+                             write_file, \
                              send, \
                              recv
 
@@ -30,6 +32,7 @@ class Terminal(object):
                 session[key] = value
         
             create_session(cherrypy.session.id, hstuuid, session)
+            return json.dumps({})
         except Exception:
             add_message(traceback.format_exc())
     
@@ -38,6 +41,7 @@ class Terminal(object):
         add_message("terminal controller: destroy session: {0}".format(hstuuid))
         try:
             destroy_session(cherrypy.session.id, hstuuid)
+            return json.dumps({})
         except Exception:
             add_message(traceback.format_exc())
     
@@ -45,6 +49,7 @@ class Terminal(object):
     def ajax_send(self, hstuuid, buffer):
         try:
             send(cherrypy.session.id, hstuuid, buffer)
+            return json.dumps({})
         except Exception:
             add_message(traceback.format_exc())
     
@@ -54,3 +59,14 @@ class Terminal(object):
             return recv(cherrypy.session.id, hstuuid)
         except Exception:
             add_message(traceback.format_exc())
+    
+    @cherrypy.expose
+    def put_file(self, file, hstuuid):
+        add_message("terminal controller: upload file: {0}".format(file.filename))
+        
+        try:
+            write_file(cherrypy.session.id, hstuuid, file)
+        except Exception:
+            add_message(traceback.format_exc())
+        
+        return json.dumps({})

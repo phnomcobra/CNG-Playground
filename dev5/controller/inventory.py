@@ -269,23 +269,25 @@ class Inventory(object):
         try:
             objects = json.loads(file.file.read())
             collection = Collection("inventory")
-        
+            
+            container = create_container("#", "Imported Objects")
+            
+            existing_objuuids = collection.list_objuuids()
+            
             for objuuid, object in objects.iteritems():
+                if objuuid in existing_objuuids:
+                    delete_node(objuuid)
+                
                 current = collection.get_object(objuuid)
                 current.object = object
+                current.object["parent"] = container.objuuid
                 current.set()
             
                 add_message("inventory controller: imported: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
+                
+                container.object["children"].append(objuuid)
         
-            for objuuid, object in objects.iteritems():
-                add_message("inventory controller: inheritance: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
-        
-                parent = collection.get_object(object["parent"])
-            
-                if "children" in parent.object:
-                    if objuuid not in parent.object["children"]:
-                        parent.object['children'].append(objuuid)
-                        parent.set()
+            container.set()
         except Exception:
             add_message(traceback.format_exc())
         
