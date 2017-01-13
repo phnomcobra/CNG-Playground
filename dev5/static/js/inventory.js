@@ -484,6 +484,7 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
     $interval(function () {
         if(inventoryObject['changed'] && !saving) {
             inventoryObject['changed'] = false;
+            document.getElementById('connectionStatus').innerHTML = '<font style="color:#F90">SAVING</font>';
             saving = true;
             $http.post('inventory/ajax_post_object', JSON.stringify(inventoryObject)
             ).then(function successCallback(response) {
@@ -499,50 +500,55 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
                 $('.nav-tabs a[href="#console"]').tab('show');
                 addMessage("save failure " + inventoryObject['objuuid']);
                 saving = false;
+                document.getElementById('connectionStatus').innerHTML = '<font style="color:#F00">NO CONN</font>';
+            });
+        } else {
+            $http.get("messaging/ajax_get_messages").then(function (response) {
+                var messageData = '<table>';
+                var responseJSON = angular.fromJson(response)['data']['messages'];
+                for(item in responseJSON) {
+                    messageData += '<tr><td>' + responseJSON[item]['timestamp'] + '</td><td>' + responseJSON[item]['message'] + '</td></tr>';
+                }
+                messageData += '</table>'
+            
+                $scope.messages = $sce.trustAsHtml(messageData);
+            });
+        
+            // Auto updating turned off do to load storms on the webserver
+            /* 
+            $.ajax({
+                'url' : 'flags/ajax_get',
+                'dataType' : 'json',
+                'data' : {
+                    'key' : 'inventoryState'
+                },
+                'success' : function(resp) {
+                    if(inventoryStateFlag != resp.value) {
+                        inventoryStateFlag = resp.value;
+                        $('#inventory').jstree('refresh');
+                    }
+                },
+            });
+            */
+        
+            $.ajax({
+                'url' : 'flags/ajax_get',
+                'dataType' : 'json',
+                'data' : {
+                    'key' : 'queueState'
+                },
+                'success' : function(resp) {
+                    if(queueStateFlag != resp.value) {
+                        queueStateFlag = resp.value;
+                        updateQueueState();
+                    }
+                    document.getElementById('connectionStatus').innerHTML = '<font style="color:#0F0">OK</font>';
+                },
+                'error' : function(resp) {
+                    document.getElementById('connectionStatus').innerHTML = '<font style="color:#F00">NO CONN</font>';
+                }
             });
         }
-        
-        $http.get("messaging/ajax_get_messages").then(function (response) {
-            var messageData = '<table>';
-            var responseJSON = angular.fromJson(response)['data']['messages'];
-            for(item in responseJSON) {
-                messageData += '<tr><td>' + responseJSON[item]['timestamp'] + '</td><td>' + responseJSON[item]['message'] + '</td></tr>';
-            }
-            messageData += '</table>'
-            
-            $scope.messages = $sce.trustAsHtml(messageData);
-        });
-        
-        // Auto updating turned off do to load storms on the webserver
-        /* 
-        $.ajax({
-            'url' : 'flags/ajax_get',
-            'dataType' : 'json',
-            'data' : {
-                'key' : 'inventoryState'
-            },
-            'success' : function(resp) {
-                if(inventoryStateFlag != resp.value) {
-                    inventoryStateFlag = resp.value;
-                    $('#inventory').jstree('refresh');
-                }
-            },
-        });
-        */
-        
-        $.ajax({
-            'url' : 'flags/ajax_get',
-            'dataType' : 'json',
-            'data' : {
-                'key' : 'queueState'
-            },
-            'success' : function(resp) {
-                if(queueStateFlag != resp.value) {
-                    queueStateFlag = resp.value;
-                    updateQueueState();
-                }
-            },
-        });
     }, 1000);
 });
 
@@ -609,6 +615,16 @@ var selectDependencies = function() {
             }
         },
     });
+}
+
+var filterSelectionByType = function(type) {
+    var nodes = $('#inventory').jstree().get_selected(true);
+    
+    $('#inventory').jstree("deselect_all");
+    
+    for(i in nodes)
+        if(nodes[i].original.type == type)
+            $('#inventory').jstree(true).select_node(nodes[i].id);
 }
 
 var expandToNode = function(nodeID) {

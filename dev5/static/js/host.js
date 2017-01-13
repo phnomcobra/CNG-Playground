@@ -2,6 +2,8 @@ var term;
 var outputBuffer = '';
 var sending = false;
 var receiving = false;
+var terminalTimerRunning = false;
+var terminalHstuuid = ''
 
 var editHost = function() {
     document.getElementById('body').innerHTML = '';
@@ -23,6 +25,16 @@ var editHost = function() {
             addAttributeRadioGroup('Console', 'console', radioButtons)
         }
     });
+    
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.innerHTML = "Terminal";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', 'launchTerminal()');
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    $('.nav-tabs a[href="#attributes"]').tab('show');
 }
 
 var loadAndEditHost = function(objuuid) {
@@ -80,15 +92,60 @@ var launchTerminal = function() {
 
     term.open(document.getElementById('terminal'));
     
+    term.write('Connecting to ' + inventoryObject.name + ' (' + inventoryObject.host + ')...');
+    
+    terminalHstuuid = inventoryObject.objuuid;
+    
     $.ajax({
         'url' : 'terminal/ajax_create_session',
         'dataType' : 'json',
         'data' : {
             'hstuuid' : inventoryObject.objuuid
+        },
+        'success' : function(resp) {
+            if(!(terminalTimerRunning)) {
+                terminalTimer();
+                terminalTimerRunning = true;
+            }
+        },
+        'error' : function(resp) {
+            term.write('failed!');
         }
     });
     
-    setTimeout(terminalTimer, 1000);
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.innerHTML = "Edit";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', 'editHost()');
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.innerHTML = "Upload";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', "$('#uploadFormInput').trigger('click');");
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+
+    link = document.createElement("p");
+    link.setAttribute("id", "termSend");
+    link.setAttribute("class", "navbar-text");
+    link.innerHTML = "SEND";
+    cell = document.createElement("li");
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    link = document.createElement("p");
+    link.setAttribute("id", "termRecv");
+    link.setAttribute("class", "navbar-text");
+    link.innerHTML = "RECV";
+    cell = document.createElement("li");
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    $('.nav-tabs a[href="#body"]').tab('show');
 }
 
 var recvTerminalData = function() {
@@ -101,10 +158,16 @@ var recvTerminalData = function() {
             },
             'success' : function(resp) {
                 receiving = false;
-                if(resp != '') term.write(resp);
+                if(resp != '') {
+                    term.write(resp);
+                    document.getElementById('termRecv').style.color = '#F90';
+                } else {
+                    document.getElementById('termRecv').style.color = '#0F0';
+                }
             },
             'error' : function() {
                 receiving = false;
+                document.getElementById('termRecv').style.color = '#F00';
             }
         });
     }
@@ -125,11 +188,15 @@ var sendTerminalData = function() {
             },
             'success' : function() {
                 sending = false;
+                document.getElementById('termSend').style.color = '#F90';
             },
             'error' : function() {
                 sending = false;
+                document.getElementById('termSend').style.color = '#F00';
             }
         });
+    } else if(outputBuffer == '') {
+        document.getElementById('termSend').style.color = '#0F0';
     }
 }
 
@@ -137,14 +204,31 @@ var terminalTimer = function() {
     if(document.getElementById('terminal')) {
         recvTerminalData();
         sendTerminalData();
-        setTimeout(terminalTimer, 1000);
+        setTimeout(terminalTimer, 100);
     } else {
+        terminalTimerRunning = false;
+        
         $.ajax({
             'url' : 'terminal/ajax_destroy_session',
             'dataType' : 'json',
             'data' : {
-                'hstuuid' : inventoryObject.objuuid
+                'hstuuid' : terminalHstuuid
             }
         });
     }
+}
+
+var uploadFileToTerminal = function(item) {
+    var formData = new FormData();
+    formData.append("file", item.files[0], item.files[0].name)
+    formData.append("hstuuid", inventoryObject.objuuid);
+          
+    $.ajax({
+        url: 'terminal/put_file',  //Server script to process data
+        type: 'POST',
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false
+    }); 
 }

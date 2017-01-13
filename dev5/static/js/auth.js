@@ -148,6 +148,7 @@ usersApp.controller('usersCtrl', function($scope, $interval, $http, $sce) {
         if(userObject['changed'] && !saving) {
             userObject['changed'] = false;
             saving = true;
+            document.getElementById('connectionStatus').innerHTML = '<font style="color:#F90">SAVING</font>';
             $http.post('/auth/ajax_post_object', JSON.stringify(userObject)
             ).then(function successCallback(response) {
                 addMessage("saving " + userObject['objuuid']);
@@ -160,34 +161,39 @@ usersApp.controller('usersCtrl', function($scope, $interval, $http, $sce) {
                 $('.nav-tabs a[href="#console"]').tab('show');
                 addMessage("save failure " + userObject['objuuid']);
                 saving = false;
+                document.getElementById('connectionStatus').innerHTML = '<font style="color:#F00">NO CONN</font>';
+            });
+        } else {
+        
+            $.ajax({
+                'url' : '/flags/ajax_get',
+                'dataType' : 'json',
+                'data' : {
+                    'key' : 'usersState'
+                },
+                'success' : function(resp) {
+                    if(usersStateFlag != resp.value) {
+                        usersStateFlag = resp.value;
+                        $("#userGrid").jsGrid("loadData");
+                    }
+                    document.getElementById('connectionStatus').innerHTML = '<font style="color:#0F0">OK</font>';
+                },
+                'error' : function(resp) {
+                    document.getElementById('connectionStatus').innerHTML = '<font style="color:#F00">NO CONN</font>';
+                }
+            });
+        
+            $http.get("/messaging/ajax_get_messages").then(function (response) {
+                var messageData = '<table>';
+                var responseJSON = angular.fromJson(response)['data']['messages'];
+                for(item in responseJSON) {
+                    messageData += '<tr><td>' + responseJSON[item]['timestamp'] + '</td><td>' + responseJSON[item]['message'] + '</td></tr>';
+                }
+                messageData += '</table>'
+                
+                $scope.messages = $sce.trustAsHtml(messageData);
             });
         }
-        
-        $.ajax({
-            'url' : '/flags/ajax_get',
-            'dataType' : 'json',
-            'data' : {
-                'key' : 'usersState'
-            },
-            'success' : function(resp) {
-                if(usersStateFlag != resp.value) {
-                    usersStateFlag = resp.value;
-                    $("#userGrid").jsGrid("loadData");
-                }
-            },
-        });
-        
-        $http.get("/messaging/ajax_get_messages").then(function (response) {
-            var messageData = '<table>';
-            var responseJSON = angular.fromJson(response)['data']['messages'];
-            for(item in responseJSON) {
-                messageData += '<tr><td>' + responseJSON[item]['timestamp'] + '</td><td>' + responseJSON[item]['message'] + '</td></tr>';
-            }
-            messageData += '</table>'
-            
-            $scope.messages = $sce.trustAsHtml(messageData);
-        });
-        
     }, 1000);
 });
 
