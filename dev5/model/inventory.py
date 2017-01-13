@@ -18,7 +18,8 @@ def __get_child_nodes(nodes, object, collection):
     try:
         node = {"id" : object.objuuid, 
                 "parent" : object.object["parent"], 
-                "text" : object.object["name"]}
+                "text" : object.object["name"],
+                "type" : object.object["type"]}
     
         if "icon" in object.object:
             node["icon"] = object.object["icon"]

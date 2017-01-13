@@ -19,9 +19,7 @@ from ..controller.messaging import add_message
 from .document import Collection
 
 global cli_sessions
-global cli_sessions_lock
 cli_sessions = {}
-cli_sessions_lock = Lock()
 
 class ErrorConsole:
     def __init__(self, message):
@@ -47,20 +45,20 @@ def recv(sessionID, hstuuid):
     except Exception:
         add_message(traceback.format_exc())
         return traceback.format_exc()
-    
-def create_session(sessionID, hstuuid, session):
-    inventory = Collection("inventory")
-    
-    cli_id = sessionID + '-' + hstuuid
-    
-    tempmodule = new_module("tempmodule")
-    
-    host = inventory.get_object(hstuuid)
-    
+
+def write_file(sessionID, hstuuid, file):
     try:
-        cli_sessions_lock.acquire()
-        cli_sessions[cli_id] = ErrorConsole("Connecting to {0}...".format(host.object["host"]))
+        cli_sessions[sessionID + '-' + hstuuid].putf(file)
+    except Exception:
+        add_message(traceback.format_exc())
         
+def create_session(sessionID, hstuuid, session):
+    try:
+        cli_id = sessionID + '-' + hstuuid
+    
+        inventory = Collection("inventory")
+        host = inventory.get_object(hstuuid)
+        tempmodule = new_module("tempmodule")
         exec inventory.get_object(host.object["console"]).object["body"] in tempmodule.__dict__
         
         if "send" not in dir(tempmodule.Console):
@@ -73,17 +71,16 @@ def create_session(sessionID, hstuuid, session):
     except Exception:
         cli_sessions[cli_id] = ErrorConsole(traceback.format_exc())
         add_message(traceback.format_exc())
-    finally:
-        cli_sessions_lock.release()
 
 def destroy_session(sessionID, hstuuid):
     cli_id = sessionID + '-' + hstuuid
     
     try:
-        cli_sessions_lock.acquire()
-        cli_sessions[cli_id].close()
+        try:
+            cli_sessions[cli_id].close()
+        except Exception:
+            add_message(traceback.format_exc())
+        finally:
+            del cli_sessions[cli_id]
     except Exception:
         add_message(traceback.format_exc())
-    finally:
-        del cli_sessions[cli_id]
-        cli_sessions_lock.release()
