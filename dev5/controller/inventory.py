@@ -249,8 +249,6 @@ class Inventory(object):
                 object = collection.get_object(objuuid).object
                 
                 if object["type"] != "container" and object["type"] != "link":
-                    object["children"] = []
-                    object["parent"] = '#'
                     inventory[objuuid] = object
                     add_message("inventory controller: exported: {0}, type: {1}, name: {2}".format(objuuid, inventory[objuuid]["type"], inventory[objuuid]["name"]))
         
@@ -275,19 +273,22 @@ class Inventory(object):
             existing_objuuids = collection.list_objuuids()
             
             for objuuid, object in objects.iteritems():
-                if objuuid in existing_objuuids:
-                    delete_node(objuuid)
-                
                 current = collection.get_object(objuuid)
                 current.object = object
-                current.object["parent"] = container.objuuid
+                
+                if objuuid not in existing_objuuids:
+                    current.object["parent"] = container.objuuid
+                    container.object["children"].append(objuuid)
+                
                 current.set()
             
                 add_message("inventory controller: imported: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
-                
-                container.object["children"].append(objuuid)
         
-            container.set()
+            if len(container.object["children"]) > 0:
+                container.set()
+            else:
+                container.destroy()
+            
         except Exception:
             add_message(traceback.format_exc())
         
