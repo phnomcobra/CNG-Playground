@@ -274,10 +274,18 @@ class Inventory(object):
             
             for objuuid, object in objects.iteritems():
                 current = collection.get_object(objuuid)
+                
+                parent = current.object["parent"]
+                children = current.object["children"]
+                
                 current.object = object
+                
+                current.object["parent"] = parent
+                current.object["children"] = children
                 
                 if objuuid not in existing_objuuids:
                     current.object["parent"] = container.objuuid
+                    current.object["children"] = []
                     container.object["children"].append(objuuid)
                 
                 current.set()
