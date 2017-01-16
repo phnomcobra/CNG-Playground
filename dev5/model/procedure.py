@@ -10,6 +10,7 @@
 ################################################################################
 
 MAX_JOBS = 10
+MAX_JOBS_PER_HOST = 2
 
 import traceback
 
@@ -75,7 +76,7 @@ def set_job(jobuuid, value):
     global_jobs[jobuuid] = value
     global_job_lock.release()
     touch_flag("queueState")
-
+    
 def get_job(jobuuid):
     try:
         global_job_lock.acquire()
@@ -96,15 +97,21 @@ def del_job(jobuuid):
         touch_flag("queueState")
         global_job_lock.release()
 
+        
 def worker():
-    running_jobs_count = 0
-    
     global_job_lock.acquire()
     
+    running_jobs_count = 0
+        
+    running_jobs_counts = {}
+    for key in global_jobs.keys():
+        running_jobs_counts[global_jobs[key]["host"]["objuuid"]] = 0
+        
     for key in global_jobs.keys():
         if global_jobs[key]["process"] != None:
             if global_jobs[key]["process"].is_alive():
                 running_jobs_count += 1
+                running_jobs_counts[global_jobs[key]["host"]["objuuid"]] += 1
             else:
                 del global_jobs[key]
                 touch_flag("queueState")
@@ -112,16 +119,18 @@ def worker():
     for key in global_jobs.keys():
         if running_jobs_count < MAX_JOBS:
             if global_jobs[key]["process"] == None:
-                global_jobs[key]["process"] = Thread(target = run_procedure, \
-                                                     args = (global_jobs[key]["host"]["objuuid"], \
-                                                             global_jobs[key]["procedure"]["objuuid"], \
-                                                             global_jobs[key]["session"], \
-                                                             global_jobs[key]["jobuuid"]))
-                global_jobs[key]["start time"] = time()
-                global_jobs[key]["process"].start()
-                running_jobs_count += 1
-                touch_flag("queueState")
-        
+                if running_jobs_counts[global_jobs[key]["host"]["objuuid"]] < MAX_JOBS_PER_HOST:
+                    global_jobs[key]["process"] = Thread(target = run_procedure, \
+                                                        args = (global_jobs[key]["host"]["objuuid"], \
+                                                                global_jobs[key]["procedure"]["objuuid"], \
+                                                                global_jobs[key]["session"], \
+                                                                global_jobs[key]["jobuuid"]))
+                    global_jobs[key]["start time"] = time()
+                    global_jobs[key]["process"].start()
+                    running_jobs_count += 1
+                    running_jobs_counts[global_jobs[key]["host"]["objuuid"]] += 1
+                    touch_flag("queueState")
+
     global_job_lock.release()
     
     sleep(1)

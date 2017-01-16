@@ -3,7 +3,7 @@ var outputBuffer = '';
 var sending = false;
 var receiving = false;
 var terminalTimerRunning = false;
-var terminalHstuuid = ''
+var ttyuuid = null;
 
 var editHost = function() {
     document.getElementById('body').innerHTML = '';
@@ -94,8 +94,6 @@ var launchTerminal = function() {
     
     term.write('Connecting to ' + inventoryObject.name + ' (' + inventoryObject.host + ')...');
     
-    terminalHstuuid = inventoryObject.objuuid;
-    
     $.ajax({
         'url' : 'terminal/ajax_create_session',
         'dataType' : 'json',
@@ -103,6 +101,7 @@ var launchTerminal = function() {
             'hstuuid' : inventoryObject.objuuid
         },
         'success' : function(resp) {
+            ttyuuid = resp.ttyuuid;
             if(!(terminalTimerRunning)) {
                 terminalTimer();
                 terminalTimerRunning = true;
@@ -154,7 +153,7 @@ var recvTerminalData = function() {
         $.ajax({
             'url' : 'terminal/ajax_recv',
             'data' : {
-                'hstuuid' : inventoryObject.objuuid
+                'ttyuuid' : ttyuuid
             },
             'success' : function(resp) {
                 receiving = false;
@@ -183,7 +182,7 @@ var sendTerminalData = function() {
             'url' : 'terminal/ajax_send',
             'dataType' : 'json',
             'data' : {
-                'hstuuid' : inventoryObject.objuuid,
+                'ttyuuid' : ttyuuid,
                 'buffer' : buffer
             },
             'success' : function() {
@@ -212,7 +211,7 @@ var terminalTimer = function() {
             'url' : 'terminal/ajax_destroy_session',
             'dataType' : 'json',
             'data' : {
-                'hstuuid' : terminalHstuuid
+                'ttyuuid' : ttyuuid
             }
         });
     }
@@ -221,7 +220,7 @@ var terminalTimer = function() {
 var uploadFileToTerminal = function(item) {
     var formData = new FormData();
     formData.append("file", item.files[0], item.files[0].name)
-    formData.append("hstuuid", inventoryObject.objuuid);
+    formData.append("ttyuuid", ttyuuid);
           
     $.ajax({
         url: 'terminal/put_file',  //Server script to process data

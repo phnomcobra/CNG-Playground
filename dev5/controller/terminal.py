@@ -25,47 +25,46 @@ from ..model.terminal import create_session, \
 class Terminal(object):
     @cherrypy.expose
     def ajax_create_session(self, hstuuid):
-        add_message("terminal controller: create session: {0}".format(hstuuid))
+        add_message("terminal controller: create terminal")
         try:
             session = {}
             for key, value in cherrypy.session.items():
                 session[key] = value
         
-            create_session(cherrypy.session.id, hstuuid, session)
+            return json.dumps({"ttyuuid" : create_session(hstuuid, session)})
+        except Exception:
+            add_message(traceback.format_exc())
+    
+    @cherrypy.expose
+    def ajax_destroy_session(self, ttyuuid):
+        add_message("terminal controller: destroy terminal: {0}".format(ttyuuid))
+        try:
+            destroy_session(ttyuuid)
             return json.dumps({})
         except Exception:
             add_message(traceback.format_exc())
     
     @cherrypy.expose
-    def ajax_destroy_session(self, hstuuid):
-        add_message("terminal controller: destroy session: {0}".format(hstuuid))
+    def ajax_send(self, ttyuuid, buffer):
         try:
-            destroy_session(cherrypy.session.id, hstuuid)
+            send(ttyuuid, buffer)
             return json.dumps({})
         except Exception:
             add_message(traceback.format_exc())
     
     @cherrypy.expose
-    def ajax_send(self, hstuuid, buffer):
+    def ajax_recv(self, ttyuuid):
         try:
-            send(cherrypy.session.id, hstuuid, buffer)
-            return json.dumps({})
+            return recv(ttyuuid)
         except Exception:
             add_message(traceback.format_exc())
     
     @cherrypy.expose
-    def ajax_recv(self, hstuuid):
-        try:
-            return recv(cherrypy.session.id, hstuuid)
-        except Exception:
-            add_message(traceback.format_exc())
-    
-    @cherrypy.expose
-    def put_file(self, file, hstuuid):
+    def put_file(self, file, ttyuuid):
         add_message("terminal controller: upload file: {0}".format(file.filename))
         
         try:
-            write_file(cherrypy.session.id, hstuuid, file)
+            write_file(ttyuuid, file)
         except Exception:
             add_message(traceback.format_exc())
         
