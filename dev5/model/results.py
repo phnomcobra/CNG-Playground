@@ -11,6 +11,9 @@
 
 import traceback
 
+from threading import Thread
+from time import time, sleep
+
 from .document import Collection
 from .ramdocument import Collection as RAMCollection
 from .utils import sucky_uuid
@@ -69,11 +72,27 @@ def get_procedure_result(prcuuid, hstuuid):
     
     return procedure_result
 
-RAMCollection("results").destroy()
+def worker():
+    results = RAMCollection("results")
     
+    for objuuid in results.list_objuuids():
+        result = results.get_object(objuuid)
+        
+        try:
+            if time() - result.object["start"] > 3600:
+                result.destroy()
+        except Exception:
+            result.destroy()
+    
+    sleep(60)
+    
+    Thread(target = worker).start()
+
 collection = RAMCollection("results")
 collection.create_attribute("start", "['start']")
 collection.create_attribute("stop", "['stop']")
 collection.create_attribute("tskuuid", "['task']['objuuid']")
 collection.create_attribute("prcuuid", "['procedure']['objuuid']")
 collection.create_attribute("hstuuid", "['host']['objuuid']")
+
+Thread(target = worker).start()

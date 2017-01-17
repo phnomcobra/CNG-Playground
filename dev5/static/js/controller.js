@@ -299,7 +299,7 @@ var drawCells = function(resultItems) {
         cell = document.getElementById('controller-cell-' + resultItems[i].host.objuuid + '-' + resultItems[i].procedure.objuuid);
 
         if(resultItems[i].stop) {
-            if(currentTime - resultItems[i].stop > 3600) {
+            if(currentTime - resultItems[i].stop > 60) {
                 cell.style.color = '#' + resultItems[i].status.sfg;
                 cell.style.backgroundColor = '#' + resultItems[i].status.sbg;
             } else {
@@ -313,10 +313,15 @@ var drawCells = function(resultItems) {
             cell.style.backgroundColor = '#' + resultItems[i].status.cbg;
             cell.innerHTML = resultItems[i].status.abbreviation;
         }
-        
+    }
+}
+
+var drawResults = function(resultItems) {
+    for(var i = 0; i < resultItems.length; i++) {
         viewProcedureResult(resultItems[i]);
     }
 }
+
 
 var updateControllerTimer = function() {
     if(document.getElementById('controllerTable')) {
@@ -331,10 +336,10 @@ var updateControllerTimer = function() {
                 if(controllerStateFlag != resp.value) {
                     controllerStateFlag = resp.value;
                     updateControllerStateData();
-                } /* else {
+                } else {
                     if(controllerStateData)
                         drawCells(controllerStateData);
-                } */
+                }
                 setTimeout(updateControllerTimer, 1000);
             },
         });
@@ -349,6 +354,7 @@ var updateControllerStateData = function() {
         'success' : function(resp) {
             controllerStateData = resp;
             drawCells(controllerStateData);
+            drawResults(controllerStateData);
         }
     });
 }
