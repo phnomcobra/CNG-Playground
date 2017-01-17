@@ -333,6 +333,7 @@ var updateControllerTimer = function() {
                 'key' : 'results'
             },
             'success' : function(resp) {
+                setTimeout(updateControllerTimer, 1000);
                 if(controllerStateFlag != resp.value) {
                     controllerStateFlag = resp.value;
                     updateControllerStateData();
@@ -340,7 +341,6 @@ var updateControllerTimer = function() {
                     if(controllerStateData)
                         drawCells(controllerStateData);
                 }
-                setTimeout(updateControllerTimer, 1000);
             },
         });
     }
