@@ -273,24 +273,32 @@ class Inventory(object):
             existing_objuuids = collection.list_objuuids()
             
             for objuuid, object in objects.iteritems():
-                current = collection.get_object(objuuid)
+                try:
+                    current = collection.get_object(objuuid)
+                    
+                    if objuuid in existing_objuuids:
+                        try:
+                            parent = current.object["parent"]
+                            children = current.object["children"]
+                            current.object = object
+                            current.object["parent"] = parent
+                            current.object["children"] = children
+                        except Exception:
+                            current.object = object
+                            current.object["parent"] = container.objuuid
+                            current.object["children"] = []
+                            container.object["children"].append(objuuid)
+                    else:
+                        current.object = object
+                        current.object["parent"] = container.objuuid
+                        current.object["children"] = []
+                        container.object["children"].append(objuuid)
                 
-                parent = current.object["parent"]
-                children = current.object["children"]
-                
-                current.object = object
-                
-                current.object["parent"] = parent
-                current.object["children"] = children
-                
-                if objuuid not in existing_objuuids:
-                    current.object["parent"] = container.objuuid
-                    current.object["children"] = []
-                    container.object["children"].append(objuuid)
-                
-                current.set()
+                    current.set()
             
-                add_message("inventory controller: imported: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
+                    add_message("inventory controller: imported: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
+                except Exception:
+                    add_message(traceback.format_exc())
         
             if len(container.object["children"]) > 0:
                 container.set()
