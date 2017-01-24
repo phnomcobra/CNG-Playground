@@ -575,19 +575,25 @@ def recstrrepl(object, find, replace):
         for key, value in object.iteritems():
             if isinstance(value, dict) or isinstance(value, list):
                 recstrrepl(object[key], find, replace)
-            elif isinstance(value, str):
-                if object[key] == find:
-                    object[key] = replace
+            else:
+                try:
+                    object[key] = object[key].replace(find, replace)
+                except Exception:
+                    pass
     elif isinstance(object, list):
         for i, value in enumerate(object):
             if isinstance(value, dict) or isinstance(value, list):
                 recstrrepl(object[i], find, replace)
-            elif isinstance(value, str):
-                if object[i] == find:
-                    object[i] = replace
-    elif isinstance(object, str):
-        if object == find:
-            object = replace
+            else:
+                try:
+                    object[i] = object[i].replace(find, replace)
+                except Exception:
+                    pass
+    else:
+        try:
+            object = object.replace(find, replace)
+        except Exception:
+            pass
 
 def copy_object(objuuid):
     collection = Collection("inventory")
