@@ -176,14 +176,16 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                     $('#inventory').jstree("deselect_all");
                                     if(obj.item.method == 'create container') {
                                         addMessage('create container success');
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         inventoryObject = resp;
                                         createNode(resp);
                                         editContainer();
                                         touchInventory();
                                         $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'create task') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage('create task success');
                                         inventoryObject = resp;
                                         createNode(resp);
@@ -191,7 +193,8 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         touchInventory();
                                         $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'create rfc') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage('create rfc success');
                                         inventoryObject = resp;
                                         createNode(resp);
@@ -199,7 +202,8 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         touchInventory();
                                         $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'create procedure') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage('create procedure success');
                                         inventoryObject = resp;
                                         createNode(resp);
@@ -207,7 +211,8 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         touchInventory();
                                         $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'create status') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage('create status success');
                                         inventoryObject = resp;
                                         createNode(resp);
@@ -215,7 +220,8 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         touchInventory();
                                         $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'create host') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage('create host success');
                                         inventoryObject = resp;
                                         createNode(resp);
@@ -223,7 +229,8 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         touchInventory();
                                         $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'create console') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage('create console success');
                                         inventoryObject = resp;
                                         createNode(resp);
@@ -231,7 +238,8 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         touchInventory();
                                         $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'create controller') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage('create controller success');
                                         inventoryObject = resp;
                                         createNode(resp);
@@ -239,82 +247,95 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         touchInventory();
                                         $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'edit task') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage("edit task success");
                                         inventoryObject = resp;
                                         editTask();
                                         $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'edit task hosts') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage("edit task success");
                                         inventoryObject = resp;
                                         editTaskHosts();
                                         setTimeout(refreshJSGrids, 1000);
                                         $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'edit container') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage("edit container success");
                                         inventoryObject = resp;
                                         editContainer();
                                         $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'edit procedure') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage("edit procedure success");
                                         inventoryObject = resp;
                                         editProcedure();
                                         setTimeout(refreshJSGrids, 1000);
                                         $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'edit rfc') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage("edit rfc success");
                                         inventoryObject = resp;
                                         editRFC();
                                         $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'edit status code') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage("edit status success");
                                         inventoryObject = resp;
                                         editStatusCode();
                                         $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'edit host') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage("edit host success");
                                         inventoryObject = resp;
                                         editHost();
                                         $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'edit controller') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage("edit controller success");
                                         inventoryObject = resp;
                                         editController();
                                         setTimeout(refreshJSGrids, 1000);
                                         $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'edit console') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage("edit console success");
                                         inventoryObject = resp;
                                         editConsole();
                                         $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'run procedure') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage("run procedure success");
                                         inventoryObject = resp;
                                         executeProcedure();
                                         $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'run controller') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage("run controller success");
                                         inventoryObject = resp;
                                         executeController();
                                         $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'run task') {
-                                        document.title = resp.type + ": " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage("run task success");
                                         inventoryObject = resp;
                                         executeTask();
                                         $('.nav-tabs a[href="#body"]').tab('show');
                                     } else if(obj.item.method == 'delete node') {
                                         document.title = "ValARIE WebApp";
+                                        document.getElementById('bodyTitle').innerHTML = '';
                                         addMessage("delete success");
                                         deleteNode(resp['id']);
                                         touchInventory();
@@ -328,7 +349,8 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         createNode(resp);
                                         touchInventory();
                                     } else if(obj.item.method == 'create terminal') {
-                                        document.title = "terminal: " + resp.name;
+                                        document.title = resp.name;
+                                        document.getElementById('bodyTitle').innerHTML = resp.type.toUpperCase() + ': ' + resp.name;
                                         addMessage("start terminal success");
                                         inventoryObject = resp;
                                         $('.nav-tabs a[href="#body"]').tab('show');
@@ -565,7 +587,8 @@ var setInventoryKey = function (key, div) {
     
     if(key == 'name') {
         $("#inventory").jstree('rename_node', inventoryObject['objuuid'] , inventoryObject[key]);
-        document.title = inventoryObject.type + ": " + inventoryObject.name;
+        document.title = inventoryObject.name;
+        document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
         touchInventory();
     }
 }
