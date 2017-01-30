@@ -664,6 +664,8 @@ def __get_dependencies(objuuid, objuuids, collection):
         elif current.object["type"] == "host":
             if current.object["console"] != None:
                 __get_dependencies(current.object["console"], objuuids, collection)
+        elif current.object["type"] == "link":
+            __get_dependencies(current.object["target"], objuuids, collection)
     
 def get_dependencies(selected_objuuids):
     collection = Collection("inventory")
