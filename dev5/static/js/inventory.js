@@ -151,6 +151,12 @@ var deleteNode = function(objuuid) {
     touchInventory();
 }
 
+$('#inventory').on('dblclick.jstree', function (evt, data) {
+    obj = {};
+    obj['item'] = contextMenu.edit;
+    contextMenu.edit.action(obj);
+});
+
 $('#inventory').on('select_node.jstree', function (evt, data) {
         contextMenu = {};
         
