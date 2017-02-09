@@ -49,6 +49,52 @@ $(document).on('dnd_stop.vakata', function (e, data) {
     if(data.event.target.className == 'jsgrid-grid-body' ||
        data.event.target.className == 'jsgrid-cell') {
         var nodes = $('#inventory').jstree().get_selected(true);
+        
+        if(nodes.length == 0) {
+            $.ajax({
+                'url' : 'inventory/ajax_get_object',
+                'dataType' : 'json',
+                'data' : {'objuuid' : data.data.nodes[0]},
+                'success' : function(resp) {
+                    $('#inventory').jstree("deselect_all");
+                    
+                    if(resp['type'] == 'task' && document.getElementById('taskGrid')) {
+                        addProcedureTask(resp['objuuid']);
+                    } else if(resp['type'] == 'rfc' &&
+                              inventoryObject['rfcs'].indexOf(resp['objuuid']) == -1 &&
+                              document.getElementById('RFCGrid')) {
+                        addProcedureRFC(resp['objuuid']);
+                    } else if(resp['type'] == 'host' &&
+                              inventoryObject['hosts'].indexOf(resp['objuuid']) == -1 &&
+                              document.getElementById('hostGrid')) {
+                        addControllerHost(resp['objuuid']);
+                    } else if(resp['type'] == 'procedure' &&
+                              inventoryObject['procedures'].indexOf(resp['objuuid']) == -1 &&
+                              document.getElementById('procedureGrid')) {
+                        addControllerProcedure(resp['objuuid']);
+                    }
+                    
+                    if(resp['type'] == 'link') {
+                        if(resp['target type'] == 'task' && document.getElementById('taskGrid')) {
+                            addProcedureTask(resp['target']);
+                        } else if(resp['target type'] == 'rfc' &&
+                                  inventoryObject['rfcs'].indexOf(resp['target']) == -1 &&
+                                  document.getElementById('RFCGrid')) {
+                            addProcedureRFC(resp['target']);
+                        } else if(resp['target type'] == 'host' &&
+                                  inventoryObject['hosts'].indexOf(resp['target']) == -1 &&
+                                  document.getElementById('hostGrid')) {
+                            addControllerHost(resp['target']);
+                        } else if(resp['target type'] == 'procedure' &&
+                                  inventoryObject['procedures'].indexOf(resp['target']) == -1 &&
+                                  document.getElementById('procedureGrid')) {
+                            addControllerProcedure(resp['target']);
+                        }
+                    }
+                }
+            });
+        }
+        
         for(i in nodes) {
             $.ajax({
                 'url' : 'inventory/ajax_get_object',
