@@ -138,19 +138,22 @@ def worker():
     Thread(target = worker).start()
 
 def get_jobs_grid():
-    grid_data = {}
+    grid_data = []
     global_job_lock.acquire()
     
     for jobuuid, dict in global_jobs.iteritems():
-        if dict["start time"]:
-            grid_data[jobuuid] = {}
-            grid_data[jobuuid]["name"] = dict["procedure"]["name"]
-            grid_data[jobuuid]["host"] = dict["host"]["name"]
-            grid_data[jobuuid]["progress"] = dict["progress"]
-            grid_data[jobuuid]["message"] = dict["message"]
-            grid_data[jobuuid]["start time"] = dict["start time"]
+        row = {}
+        row["name"] = dict["procedure"]["name"]
+        row["host"] = dict["host"]["name"]
+        row["progress"] = dict["progress"]
+        grid_data.append(row)
     
     global_job_lock.release()
+    
+    for i in range(0, len(grid_data)):
+        for j in range(i, len(grid_data)):
+            if grid_data[i]["progress"] < grid_data[j]["progress"]:
+                grid_data[i], grid_data[j] = grid_data[j], grid_data[i]
     
     return grid_data
 
@@ -170,7 +173,6 @@ def queue_procedure(hstuuid, prcuuid, session):
         "queue time" : time(),
         "start time" : None,
         "progress" : 0,
-        "message" : "Queued",
     }
     
     set_job(jobuuid, job)
@@ -186,9 +188,6 @@ class TaskError:
     
 def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
     add_message("Executing host: {0}, procedure {1}...".format(hstuuid, prcuuid))
-    
-    if jobuuid:
-        update_job(jobuuid, "message", "Executing")
     
     inventory = Collection("inventory")
     results = RAMCollection("results")
@@ -239,9 +238,6 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
             
             try:
                 result.object["output"].append("importing task {0}...".format(inventory.get_object(tskuuid).object["name"]))
-                
-                if jobuuid:
-                    update_job(jobuuid, "message", "Executing Task: " + inventory.get_object(tskuuid).object["name"])
                 
                 exec status_code_body + inventory.get_object(tskuuid).object["body"] in tempmodule.__dict__
                 task = tempmodule.Task()

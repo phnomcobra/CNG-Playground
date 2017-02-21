@@ -79,12 +79,12 @@ def worker():
         result = results.get_object(objuuid)
         
         try:
-            if time() - result.object["start"] > 3600:
+            if time() - result.object["start"] > 28800:
                 result.destroy()
         except Exception:
             result.destroy()
     
-    sleep(60)
+    sleep(3600)
     
     Thread(target = worker).start()
 
