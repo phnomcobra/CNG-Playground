@@ -257,7 +257,7 @@ var executeSelectedProcedures = function() {
                             'hstuuid' : $(this)[0].attributes['data-host-objuuid'].value
                         },
                         'success' : function(resp){
-                            $('.nav-tabs a[href="#queue"]').tab('show');
+                            //$('.nav-tabs a[href="#queue"]').tab('show');
                         },
                         'failure' : function(resp){
                             $('.nav-tabs a[href="#console"]').tab('show');
@@ -299,7 +299,7 @@ var drawCells = function(resultItems) {
         cell = document.getElementById('controller-cell-' + resultItems[i].host.objuuid + '-' + resultItems[i].procedure.objuuid);
 
         if(resultItems[i].stop) {
-            if(currentTime - resultItems[i].stop > 60) {
+            if(currentTime - resultItems[i].stop > 14400) {
                 cell.style.color = '#' + resultItems[i].status.sfg;
                 cell.style.backgroundColor = '#' + resultItems[i].status.sbg;
             } else {
@@ -364,7 +364,7 @@ var editController = function() {
     addAttributeText('Controller UUID', 'objuuid');
     addAttributeTextBox('Controller Name', 'name');
     
-    document.getElementById('body').innerHTML = '<div id="procedureGrid" style="padding:10px"></div><div id="hostGrid" style="padding:10px"></div>';
+    document.getElementById('body').innerHTML = '<div id="procedureGrid" style="padding:10px;float:left"></div><div id="hostGrid" style="padding:10px;margin-left:50%"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
     
     link = document.createElement("a");
@@ -376,8 +376,8 @@ var editController = function() {
     document.getElementById('menuBarDynamic').appendChild(cell);
     
     $("#procedureGrid").jsGrid({
-        height: "calc(50% - 5px)",
-        width: "calc(100% - 5px)",
+        height: "calc(100% - 5px)",
+        width: "calc(50% - 10px)",
         autoload: true,
         
         deleteButton: true,
@@ -443,8 +443,8 @@ var editController = function() {
     });
     
     $("#hostGrid").jsGrid({
-        height: "calc(50% - 5px)",
-        width: "calc(100% - 5px)",
+        height: "calc(100% - 5px)",
+        width: "calc(50% - 10px)",
         autoload: true,
         
         deleteButton: true,

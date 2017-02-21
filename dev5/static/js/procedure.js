@@ -403,7 +403,7 @@ var runProcedure = function () {
                 'hstuuid' : inventoryObject.hosts[i]
             },
             'success' : function(resp){
-                $('.nav-tabs a[href="#queue"]').tab('show');
+                //$('.nav-tabs a[href="#queue"]').tab('show');
             },
             'failure' : function(resp){
                 $('.nav-tabs a[href="#console"]').tab('show');

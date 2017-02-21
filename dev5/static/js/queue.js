@@ -1,59 +1,40 @@
 var drawQueue = function(resp) {
     queue = document.getElementById('queue');
-    queue.innerHTML = '';
+    queue.innerHTML = '<table class="table" id="queueTable"></table>';
+    
+    console.log(resp);
+    var table = document.getElementById('queueTable');
+    var row;
+    var cell;
+    
+    row = table.insertRow(-1);
+    cell = row.insertCell(-1);
+    cell.innerHTML = '<b>Procedure</b>';
+        
+    cell = row.insertCell(-1);
+    cell.innerHTML = '<b>Host</b>';
+
+    cell = row.insertCell(-1);
+    cell.innerHTML = '<b>Progress</b>';
     
     var count = 0;
-    for(var jobuuid in resp) {
+    for(var i in resp) {
         count++;
         
-        queueItem = document.createElement('div');
-        queueItem.setAttribute('id', 'jobuuid-' + jobuuid);
-        queueItem.setAttribute('data-jobuuid', jobuuid);
-        queueItem.setAttribute('class', 'panel panel-default');
-        queueItem.setAttribute('style', 'width:100%');
+        row = table.insertRow(-1);
+        cell = row.insertCell(-1);
+        cell.innerHTML = resp[i].name;
+        
+        cell = row.insertCell(-1);
+        cell.innerHTML = resp[i].host;
 
-        progressInnerDIV = document.createElement('div');
-        progressInnerDIV.setAttribute('class', 'progress-bar');
-        progressInnerDIV.setAttribute('role', 'progressbar');
-        progressInnerDIV.setAttribute('style', 'width:' + Math.round(resp[jobuuid].progress * 100.0) + '%');
-        progressInnerDIV.innerHTML = Math.round(resp[jobuuid].progress * 100.0) + '%';
-
-        progressOuterDIV = document.createElement('div');
-        progressOuterDIV.setAttribute('class', 'progress');
-        progressOuterDIV.appendChild(progressInnerDIV);
-        
-        panelHeading = document.createElement('div');
-        panelHeading.setAttribute('class', 'panel-heading');
-        panelHeading.innerHTML = resp[jobuuid].name + '@' + resp[jobuuid].host;
-        
-        panelBody = document.createElement('div');
-        panelBody.setAttribute('class', 'panel-body');
-        
-        panelTable = document.createElement('table');
-        panelTable.setAttribute('class', 'table');
-        
-        row = panelTable.insertRow(-1);
         cell = row.insertCell(-1);
-        cell.innerHTML = "Message";
-        cell = row.insertCell(-1);
-        cell.innerHTML = resp[jobuuid].message;
-        
-        row = panelTable.insertRow(-1);
-        cell = row.insertCell(-1);
-        cell.innerHTML = "Start Time";
-        cell = row.insertCell(-1);
-        cell.innerHTML = new Date(resp[jobuuid]['start time'] * 1000);
-        
-        queueItem.appendChild(panelHeading);
-        queueItem.appendChild(panelBody);
-        panelBody.appendChild(progressOuterDIV);
-        panelBody.appendChild(panelTable);
-
-        queue.appendChild(queueItem);
+        cell.innerHTML = Math.round(resp[i].progress * 100.0) + '%';
     }
     
-    if(count == 0)
-        $('.nav-tabs a[href="#inventoryContainer"]').tab('show');
+    //if(count == 0)
+    //    $('.nav-tabs a[href="#inventoryContainer"]').tab('show');
+    
 }
 
 var updateQueueState = function() {
