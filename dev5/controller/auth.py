@@ -7,6 +7,7 @@
 # (614) 692 2050
 #
 # 01/03/2017 Original construction
+# 02/22/2017 on_login function assignes session id to user object
 ################################################################################
 
 import cherrypy
@@ -102,7 +103,10 @@ def all_of(*conditions):
 
 class Auth(object):
     def on_login(self, username):
-        """Called on successful login"""
+        users = Collection("users")
+        for user in users.find(name = username):
+            user.object['session id'] = cherrypy.session.id
+            user.set()
     
     def on_logout(self, username):
         """Called on logout"""

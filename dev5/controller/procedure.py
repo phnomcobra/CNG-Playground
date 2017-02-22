@@ -7,6 +7,7 @@
 # (614) 692 2050
 #
 # 10/16/2016 Original construction
+# 02/22/2017 Updated execute methods to pull session data from user objects
 ################################################################################
 
 import cherrypy
@@ -14,7 +15,7 @@ import json
 import traceback
 
 from .messaging import add_message
-
+from ..model.document import Collection
 from ..model.procedure import get_task_grid, \
                               get_host_grid, \
                               get_jobs_grid, \
@@ -42,10 +43,7 @@ class Procedure(object):
     def ajax_execute_procedure(self, prcuuid, hstuuid):
         add_message("procedure controller: execute procedure: hstuuid: {0}, prcuuid: {1}".format(hstuuid, prcuuid))
         try:
-            session = {}
-            for key, value in cherrypy.session.items():
-                session[key] = value
-            return json.dumps(run_procedure(hstuuid, prcuuid, session))
+            return json.dumps(run_procedure(hstuuid, prcuuid, Collection("users").find(sessionid = cherrypy.session.id)[0].object))
         except Exception:
             add_message(traceback.format_exc())
     
@@ -53,10 +51,7 @@ class Procedure(object):
     def ajax_queue_procedure(self, prcuuid, hstuuid):
         add_message("procedure controller: queuing procedure: hstuuid: {0}, prcuuid: {1}".format(hstuuid, prcuuid))
         try:
-            session = {}
-            for key, value in cherrypy.session.items():
-                session[key] = value
-            queue_procedure(hstuuid, prcuuid, session)
+            queue_procedure(hstuuid, prcuuid, Collection("users").find(sessionid = cherrypy.session.id)[0].object)
             return json.dumps({})
         except Exception:
             add_message(traceback.format_exc())

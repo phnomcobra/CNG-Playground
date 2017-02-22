@@ -7,6 +7,8 @@
 # (614) 692 2050
 #
 # 12/30/2016 Original construction
+# 02/22/2017 Added session id to user objects
+#            Added session id as an attribute to users collection
 ################################################################################
 
 import traceback
@@ -28,7 +30,7 @@ def create_user(name = "New User", objuuid = None):
         "enabled" : True,
         "role" : "",
         "session" : {},
-        
+        "session id" : None
     }
     user.set()
     return user
@@ -47,6 +49,7 @@ def get_users_grid():
 collection = Collection("users")
 collection.create_attribute("group", "['group']")
 collection.create_attribute("name", "['name']")
+collection.create_attribute("sessionid", "['session id']")
 collection.create_attribute("enabled", "['enabled']")
 
 if len(collection.find(name = "root")) == 0:

@@ -7,6 +7,7 @@
 # (614) 692 2050
 #
 # 01/09/2017 Original construction
+# 02/22/2017 Updated create session to pull session data from user objects
 ################################################################################
 
 import cherrypy
@@ -16,6 +17,7 @@ import traceback
 from cherrypy.lib.static import serve_fileobj
 
 from .messaging import add_message
+from ..model.document import Collection
 from ..model.terminal import create_session, \
                              destroy_session, \
                              write_file, \
@@ -27,11 +29,7 @@ class Terminal(object):
     def ajax_create_session(self, hstuuid):
         add_message("terminal controller: create terminal")
         try:
-            session = {}
-            for key, value in cherrypy.session.items():
-                session[key] = value
-        
-            return json.dumps({"ttyuuid" : create_session(hstuuid, session)})
+            return json.dumps({"ttyuuid" : create_session(hstuuid, Collection("users").find(sessionid = cherrypy.session.id)[0].object)})
         except Exception:
             add_message(traceback.format_exc())
     

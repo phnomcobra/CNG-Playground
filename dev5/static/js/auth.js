@@ -5,6 +5,7 @@ var usersStateFlag = null;
 var loadUserAttributes = function() {
     initAttributes();
     addAttributeText('User UUID', 'objuuid');
+    addAttributeText('Session ID', 'session id');
     addAttributeTextBox('User Name', 'name');
     addAttributeTextBox('First Name', 'first name');
     addAttributeTextBox('Last Name', 'last name');
