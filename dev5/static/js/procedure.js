@@ -98,7 +98,8 @@ var editProcedure = function() {
             return "client-" + itemIndex;
         },
         
-        rowDoubleClick: function(args) {
+        editing: true,
+        onItemEditing: function(args) {
             loadAndEditTask(args.item.objuuid);
         },
         
@@ -161,7 +162,8 @@ var editProcedure = function() {
         deleteButton: true,
         confirmDeleting: false,
         
-        rowDoubleClick: function(args) {
+        editing: true,
+        onItemEditing: function(args) {
             loadAndEditHost(args.item.objuuid);
         },
         
@@ -208,7 +210,8 @@ var editProcedure = function() {
             return "client-" + itemIndex;
         },
         
-        rowDoubleClick: function(args) {
+        editing: true,
+        onItemEditing: function(args) {
             loadAndEditRFC(args.item.objuuid);
         },
  
@@ -243,6 +246,18 @@ var editProcedure = function() {
     setTimeout(refreshJSGrids, 1000);
 }
 
+String.prototype.toHHMMSS = function () {
+    var sec_num = parseInt(this, 10); // don't forget the second param
+    var hours   = Math.floor(sec_num / 3600);
+    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    return hours+':'+minutes+':'+seconds;
+}
+
 var viewProcedureResult = function(result) {
     document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML = result.procedure.name + '<br>' + result.host.name + ' ' + result.host.host + ' <br>' + new Date(result.stop * 1000) + ' [' + result.status.name + ']';
     
@@ -252,9 +267,11 @@ var viewProcedureResult = function(result) {
     var row;
     var cell;
     
+    /*
     row = table.insertRow(-1);
     row.insertCell(-1).innerHTML = '<b>Procedure Name:</b>';
     row.insertCell(-1).innerHTML = result.procedure.name;
+    */
     
     row = table.insertRow(-1);
     row.insertCell(-1).innerHTML = '<b>Procedure Title:</b>';
@@ -264,6 +281,7 @@ var viewProcedureResult = function(result) {
     row.insertCell(-1).innerHTML = '<b>Procedure Description:</b>';
     row.insertCell(-1).innerHTML = result.procedure.description;
     
+    /*
     row = table.insertRow(-1);
     row.insertCell(-1).innerHTML = '<b>Procedure Start:</b>';
     row.insertCell(-1).innerHTML = new Date(result.start * 1000);
@@ -271,24 +289,24 @@ var viewProcedureResult = function(result) {
     row = table.insertRow(-1);
     row.insertCell(-1).innerHTML = '<b>Procedure Stop:</b>';
     row.insertCell(-1).innerHTML = new Date(result.stop * 1000);
+    */
     
+    /*
     row = table.insertRow(-1);
     row.insertCell(-1).innerHTML = '<b>Procedure Status:</b>';
     row.insertCell(-1).innerHTML = result.status.name;
+    */
     
-    row = table.insertRow(-1);
-    row.insertCell(-1).innerHTML = '<b>Procedure Output:</b>';
-    cell = row.insertCell(-1);
-    for(var j = 0; j < result.output.length; j++)
-        cell.innerHTML += result.output[j] + '<br>';
-    
+    /*
     document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br><br><table class="table" id="section-body-rfcs-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
-    table = document.getElementById('section-body-rfcs-' + result.host.objuuid + '-' + result.procedure.objuuid);
+    table = document.getElementById('section-body-rfcs-' + result.host.objuuid + '-' + result.procedure.objuuid); 
+    */
     for(var i = 0; i < result.rfcs.length; i++) {
         row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>RFC Name:</b>';
+        row.insertCell(-1).innerHTML = '<b>RFC ' + result.rfcs[i].number + '</b>';
         row.insertCell(-1).innerHTML = result.rfcs[i].name;
         
+        /*
         row = table.insertRow(-1);
         row.insertCell(-1).innerHTML = '<b>RFC Number:</b>';
         row.insertCell(-1).innerHTML = result.rfcs[i].number;
@@ -311,26 +329,38 @@ var viewProcedureResult = function(result) {
         
         row = table.insertRow(-1);
         row.insertCell(-1).innerHTML = ' ';
+        */
     }
     
+    row = table.insertRow(-1);
+    row.insertCell(-1).innerHTML = '<b>Procedure Output:</b>';
+    cell = row.insertCell(-1);
+    for(var j = 0; j < result.output.length; j++)
+        cell.innerHTML += result.output[j] + '<br>';
+    
+    row = table.insertRow(-1);
+    row.insertCell(-1).innerHTML = '<b>Task Output:</b>';
+    row.insertCell(-1).innerHTML = '<div id="section-body-tasks-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></div>';
+    
+    //document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<div id="section-body-tasks-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></div>';
+    
     for(var i = 0; i < result.tasks.length; i++) {
-        document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br><br><table class="table" id="section-body-task-header-' + i + '-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
-        table = document.getElementById('section-body-task-header-' + i + '-' + result.host.objuuid + '-' + result.procedure.objuuid);
-    
-        row = table.insertRow(-1);
-        cell = row.insertCell(-1);
-        cell.innerHTML = '<b>' + result.tasks[i].status.abbreviation + '</b>';
-        cell.style.color = '#' + result.tasks[i].status.cfg;
-        cell.style.backgroundColor = '#' + result.tasks[i].status.cbg;
+        title = document.createElement("div");
+        taskOutput = document.createElement("code");
+        taskOutput.setAttribute('style', 'width:100%');
         
-        cell = row.insertCell(-1);
-        cell.style.color = '#' + result.tasks[i].status.cfg;
-        cell.style.backgroundColor = '#' + result.tasks[i].status.cbg;
-    
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>Task Name:</b>';
-        row.insertCell(-1).innerHTML = result.tasks[i].name;
+        document.getElementById('section-body-tasks-' + result.host.objuuid + '-' + result.procedure.objuuid).appendChild(title);
+        document.getElementById('section-body-tasks-' + result.host.objuuid + '-' + result.procedure.objuuid).appendChild(taskOutput);
         
+        title.innerHTML = result.tasks[i].name + ' [Duration: ' + String(result.tasks[i].stop - result.tasks[i].start).toHHMMSS() + '] [' + result.tasks[i].status.name + ']';
+        title.style.color = '#' + result.tasks[i].status.cfg;
+        title.style.backgroundColor = '#' + result.tasks[i].status.cbg;
+        
+        /* cell = row.insertCell(-1);
+        cell.style.color = '#' + result.tasks[i].status.cfg;
+        cell.style.backgroundColor = '#' + result.tasks[i].status.cbg; */
+    
+        /*
         row = table.insertRow(-1);
         row.insertCell(-1).innerHTML = '<b>Task Start:</b>';
         row.insertCell(-1).innerHTML = new Date(result.tasks[i].start * 1000);
@@ -338,19 +368,20 @@ var viewProcedureResult = function(result) {
         row = table.insertRow(-1);
         row.insertCell(-1).innerHTML = '<b>Task Stop:</b>';
         row.insertCell(-1).innerHTML = new Date(result.tasks[i].stop * 1000);
+        */
         
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>Task Status:</b>';
-        row.insertCell(-1).innerHTML = result.tasks[i].status.name;
-        
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>Task Output:</b>';
-        cell = row.insertCell(-1);
         for(var j = 0; j < result.tasks[i].output.length; j++)
-            cell.innerHTML += result.tasks[i].output[j] + '<br>';
+            taskOutput.innerHTML += result.tasks[i].output[j] + '<br>';
         
-        document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br>';
+        //document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br>';
     }
+    
+    $('#section-body-tasks-' + result.host.objuuid + '-' + result.procedure.objuuid).accordion({
+        collapsible: true,
+        heightStyle: "content",
+        active: false
+    });
+    
     
     document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).style.color = '#' + result.status.cfg;
     document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).style.backgroundColor = '#' + result.status.cbg;

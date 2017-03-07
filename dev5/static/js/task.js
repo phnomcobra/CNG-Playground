@@ -103,7 +103,8 @@ var editTaskHosts = function() {
         deleteButton: true,
         confirmDeleting: false,
         
-        rowDoubleClick: function(args) {
+        editing: true,
+        onItemEditing: function(args) {
             loadAndEditHost(args.item.objuuid);
         },
         

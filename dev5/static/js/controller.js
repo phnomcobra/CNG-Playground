@@ -387,10 +387,11 @@ var editController = function() {
             return "client-" + itemIndex;
         },
         
-        rowDoubleClick: function(args) {
+        editing: true,
+        onItemEditing: function(args) {
             loadAndEditProcedure(args.item.objuuid);
-        },
- 
+        },   
+
         controller: {
             loadData: function(filter) {
                 return $.ajax({
@@ -454,9 +455,10 @@ var editController = function() {
             return "client-" + itemIndex;
         },
         
-        rowDoubleClick: function(args) {
+        editing: true,
+        onItemEditing: function(args) {
             loadAndEditHost(args.item.objuuid);
-        },
+        },   
  
         controller: {
             loadData: function(filter) {
