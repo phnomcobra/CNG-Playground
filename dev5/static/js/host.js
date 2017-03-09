@@ -9,6 +9,10 @@ var editHost = function() {
     document.getElementById('body').innerHTML = '';
     document.getElementById('menuBarDynamic').innerHTML = '';
     
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#attributes"]').tab('show');
+    
     initAttributes();
     addAttributeText('Host UUID', 'objuuid');
     addAttributeTextBox('Name', 'name');
@@ -34,8 +38,6 @@ var editHost = function() {
     cell.appendChild(link);
     document.getElementById('menuBarDynamic').appendChild(cell);
     
-    $('.nav-tabs a[href="#attributes"]').tab('show');
-    
     loadRequiresGrid();
     loadProvidesGrid();
 }
@@ -59,6 +61,10 @@ var loadAndEditHost = function(objuuid) {
 var launchTerminal = function() {
     document.getElementById('body').innerHTML = '<div id="terminal"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
+    
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
     
     initAttributes();
     addAttributeText('Host UUID', 'objuuid');
@@ -148,6 +154,9 @@ var launchTerminal = function() {
     document.getElementById('menuBarDynamic').appendChild(cell);
     
     $('.nav-tabs a[href="#body"]').tab('show');
+    
+    loadRequiresGrid();
+    loadProvidesGrid();
 }
 
 var recvTerminalData = function() {

@@ -1,7 +1,7 @@
 var loadRequiresGrid = function(){
     $("#requiresGrid").jsGrid({
         width: "calc(100% - 5px)",
-        height: "calc(50vh - 80px)",
+        height: "calc(100% - 10px)",
         autoload: true,
         
         rowClick: function(args) {
@@ -36,7 +36,7 @@ var loadRequiresGrid = function(){
         },
        
         fields: [
-            {name : "name", type : "text", title : "Requires"},
+            {name : "name", type : "text", title : "Name"},
             {name : "type", type : "text", title : "Type"},
             {name : "objuuid", type : "text", visible: false}
         ],
@@ -46,7 +46,7 @@ var loadRequiresGrid = function(){
 var loadProvidesGrid = function(){
     $("#providesGrid").jsGrid({
         width: "calc(100% - 5px)",
-        height: "calc(50vh - 80px)",
+        height: "calc(100% - 10px)",
         autoload: true,
         
         rowClick: function(args) {
@@ -81,7 +81,7 @@ var loadProvidesGrid = function(){
         },
         
         fields: [
-            {name : "name", type : "text", title : "Provides"},
+            {name : "name", type : "text", title : "Name"},
             {name : "type", type : "text", title : "Type"},
             {name : "objuuid", type : "text", visible: false}
         ],

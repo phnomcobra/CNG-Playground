@@ -40,6 +40,10 @@ var addControllerHost = function(objuuid) {
 }
 
 var executeController = function() {
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
+    
     document.getElementById('body').innerHTML = '<div id="controllerTableDiv" style="width:inherit;height:inherit"><table id="controllerTable"></table></div><div id="procedureResultAccordion" style="display:none"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
     
@@ -359,10 +363,30 @@ var updateControllerStateData = function() {
     });
 }
 
+var loadAndEditController = function(objuuid) {
+    document.getElementById('body').innerHTML = '';
+    document.getElementById('menuBarDynamic').innerHTML = '';
+    
+    $.ajax({
+        'url' : 'inventory/ajax_get_object',
+        'dataType' : 'json',
+        'data' : {'objuuid' : objuuid},
+        'success' : function(resp) {
+            inventoryObject = resp;
+            editController();
+            expandToNode(inventoryObject.objuuid);
+        }
+    });
+}
+
 var editController = function() {
     initAttributes();
     addAttributeText('Controller UUID', 'objuuid');
     addAttributeTextBox('Controller Name', 'name');
+    
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
     
     document.getElementById('body').innerHTML = '<div id="procedureGrid" style="padding:10px;float:left"></div><div id="hostGrid" style="padding:10px;margin-left:50%"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';

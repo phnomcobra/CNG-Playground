@@ -70,6 +70,10 @@ var editProcedure = function() {
     document.getElementById('body').innerHTML = '<div id="taskGrid" style="padding:10px;float:left"></div><div id="hostGrid" style="padding:10px; margin-left:50%"></div><div id="RFCGrid" style="padding:10px;margin-left:50%"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
     
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
+    
     link = document.createElement("a");
     link.setAttribute("href", "#");
     link.innerHTML = "Run";
@@ -396,6 +400,10 @@ var executeProcedure = function() {
     document.getElementById('body').innerHTML = '<div id="procedureResultAccordion"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
     
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
+    
     for(var i = 0; i < inventoryObject.hosts.length; i++) {
         document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + inventoryObject.hosts[i] + '-' + inventoryObject.objuuid + '"></div>';
         document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + inventoryObject.hosts[i] + '-' + inventoryObject.objuuid + '"></code></pre>';
@@ -425,6 +433,9 @@ var executeProcedure = function() {
     
     updateProcedureTimer();
     updateProcedureStateData();
+    
+    loadRequiresGrid();
+    loadProvidesGrid();
 }
 
 var runProcedure = function () {

@@ -2,6 +2,10 @@ var editRFC = function() {
     document.getElementById('body').innerHTML = '<div id="aceInstance"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
     
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#attributes"]').tab('show');
+    
     initAttributes();
     addAttributeText('RFC UUID', 'objuuid');
     addAttributeTextBox('RFC Name', 'name');

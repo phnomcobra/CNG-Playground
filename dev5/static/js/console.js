@@ -8,7 +8,6 @@ var editConsole = function() {
 
     var editor = new ace.edit(document.getElementById('aceInstance'));
     
-    //editor.setTheme("ace/theme/twilight");
     editor.session.setMode("ace/mode/python");
     editor.setValue(inventoryObject['body']);
     editor.selection.moveTo(0, 0);
@@ -21,6 +20,9 @@ var editConsole = function() {
     
     loadRequiresGrid();
     loadProvidesGrid();
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
 }
 
 var loadAndEditConsole = function(objuuid) {

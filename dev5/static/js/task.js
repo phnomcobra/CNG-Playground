@@ -2,6 +2,10 @@ var editTask = function() {
     document.getElementById('body').innerHTML = '<div id="aceInstance"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
     
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
+    
     initAttributes();
     addAttributeText('Task UUID', 'objuuid');
     addAttributeTextBox('Task Name', 'name');
@@ -18,6 +22,9 @@ var editTask = function() {
         f.inventoryObject['body'] = f.getValue();
         f.inventoryObject['changed'] = true;
     });
+    
+    loadRequiresGrid();
+    loadProvidesGrid();
 }
 
 var loadAndEditTask = function(objuuid) {
@@ -62,6 +69,10 @@ var executeTask = function() {
     addAttributeText('Task UUID', 'objuuid');
     addAttributeTextBox('Task Name', 'name');
     
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
+    
     document.getElementById('body').innerHTML = '<div id="taskResultAccordion"></div>';
     
     for(var i = 0; i < inventoryObject.hosts.length; i++) {
@@ -86,12 +97,19 @@ var executeTask = function() {
         heightStyle: "content",
         active: false
     });
+    
+    loadRequiresGrid();
+    loadProvidesGrid();
 }
 
 var editTaskHosts = function() {
     initAttributes();
     addAttributeText('Task UUID', 'objuuid');
     addAttributeTextBox('Task Name', 'name');
+    
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
     
     document.getElementById('body').innerHTML = '<div id="hostGrid" style="padding:10px"></div>';
     
