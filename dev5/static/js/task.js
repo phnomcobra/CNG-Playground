@@ -139,5 +139,8 @@ var editTaskHosts = function() {
         ],
     });
     
+    loadRequiresGrid();
+    loadProvidesGrid();
+    
     setTimeout(refreshJSGrids, 1000);
 }

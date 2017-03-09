@@ -35,6 +35,9 @@ var editHost = function() {
     document.getElementById('menuBarDynamic').appendChild(cell);
     
     $('.nav-tabs a[href="#attributes"]').tab('show');
+    
+    loadRequiresGrid();
+    loadProvidesGrid();
 }
 
 var loadAndEditHost = function(objuuid) {

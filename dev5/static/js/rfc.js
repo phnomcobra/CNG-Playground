@@ -11,6 +11,9 @@ var editRFC = function() {
     addAttributeTextBox('POC Name', 'poc name');
     addAttributeTextBox('POC Email', 'poc email');
     addAttributeTextBox('POC Phone', 'poc phone');
+    
+    loadRequiresGrid();
+    loadProvidesGrid();
 }
 
 var loadAndEditRFC = function(objuuid) {

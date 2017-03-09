@@ -688,6 +688,92 @@ def get_status_objects():
         status_objects.append(object.object)
         
     return status_objects
+
+def get_required_objects_grid(objuuid):
+    collection = Collection("inventory")
+    
+    required_objuuids = []
+    
+    object = collection.get_object(objuuid).object
+    if "type" in object:
+        if object["type"] == "host":
+            required_objuuids.append(object["console"])
+        elif object["type"] == "task":
+            required_objuuids += object["hosts"]
+        elif object["type"] == "procedure":
+            required_objuuids += object["hosts"]
+            required_objuuids += object["rfcs"]
+            required_objuuids += object["tasks"]
+        elif object["type"] == "controller":
+            required_objuuids += object["hosts"]
+            required_objuuids += object["procedures"]
+    
+    grid_data = []
+    
+    for objuuid in required_objuuids:
+        object = collection.get_object(objuuid).object
+        
+        if "type" in object:
+            grid_data.append({"name" : object["name"], "type" : object["type"], "objuuid" : object["objuuid"]})
+        else:
+            add_message("object {0} is missing!".format(hstuuid))
+            grid_data.append({"name" : "MISSING!", "type" : "???????", "objuuid" : object["objuuid"]})
+        
+    return grid_data
+
+def get_provided_objects_grid(objuuid):
+    collection = Collection("inventory")
+    
+    required_objuuids = []
+    
+    object = collection.get_object(objuuid).object
+    if "type" in object:
+        if object["type"] == "console":
+            for host in collection.find(type = "host"):
+                if host.object["console"] == objuuid:
+                    required_objuuids.append(host.objuuid)
+
+        elif object["type"] == "host":
+            for task in collection.find(type = "task"):
+                if objuuid in task.object["hosts"]:
+                    required_objuuids.append(task.objuuid)
+            
+            for procedure in collection.find(type = "procedure"):
+                if objuuid in procedure.object["hosts"]:
+                    required_objuuids.append(procedure.objuuid)
+            
+            for controller in collection.find(type = "controller"):
+                if objuuid in controller.object["hosts"]:
+                    required_objuuids.append(controller.objuuid)
+
+        elif object["type"] == "rfc":
+            for procedure in collection.find(type = "procedure"):
+                if objuuid in procedure.object["rfcs"]:
+                    required_objuuids.append(procedure.objuuid)
+
+        elif object["type"] == "task":
+            for procedure in collection.find(type = "procedure"):
+                if objuuid in procedure.object["tasks"]:
+                    required_objuuids.append(procedure.objuuid)
+                    
+        elif object["type"] == "procedure":
+            for controller in collection.find(type = "controller"):
+                if objuuid in controller.object["procedures"]:
+                    required_objuuids.append(controller.objuuid)
+    
+    grid_data = []
+    
+    for objuuid in required_objuuids:
+        object = collection.get_object(objuuid).object
+        
+        if "type" in object:
+            grid_data.append({"name" : object["name"], "type" : object["type"], "objuuid" : object["objuuid"]})
+        else:
+            add_message("object {0} is missing!".format(hstuuid))
+            grid_data.append({"name" : "MISSING!", "type" : "???????", "objuuid" : object["objuuid"]})
+        
+    return grid_data
+
     
 collection = Collection("inventory")
 collection.create_attribute("parent", "['parent']")

@@ -512,5 +512,8 @@ var editController = function() {
         }
     });
     
+    loadRequiresGrid();
+    loadProvidesGrid();
+    
     setTimeout(refreshJSGrids, 1000);
 }

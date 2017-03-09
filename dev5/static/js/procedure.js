@@ -243,6 +243,9 @@ var editProcedure = function() {
         ]
     });
     
+    loadRequiresGrid();
+    loadProvidesGrid();
+    
     setTimeout(refreshJSGrids, 1000);
 }
 

@@ -5,4 +5,7 @@ var editContainer = function() {
     initAttributes();
     addAttributeText('Container UUID', 'objuuid');
     addAttributeTextBox('Container Name', 'name');
+    
+    loadRequiresGrid();
+    loadProvidesGrid();
 }

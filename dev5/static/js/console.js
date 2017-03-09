@@ -18,6 +18,9 @@ var editConsole = function() {
         f.inventoryObject['body'] = f.getValue();
         f.inventoryObject['changed'] = true;
     });
+    
+    loadRequiresGrid();
+    loadProvidesGrid();
 }
 
 var loadAndEditConsole = function(objuuid) {

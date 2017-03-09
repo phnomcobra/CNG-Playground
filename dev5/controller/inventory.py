@@ -35,7 +35,9 @@ from ..model.inventory import get_child_nodes, \
                               create_host, \
                               create_console, \
                               get_dependencies, \
-                              copy_object
+                              copy_object, \
+                              get_provided_objects_grid, \
+                              get_required_objects_grid
 
 class Inventory(object):
     def __init__(self):
@@ -256,6 +258,24 @@ class Inventory(object):
             cherrypy.response.headers['Content-Disposition'] = 'attachment; filename=export.{0}.json'.format(time())
         
             return serve_fileobj(json.dumps(inventory))
+        except Exception:
+            add_message(traceback.format_exc())
+    
+    @cherrypy.expose
+    @require()
+    def ajax_get_required_objects_grid(self, objuuid):
+        add_message("inventory controller: get required objects grid: {0}".format(objuuid))
+        try:
+            return json.dumps(get_required_objects_grid(objuuid))
+        except Exception:
+            add_message(traceback.format_exc())
+    
+    @cherrypy.expose
+    @require()
+    def ajax_get_provided_objects_grid(self, objuuid):
+        add_message("inventory controller: get provided objects grid: {0}".format(objuuid))
+        try:
+            return json.dumps(get_provided_objects_grid(objuuid))
         except Exception:
             add_message(traceback.format_exc())
     
