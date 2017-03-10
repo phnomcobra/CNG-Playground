@@ -729,37 +729,37 @@ def get_provided_objects_grid(objuuid):
     object = collection.get_object(objuuid).object
     if "type" in object:
         if object["type"] == "console":
-            for host in collection.find(type = "host"):
-                if host.object["console"] == objuuid:
-                    required_objuuids.append(host.objuuid)
+            for hstuuid in collection.find_objuuids(type = "host"):
+                if collection.get_object(hstuuid).object["console"] == objuuid:
+                    required_objuuids.append(hstuuid)
 
         elif object["type"] == "host":
-            for task in collection.find(type = "task"):
-                if objuuid in task.object["hosts"]:
-                    required_objuuids.append(task.objuuid)
+            for tskuuid in collection.find_objuuids(type = "task"):
+                if objuuid in collection.get_object(tskuuid).object["hosts"]:
+                    required_objuuids.append(tskuuid)
             
-            for procedure in collection.find(type = "procedure"):
-                if objuuid in procedure.object["hosts"]:
-                    required_objuuids.append(procedure.objuuid)
+            for prcuuid in collection.find_objuuids(type = "procedure"):
+                if objuuid in collection.get_object(prcuuid).object["hosts"]:
+                    required_objuuids.append(prcuuid)
             
-            for controller in collection.find(type = "controller"):
-                if objuuid in controller.object["hosts"]:
-                    required_objuuids.append(controller.objuuid)
+            for ctruuid in collection.find_objuuids(type = "controller"):
+                if objuuid in collection.get_object(ctruuid).object["hosts"]:
+                    required_objuuids.append(ctruuid)
 
         elif object["type"] == "rfc":
-            for procedure in collection.find(type = "procedure"):
-                if objuuid in procedure.object["rfcs"]:
-                    required_objuuids.append(procedure.objuuid)
+            for prcuuid in collection.find_objuuids(type = "procedure"):
+                if objuuid in collection.get_object(prcuuid).object["rfcs"]:
+                    required_objuuids.append(prcuuid)
 
         elif object["type"] == "task":
-            for procedure in collection.find(type = "procedure"):
-                if objuuid in procedure.object["tasks"]:
-                    required_objuuids.append(procedure.objuuid)
+            for prcuuid in collection.find_objuuids(type = "procedure"):
+                if objuuid in collection.get_object(prcuuid).object["tasks"]:
+                    required_objuuids.append(prcuuid)
                     
         elif object["type"] == "procedure":
-            for controller in collection.find(type = "controller"):
-                if objuuid in controller.object["procedures"]:
-                    required_objuuids.append(controller.objuuid)
+            for ctruuid in collection.find_objuuids(type = "controller"):
+                if objuuid in collection.get_object(ctruuid).object["procedures"]:
+                    required_objuuids.append(ctruuid)
     
     grid_data = []
     
