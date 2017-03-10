@@ -336,6 +336,21 @@ class Collection(Document):
             objects.append(Object(self.coluuid, objuuid))
         
         return objects
+    
+    def find_objuuids(self, **kargs):
+        objuuid_sets = []
+        for attribute, value in kargs.iteritems():
+            objuuid_sets.append(Document.find_objects(self, self.coluuid, attribute, value))
+        
+        intersection = set(objuuid_sets[0])
+        for objuuids in objuuid_sets[1:]:
+            intersection = intersection.intersection(set(objuuids))
+        
+        objuuids = []
+        for objuuid in list(intersection):
+            objuuids.append(objuuid)
+        
+        return objuuids
 
     def get_object(self, objuuid = None):
         if not objuuid:
