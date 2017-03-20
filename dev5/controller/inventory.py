@@ -7,6 +7,9 @@
 # (614) 692 2050
 #
 # 10/16/2016 Original construction
+# 03/20/2017 Overhauled import and export methods to include links and 
+#              containers. Pre-existing child node references are also
+#              preserved now to enable precise bulk imports and exports.
 ################################################################################
 
 import cherrypy
@@ -248,11 +251,8 @@ class Inventory(object):
             inventory = {}
         
             for objuuid in objuuids.split(","):
-                object = collection.get_object(objuuid).object
-                
-                if object["type"] != "container" and object["type"] != "link":
-                    inventory[objuuid] = object
-                    add_message("inventory controller: exported: {0}, type: {1}, name: {2}".format(objuuid, inventory[objuuid]["type"], inventory[objuuid]["name"]))
+                inventory[objuuid] = collection.get_object(objuuid).object
+                add_message("inventory controller: exported: {0}, type: {1}, name: {2}".format(objuuid, inventory[objuuid]["type"], inventory[objuuid]["name"]))
         
             cherrypy.response.headers['Content-Type'] = "application/x-download"
             cherrypy.response.headers['Content-Disposition'] = 'attachment; filename=export.{0}.json'.format(time())
@@ -290,36 +290,38 @@ class Inventory(object):
             
             container = create_container("#", "Imported Objects")
             
-            existing_objuuids = collection.list_objuuids()
-            
             for objuuid, object in objects.iteritems():
                 try:
                     current = collection.get_object(objuuid)
-                    
-                    if objuuid in existing_objuuids:
-                        try:
-                            parent = current.object["parent"]
-                            children = current.object["children"]
-                            current.object = object
-                            current.object["parent"] = parent
-                            current.object["children"] = children
-                        except Exception:
-                            current.object = object
-                            current.object["parent"] = container.objuuid
-                            current.object["children"] = []
-                            container.object["children"].append(objuuid)
+                    if "children" in current.object:
+                        old_children = current.object["children"]
+                        current.object = object
+                        
+                        for child in old_children:
+                            if child not in current.object["children"]:
+                                current.object["children"].append(child)
                     else:
                         current.object = object
-                        current.object["parent"] = container.objuuid
-                        current.object["children"] = []
-                        container.object["children"].append(objuuid)
-                
                     current.set()
             
                     add_message("inventory controller: imported: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
                 except Exception:
                     add_message(traceback.format_exc())
-        
+            
+            objuuids = collection.list_objuuids()
+            for objuuid in objuuids:
+                current = collection.get_object(objuuid)
+                if current.object["parent"] not in objuuids and \
+                   current.object["parent"] != "#":
+                    current.object["parent"] = container.objuuid
+                    container.object["children"].append(objuuid)
+                    current.set()
+                elif current.object["parent"] != "#":
+                    parent = collection.get_object(current.object["parent"])
+                    if current.objuuid not in parent.object["children"]:
+                        parent.object["children"].append(current.objuuid)
+                        parent.set()
+            
             if len(container.object["children"]) > 0:
                 container.set()
             else:
