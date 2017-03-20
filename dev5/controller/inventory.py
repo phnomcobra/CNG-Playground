@@ -311,16 +311,17 @@ class Inventory(object):
             objuuids = collection.list_objuuids()
             for objuuid in objuuids:
                 current = collection.get_object(objuuid)
-                if current.object["parent"] not in objuuids and \
-                   current.object["parent"] != "#":
-                    current.object["parent"] = container.objuuid
-                    container.object["children"].append(objuuid)
-                    current.set()
-                elif current.object["parent"] != "#":
-                    parent = collection.get_object(current.object["parent"])
-                    if current.objuuid not in parent.object["children"]:
-                        parent.object["children"].append(current.objuuid)
-                        parent.set()
+                if "parent" in current.object:
+                    if current.object["parent"] not in objuuids and \
+                       current.object["parent"] != "#":
+                        current.object["parent"] = container.objuuid
+                        container.object["children"].append(objuuid)
+                        current.set()
+                    elif current.object["parent"] != "#":
+                        parent = collection.get_object(current.object["parent"])
+                        if current.objuuid not in parent.object["children"]:
+                            parent.object["children"].append(current.objuuid)
+                            parent.set()
             
             if len(container.object["children"]) > 0:
                 container.set()
