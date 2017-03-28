@@ -461,8 +461,14 @@ var addAttributeCheckBox = function(fieldName, inventoryKey) {
     attributeCell = attributeRow.insertCell(-1);
     var id = 'inventory-obj-key-' + inventoryKey;
     attributeCell.innerHTML = '<input type="checkbox" id="' + id + '" onchange="this.value = this.checked;setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)"></input>';
-    document.getElementById(id).checked = inventoryObject[inventoryKey];
-    document.getElementById(id).value = inventoryObject[inventoryKey];
+    
+    if(inventoryObject[inventoryKey] == 'true' || inventoryObject[inventoryKey] == true) {
+        document.getElementById(id).checked = true;
+        document.getElementById(id).value = true;
+    } else {
+        document.getElementById(id).checked = false;
+        document.getElementById(id).value = false;
+    }
 }
 
 var addAttributeColor = function(fieldName, inventoryKey) {
