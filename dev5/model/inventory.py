@@ -13,6 +13,7 @@ import traceback
 
 from .document import Collection
 from .utils import sucky_uuid
+from ..controller.messaging import add_message
 
 def __get_child_nodes(nodes, object, collection):
     try:
@@ -716,7 +717,7 @@ def get_required_objects_grid(objuuid):
         if "type" in object:
             grid_data.append({"name" : object["name"], "type" : object["type"], "objuuid" : object["objuuid"]})
         else:
-            add_message("object {0} is missing!".format(hstuuid))
+            add_message("object {0} is missing!".format(object["objuuid"]))
             grid_data.append({"name" : "MISSING!", "type" : "???????", "objuuid" : object["objuuid"]})
         
     return grid_data
@@ -769,7 +770,7 @@ def get_provided_objects_grid(objuuid):
         if "type" in object:
             grid_data.append({"name" : object["name"], "type" : object["type"], "objuuid" : object["objuuid"]})
         else:
-            add_message("object {0} is missing!".format(hstuuid))
+            add_message("object {0} is missing!".format(object["objuuid"]))
             grid_data.append({"name" : "MISSING!", "type" : "???????", "objuuid" : object["objuuid"]})
         
     return grid_data

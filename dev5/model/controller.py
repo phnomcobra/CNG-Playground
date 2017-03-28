@@ -13,6 +13,7 @@ from threading import Thread
 
 from .document import Collection
 from .utils import sucky_uuid
+from ..controller.messaging import add_message
 
 def get_procedure_grid(ctruuid):
     collection = Collection("inventory")

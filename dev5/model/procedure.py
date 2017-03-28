@@ -259,7 +259,12 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
             try:
                 task_result["status"] = status_data[task.status]
                 try:
-                    if not inventory.get_object(prcuuid).object["continue {0}".format(task.status)]:
+                    continue_flag = inventory.get_object(prcuuid).object["continue {0}".format(task.status)]
+                    
+                    if continue_flag == 'false':
+                        continue_flag = False
+                    
+                    if not continue_flag:
                         continue_procedure = False
                 except Exception:
                     continue_procedure = False
