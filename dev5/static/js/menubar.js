@@ -18,7 +18,12 @@ var submitCredentials = function() {
         'url' : 'credentials/set_mysql_password',
         'data' : {'b64str' : window.btoa(document.getElementById('sql_pwd').value)}
     });
-
+    
+    $.ajax({
+        'url' : 'credentials/set_password',
+        'data' : {'b64str' : window.btoa(document.getElementById('app_pwd').value)}
+    });
+    
     closeModal();
 }
 

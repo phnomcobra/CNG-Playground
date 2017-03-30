@@ -12,24 +12,16 @@ var loadUserAttributes = function() {
     addAttributeTextBox('Phone', 'phone');
     addAttributeTextBox('Email', 'email');
     addAttributePassword('User Password', 'password');
-    addAttributeCheckBox('User Enabled', 'enabled');
-    addAttributeRadioGroup('Role', 'role', [
-        {'name' : 'admin', 'value' : 'admin'},
-        {'name' : 'user', 'value' : 'user'}
-    ]);
     addAttributeTextBox('SSH Username', 'ssh username');
     addAttributePassword('SSH Password', 'ssh password');
     addAttributeTextBox('MySQL Username', 'mysql username');
     addAttributePassword('MySQL Password', 'mysql password');
 }
 
-var loadUser = function(objuuid) {
+var loadUser = function() {
     $.ajax({
-        'url' : '/auth/ajax_get_object',
+        'url' : '/auth/ajax_get_current_object',
         'dataType' : 'json',
-        'data' : {
-            'objuuid' : objuuid
-        },
         'success' : function(resp) {
             addMessage('load user object success');
             userObject = resp;
@@ -43,89 +35,6 @@ var loadUser = function(objuuid) {
             initAttributes();
             $('.nav-tabs a[href="#console"]').tab('show');
         }
-    });
-}
-
-var loadUserGrid = function(){
-    $("#userGrid").jsGrid({
-        width: "calc(100% - 5px)",
-        height: "calc(100vh - 120px)",
-        autoload: true,
-        
-        deleteButton: true,
-        confirmDeleting: false,
-        //editing: true,
-        inserting: true,
-        
-        rowDoubleClick: function(args) {
-            //console.log(args);
-            //loadAndEditHost(args.item.objuuid);
-            loadUser(args.item.objuuid);
-            
-        },
-        
-        rowClick: function(args) {
-            //loadAndEditHost(args.item.objuuid);
-        },
-        
-        rowClass: function(item, itemIndex) {
-            return "client-" + itemIndex;
-        },
- 
-        controller: {
-            loadData: function(filter) {
-                return $.ajax({
-                    type: "GET",
-                    url: "/auth/ajax_get_users_grid",
-                    //data: {'objuuid' : userObject['objuuid']},
-                    dataType: "JSON"
-                });
-            },
-            insertItem: function(item) {
-                $.ajax({
-                    'url' : '/auth/ajax_create_user',
-                    'dataType' : 'json',
-                    'data' : {
-                        'name' : item.name
-                    },
-                    'success' : function(resp) {
-                        $("#userGrid").jsGrid("loadData");
-                        userObject = resp;
-                        loadUserAttributes();
-                        $('.nav-tabs a[href="#attributes"]').tab('show');
-                        touchUsers();
-                    },
-                });
-            },
-            deleteItem: function(item) {
-                //userObject['hosts'].splice(userObject['hosts'].indexOf(item.objuuid), 1);
-                //userObject['changed'] = true;
-                $('.nav-tabs a[href="#console"]').tab('show');
-                
-                $.ajax({
-                    'url' : '/auth/ajax_delete',
-                    'dataType' : 'json',
-                    'data' : {
-                        'objuuid' : item.objuuid
-                    },
-                    'success' : function(resp) {
-                        initAttributes();
-                        touchUsers();
-                        $('.nav-tabs a[href="#console"]').tab('show');
-                    },
-                    'failure' : function(resp) {
-                        $("#userGrid").jsGrid("loadData");
-                        $('.nav-tabs a[href="#console"]').tab('show');
-                    }
-                });
-            }
-        },
-        
-        fields: [
-            {name : "name", type : "text", title : "User Name"},
-            {name : "objuuid", type : "text", visible: false},
-            {type : "control" }
-        ],
     });
 }
 
@@ -169,25 +78,6 @@ usersApp.controller('usersCtrl', function($scope, $interval, $http, $sce) {
                 document.getElementById('connectionStatus').innerHTML = '<font style="color:#F00">NO CONN</font>';
             });
         } else {
-        
-            $.ajax({
-                'url' : '/flags/ajax_get',
-                'dataType' : 'json',
-                'data' : {
-                    'key' : 'usersState'
-                },
-                'success' : function(resp) {
-                    if(usersStateFlag != resp.value) {
-                        usersStateFlag = resp.value;
-                        $("#userGrid").jsGrid("loadData");
-                    }
-                    document.getElementById('connectionStatus').innerHTML = '<font style="color:#0F0">OK</font>';
-                },
-                'error' : function(resp) {
-                    document.getElementById('connectionStatus').innerHTML = '<font style="color:#F00">NO CONN</font>';
-                }
-            });
-        
             $http.get("/messaging/ajax_get_messages").then(function (response) {
                 var messageData = '<table>';
                 var responseJSON = angular.fromJson(response)['data']['messages'];
@@ -197,6 +87,8 @@ usersApp.controller('usersCtrl', function($scope, $interval, $http, $sce) {
                 messageData += '</table>'
                 
                 $scope.messages = $sce.trustAsHtml(messageData);
+                
+                document.getElementById('connectionStatus').innerHTML = '<font style="color:#0F0">OK</font>';
             });
         }
     }, 1000);
@@ -334,4 +226,4 @@ var addMessage = function (message) {
     });
 };
 
-loadUserGrid();
+loadUser();
