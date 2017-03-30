@@ -17,6 +17,12 @@ def admin_view():
     template = templateEnv.get_template('auth.html')
     return template.render()
 
+def user_attr_view():
+    templateLoader = jinja2.FileSystemLoader(searchpath = "./dev5/view/templates")
+    templateEnv = jinja2.Environment(loader = templateLoader )
+    template = templateEnv.get_template('userattr.html')
+    return template.render()
+    
 def login_view(username, msg="Enter login information", from_page="/"):
     templateLoader = jinja2.FileSystemLoader(searchpath = "./dev5/view/templates")
     templateEnv = jinja2.Environment(loader = templateLoader)
