@@ -18,7 +18,6 @@ from .inventory import Inventory
 from .messaging import Messaging
 from .procedure import Procedure
 from .controller import Controller
-from .credentials import Credentials
 from .console import Console
 from .rfc import RFC
 from .results import Results
@@ -32,7 +31,6 @@ class Root(object):
     messaging = Messaging()
     procedure = Procedure()
     controller = Controller()
-    credentials = Credentials()
     console = Console()
     rfc = RFC()
     results = Results()

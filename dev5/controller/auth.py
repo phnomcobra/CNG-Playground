@@ -17,7 +17,7 @@ import traceback
 from ..model.document import Collection
 from ..model.auth import create_user, get_users_grid
 from .messaging import add_message
-from ..view.auth import login_view, admin_view
+from ..view.auth import login_view, admin_view, user_attr_view
 
 SESSION_KEY = '_cp_username'
 
@@ -117,6 +117,10 @@ class Auth(object):
         return admin_view()
     
     @cherrypy.expose
+    def userattr(self):
+        return user_attr_view()
+    
+    @cherrypy.expose
     def login(self, username=None, password=None, from_page="/"):
         if username is None or password is None:
             return login_view("", from_page=from_page)
@@ -140,6 +144,7 @@ class Auth(object):
         raise cherrypy.HTTPRedirect(from_page or "/")
 
     @cherrypy.expose
+    @require(member_of("admin"))
     def ajax_get_users_grid(self):
         add_message("auth controller: get users grid")
         try:
@@ -148,6 +153,7 @@ class Auth(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require(member_of("admin"))
     def ajax_create_user(self, name):
         add_message("auth controller: create user: {0}".format(name))
         try:
@@ -156,6 +162,7 @@ class Auth(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    @require(member_of("admin"))
     def ajax_delete(self, objuuid):
         add_message("auth controller: delete user object: {0}".format(objuuid))
         try:
@@ -175,6 +182,17 @@ class Auth(object):
         except Exception:
             add_message(traceback.format_exc())
     
+    @cherrypy.expose
+    def ajax_get_current_object(self):
+        add_message("auth controller: get current user object...")
+        try:
+            collection = Collection("users")
+            object = collection.find(sessionid = cherrypy.session.id)[0].object
+            add_message("auth controller: get: {0}, name: {1}".format(object["objuuid"], object["name"]))
+            return json.dumps(object)
+        except Exception:
+            add_message(traceback.format_exc())
+        
     @cherrypy.expose
     def ajax_post_object(self):
         add_message("auth controller: post user object...")
