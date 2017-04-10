@@ -43,6 +43,11 @@ def get_users_grid():
     for usruuid in collection.list_objuuids():
         user = collection.get_object(usruuid)
         grid_data.append({"name" : user.object["name"], "objuuid" : user.object["objuuid"]})
+    
+    for i in range(0, len(grid_data)):
+        for j in range(i, len(grid_data)):
+            if grid_data[i]["name"] > grid_data[j]["name"]:
+                grid_data[i], grid_data[j] = grid_data[j], grid_data[i]
         
     return grid_data
 
