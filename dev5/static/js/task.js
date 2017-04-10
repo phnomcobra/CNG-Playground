@@ -55,7 +55,7 @@ var addRunTaskHost = function(objuuid) {
 }
 
 var viewTaskResult = function(result) {
-    document.getElementById('section-header-' + result.host.objuuid).innerHTML = result.host.name + '<br>' + result.host.host + '<br>' + result.status.name;
+    document.getElementById('section-header-' + result.host.objuuid).innerHTML = result.host.name + ' - ' + result.host.host + ' - ' + result.status.name;
     
     for(var i = 0; i < result.output.length; i++)
         document.getElementById('section-body-' + result.host.objuuid).innerHTML += result.output[i] + '<br>';
@@ -94,8 +94,7 @@ var executeTask = function() {
     
     $("#taskResultAccordion").accordion({
         collapsible: true,
-        heightStyle: "content",
-        active: false
+        heightStyle: "content"
     });
     
     loadRequiresGrid();
@@ -120,6 +119,7 @@ var editTaskHosts = function() {
         
         deleteButton: true,
         confirmDeleting: false,
+        sorting: false,
         
         editing: true,
         onItemEditing: function(args) {

@@ -406,6 +406,7 @@ var editController = function() {
         
         deleteButton: true,
         confirmDeleting: false,
+        sorting: false,
         
         rowClass: function(item, itemIndex) {
             return "client-" + itemIndex;
@@ -483,6 +484,7 @@ var editController = function() {
         onItemEditing: function(args) {
             loadAndEditHost(args.item.objuuid);
         },   
+        sorting: false,
  
         controller: {
             loadData: function(filter) {

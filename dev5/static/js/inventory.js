@@ -407,7 +407,7 @@ var addAttributeTextBox = function(fieldName, inventoryKey) {
     
     attributeCell = attributeRow.insertCell(-1);
     var id = 'inventory-obj-key-' + inventoryKey;
-    attributeCell.innerHTML = '<input type="text" id="' + id + '" onchange="setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
+    attributeCell.innerHTML = '<input type="text" id="' + id + '" onchange="setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)" onkeyup="setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
     document.getElementById(id).value = inventoryObject[inventoryKey];
 }
 
@@ -446,7 +446,7 @@ var addAttributeTextArea = function(fieldName, inventoryKey) {
     
     attributeCell = attributeRow.insertCell(-1);
     var id = 'inventory-obj-key-' + inventoryKey;
-    attributeCell.innerHTML = '<textarea rows = "5" id="' + id + '" onchange="setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)" style="width:98%;"></textarea>';
+    attributeCell.innerHTML = '<textarea rows = "5" id="' + id + '" onchange="setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)" onkeyup="setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)" style="width:98%;"></textarea>';
     document.getElementById(id).value = inventoryObject[inventoryKey];
 }
 
@@ -481,7 +481,7 @@ var addAttributeColor = function(fieldName, inventoryKey) {
     
     attributeCell = attributeRow.insertCell(-1);
     var id = 'inventory-obj-key-' + inventoryKey;
-    attributeCell.innerHTML = '<input class="jscolor" id="' + id + '" onchange="setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
+    attributeCell.innerHTML = '<input class="jscolor" id="' + id + '" onchange="setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)" onkeyup="setInventoryKey(&quot;' + inventoryKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
     jsc.tryInstallOnElements([document.getElementById(id)], "jscolor");
     jsc.register();
     document.getElementById(id).jscolor.fromString(inventoryObject[inventoryKey]);

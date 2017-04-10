@@ -97,6 +97,7 @@ var editProcedure = function() {
         
         deleteButton: true,
         confirmDeleting: false,
+        sorting: false,
         
         rowClass: function(item, itemIndex) {
             return "client-" + itemIndex;
@@ -153,6 +154,8 @@ var editProcedure = function() {
                         inventoryObject['tasks'].push(items[i].objuuid);
                     }
                     inventoryObject['changed'] = true;
+                    
+                    setTimeout(function(){$("#taskGrid").jsGrid("loadData")}, 1000);
                 }
             });
         }
@@ -165,6 +168,7 @@ var editProcedure = function() {
         
         deleteButton: true,
         confirmDeleting: false,
+        sorting: false,
         
         editing: true,
         onItemEditing: function(args) {
@@ -214,6 +218,7 @@ var editProcedure = function() {
             return "client-" + itemIndex;
         },
         
+        sorting: false,
         editing: true,
         onItemEditing: function(args) {
             loadAndEditRFC(args.item.objuuid);
@@ -411,8 +416,7 @@ var executeProcedure = function() {
     
     $("#procedureResultAccordion").accordion({
         collapsible: true,
-        heightStyle: "content",
-        active: false
+        heightStyle: "content"
     });
     
     link = document.createElement("a");

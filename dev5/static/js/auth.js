@@ -216,7 +216,7 @@ var addAttributeTextBox = function(fieldName, userKey) {
     
     attributeCell = attributeRow.insertCell(-1);
     var id = 'inventory-obj-key-' + userKey;
-    attributeCell.innerHTML = '<input type="text" id="' + id + '" onchange="setUserKey(&quot;' + userKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
+    attributeCell.innerHTML = '<input type="text" id="' + id + '" onchange="setUserKey(&quot;' + userKey + '&quot;, &quot;' + id + '&quot;)" onkeyup="setUserKey(&quot;' + userKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
     document.getElementById(id).value = userObject[userKey];
 }
 
@@ -230,7 +230,7 @@ var addAttributePassword = function(fieldName, userKey) {
     
     attributeCell = attributeRow.insertCell(-1);
     var id = 'inventory-obj-key-' + userKey;
-    attributeCell.innerHTML = '<input type="password" id="' + id + '" onchange="setUserKey(&quot;' + userKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
+    attributeCell.innerHTML = '<input type="password" id="' + id + '" onchange="setUserKey(&quot;' + userKey + '&quot;, &quot;' + id + '&quot;)" onkeyup="setUserKey(&quot;' + userKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
     document.getElementById(id).value = userObject[userKey];
 }
 
@@ -269,7 +269,7 @@ var addAttributeTextArea = function(fieldName, userKey) {
     
     attributeCell = attributeRow.insertCell(-1);
     var id = 'inventory-obj-key-' + userKey;
-    attributeCell.innerHTML = '<textarea rows = "5" id="' + id + '" onchange="setUserKey(&quot;' + userKey + '&quot;, &quot;' + id + '&quot;)" style="width:98%;"></textarea>';
+    attributeCell.innerHTML = '<textarea rows = "5" id="' + id + '" onchange="setUserKey(&quot;' + userKey + '&quot;, &quot;' + id + '&quot;)" onkeyup="setUserKey(&quot;' + userKey + '&quot;, &quot;' + id + '&quot;)" style="width:98%;"></textarea>';
     document.getElementById(id).value = userObject[userKey];
 }
 
@@ -304,7 +304,7 @@ var addAttributeColor = function(fieldName, userKey) {
     
     attributeCell = attributeRow.insertCell(-1);
     var id = 'inventory-obj-key-' + userKey;
-    attributeCell.innerHTML = '<input class="jscolor" id="' + id + '" onchange="setUserKey(&quot;' + userKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
+    attributeCell.innerHTML = '<input class="jscolor" id="' + id + '" onchange="setUserKey(&quot;' + userKey + '&quot;, &quot;' + id + '&quot;)" onkeyup="setUserKey(&quot;' + userKey + '&quot;, &quot;' + id + '&quot;)" style="width:99%"></input>';
     jsc.tryInstallOnElements([document.getElementById(id)], "jscolor");
     jsc.register();
     document.getElementById(id).jscolor.fromString(userObject[userKey]);
