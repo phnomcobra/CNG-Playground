@@ -14,8 +14,11 @@
         
         <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Inventory<span class="caret"></span></a>
             <ul class="dropdown-menu">
-                <li><a href="#" onclick="$('#importFormInput').trigger('click');">Import</a></li>
-                <li><a href="#" onclick="exportFromInventory()">Export</a></li>
+                <li><a href="#" onclick="$('#importJSONFormInput').trigger('click');">Import JSON</a></li>
+                <li><a href="#" onclick="$('#importZipFormInput').trigger('click');">Import Zip</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="#" onclick="exportJSONFromInventory()">Export JSON</a></li>
+                <li><a href="#" onclick="exportZipFromInventory()">Export Zip</a></li>
                 <li role="separator" class="divider"></li>
                 <li><a href="#" onclick="selectDependencies()">Select Dependencies</a></li>
                 <li><a href="#" onclick="$('#inventory').jstree('deselect_all')">Clear Selected</a></li>
