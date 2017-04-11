@@ -10,11 +10,16 @@
 # 03/20/2017 Overhauled import and export methods to include links and 
 #              containers. Pre-existing child node references are also
 #              preserved now to enable precise bulk imports and exports.
+# 04/11/2017 Moved import logic to inventory model.
+#            Added zip import and export routes.
+#            Renamed json import and export routes.
 ################################################################################
 
 import cherrypy
 import json
 import traceback
+import zipfile
+import StringIO
 
 from cherrypy.lib.static import serve_fileobj
 from time import sleep, time
@@ -40,7 +45,8 @@ from ..model.inventory import get_child_nodes, \
                               get_dependencies, \
                               copy_object, \
                               get_provided_objects_grid, \
-                              get_required_objects_grid
+                              get_required_objects_grid, \
+                              import_objects
 
 class Inventory(object):
     def __init__(self):
@@ -242,7 +248,7 @@ class Inventory(object):
     
     @cherrypy.expose
     @require()
-    def export_objects(self, objuuids):
+    def export_objects_json(self, objuuids):
         add_message("inventory controller: exporting inventory objects...")
         
         try:
@@ -258,6 +264,32 @@ class Inventory(object):
             cherrypy.response.headers['Content-Disposition'] = 'attachment; filename=export.{0}.json'.format(time())
         
             return serve_fileobj(json.dumps(inventory))
+        except Exception:
+            add_message(traceback.format_exc())
+    
+    @cherrypy.expose
+    @require()
+    def export_objects_zip(self, objuuids):
+        add_message("inventory controller: exporting inventory objects...")
+        
+        try:
+            collection = Collection("inventory")
+        
+            inventory = {}
+        
+            for objuuid in objuuids.split(","):
+                inventory[objuuid] = collection.get_object(objuuid).object
+                add_message("inventory controller: exported: {0}, type: {1}, name: {2}".format(objuuid, inventory[objuuid]["type"], inventory[objuuid]["name"]))
+        
+            cherrypy.response.headers['Content-Type'] = "application/x-download"
+            cherrypy.response.headers['Content-Disposition'] = 'attachment; filename=export.{0}.zip'.format(time())
+            
+            mem_file = StringIO.StringIO()
+            
+            with zipfile.ZipFile(mem_file, mode = 'w', compression = zipfile.ZIP_DEFLATED) as zf:
+                zf.writestr('inventory.json', json.dumps(inventory))
+            
+            return serve_fileobj(mem_file.getvalue())
         except Exception:
             add_message(traceback.format_exc())
     
@@ -281,53 +313,25 @@ class Inventory(object):
     
     @cherrypy.expose
     @require()
-    def import_objects(self, file):
+    def import_objects_json(self, file):
         add_message("inventory controller: importing inventory objects...")
         
         try:
-            objects = json.loads(file.file.read())
-            collection = Collection("inventory")
+            import_objects(json.loads(file.file.read()))
+        except Exception:
+            add_message(traceback.format_exc())
+        
+        return json.dumps({})
+    
+    @cherrypy.expose
+    @require()
+    def import_objects_zip(self, file):
+        add_message("inventory controller: importing inventory objects...")
+        
+        try:
+            archive = zipfile.ZipFile(file.file, 'r')
             
-            container = create_container("#", "Imported Objects")
-            
-            for objuuid, object in objects.iteritems():
-                try:
-                    current = collection.get_object(objuuid)
-                    if "children" in current.object:
-                        old_children = current.object["children"]
-                        current.object = object
-                        
-                        for child in old_children:
-                            if child not in current.object["children"]:
-                                current.object["children"].append(child)
-                    else:
-                        current.object = object
-                    current.set()
-            
-                    add_message("inventory controller: imported: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
-                except Exception:
-                    add_message(traceback.format_exc())
-            
-            objuuids = collection.list_objuuids()
-            for objuuid in objuuids:
-                current = collection.get_object(objuuid)
-                if "parent" in current.object:
-                    if current.object["parent"] not in objuuids and \
-                       current.object["parent"] != "#":
-                        current.object["parent"] = container.objuuid
-                        container.object["children"].append(objuuid)
-                        current.set()
-                    elif current.object["parent"] != "#":
-                        parent = collection.get_object(current.object["parent"])
-                        if current.objuuid not in parent.object["children"]:
-                            parent.object["children"].append(current.objuuid)
-                            parent.set()
-            
-            if len(container.object["children"]) > 0:
-                container.set()
-            else:
-                container.destroy()
-            
+            import_objects(json.loads(archive.read("inventory.json")))
         except Exception:
             add_message(traceback.format_exc())
         
