@@ -7,6 +7,7 @@
 # (614) 692 2050
 #
 # 11/07/2016 Original construction
+# 04/11/2017 Moved object import logic here
 ################################################################################
 
 import traceback
@@ -775,6 +776,68 @@ def get_provided_objects_grid(objuuid):
         
     return grid_data
 
+def import_objects(objects):
+    collection = Collection("inventory")
+            
+    container = create_container("#", "Imported Objects")
+    
+    objuuids = collection.list_objuuids()    
+    for objuuid, object in objects.iteritems():
+        try:
+            current = collection.get_object(objuuid)
+            
+            if "parent" in current.object:
+                if current.object["parent"] in objuuids:
+                    parent = collection.get_object(current.object["parent"])
+                    
+                    if "children" in parent.object:
+                        parent.object["children"].remove(objuuid)
+                        parent.set()
+                
+            if "children" in current.object:
+                old_children = current.object["children"]
+                current.object = object
+                        
+                for child in old_children:
+                    if child not in current.object["children"]:
+                        current.object["children"].append(child)
+            else:
+                current.object = object
+            
+            if "parent" in current.object:
+                if current.object["parent"] in objuuids:
+                    parent = collection.get_object(current.object["parent"])
+                    
+                    if "children" in parent.object:
+                        if objuuid not in parent.object["children"]:
+                            parent.object["children"].append(objuuid)
+                            parent.set()
+                        
+            current.set()
+            
+            add_message("imported: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
+        except Exception:
+            add_message(traceback.format_exc())
+            
+    objuuids = collection.list_objuuids()
+    for objuuid in objuuids:
+        current = collection.get_object(objuuid)
+        if "parent" in current.object:
+            if current.object["parent"] not in objuuids and \
+               current.object["parent"] != "#":
+                current.object["parent"] = container.objuuid
+                container.object["children"].append(objuuid)
+                current.set()
+            elif current.object["parent"] != "#":
+                parent = collection.get_object(current.object["parent"])
+                if current.objuuid not in parent.object["children"]:
+                    parent.object["children"].append(current.objuuid)
+                    parent.set()
+            
+    if len(container.object["children"]) > 0:
+        container.set()
+    else:
+        container.destroy()
     
 collection = Collection("inventory")
 collection.create_attribute("parent", "['parent']")
