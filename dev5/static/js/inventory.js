@@ -142,7 +142,7 @@ $(document).on('dnd_stop.vakata', function (e, data) {
     }
 });
 
-var exportFromInventory = function() {
+var exportJSONFromInventory = function() {
     $('.nav-tabs a[href="#console"]').tab('show');
     
     var nodes = $('#inventory').jstree().get_selected(true);
@@ -151,22 +151,49 @@ var exportFromInventory = function() {
     for(i in nodes)
         objuuids.push(nodes[i].id);
     
-    window.location = 'inventory/export_objects?objuuids=' + objuuids.join(',');
+    window.location = 'inventory/export_objects_json?objuuids=' + objuuids.join(',');
 }
 
-var importToInventory = function(item) {
+var exportZipFromInventory = function() {
+    $('.nav-tabs a[href="#console"]').tab('show');
+    
+    var nodes = $('#inventory').jstree().get_selected(true);
+    
+    var objuuids = []
+    for(i in nodes)
+        objuuids.push(nodes[i].id);
+    
+    window.location = 'inventory/export_objects_zip?objuuids=' + objuuids.join(',');
+}
+
+var importJSONToInventory = function(item) {
     $('.nav-tabs a[href="#console"]').tab('show');
     
     var formData = new FormData();
     formData.append("file", item.files[0], item.files[0].name);
+         
+    $.ajax({
+        url: 'inventory/import_objects_json',  //Server script to process data
+        type: 'POST',
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function(resp) {
+            touchInventory();
+            $('#inventory').jstree('refresh');
+        }
+    }); 
+}
+
+var importZipToInventory = function(item) {
+    $('.nav-tabs a[href="#console"]').tab('show');
     
-    //var xhr = new XMLHttpRequest();
-    //xhr.open('POST', 'inventory/import_objects', true);
-    //xhr.send(formData);
-    
+    var formData = new FormData();
+    formData.append("file", item.files[0], item.files[0].name);
      
     $.ajax({
-        url: 'inventory/import_objects',  //Server script to process data
+        url: 'inventory/import_objects_zip',  //Server script to process data
         type: 'POST',
         data: formData,
         cache: false,
