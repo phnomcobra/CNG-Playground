@@ -21,6 +21,7 @@ var editHost = function() {
     $.ajax({
         'url' : 'console/ajax_get_consoles',
         'dataType' : 'json',
+        'method': 'POST',
         'success' : function(resp) {
             var radioButtons = [];
             for(var i = 0; i < resp.length; i++) {
@@ -49,6 +50,7 @@ var loadAndEditHost = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             inventoryObject = resp;
@@ -74,6 +76,7 @@ var launchTerminal = function() {
     $.ajax({
         'url' : 'console/ajax_get_consoles',
         'dataType' : 'json',
+        'method': 'POST',
         'success' : function(resp) {
             var radioButtons = [];
             for(var i = 0; i < resp.length; i++) {
@@ -106,6 +109,7 @@ var launchTerminal = function() {
     $.ajax({
         'url' : 'terminal/ajax_create_session',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {
             'hstuuid' : inventoryObject.objuuid
         },
@@ -164,6 +168,7 @@ var recvTerminalData = function() {
         receiving = true;
         $.ajax({
             'url' : 'terminal/ajax_recv',
+            'method': 'POST',
             'data' : {
                 'ttyuuid' : ttyuuid
             },
@@ -193,6 +198,7 @@ var sendTerminalData = function() {
         $.ajax({
             'url' : 'terminal/ajax_send',
             'dataType' : 'json',
+            'method': 'POST',
             'data' : {
                 'ttyuuid' : ttyuuid,
                 'buffer' : buffer
@@ -222,6 +228,7 @@ var terminalTimer = function() {
         $.ajax({
             'url' : 'terminal/ajax_destroy_session',
             'dataType' : 'json',
+            'method': 'POST',
             'data' : {
                 'ttyuuid' : ttyuuid
             }

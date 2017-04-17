@@ -27,6 +27,7 @@ var loadAndEditRFC = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             inventoryObject = resp;

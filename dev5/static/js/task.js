@@ -34,6 +34,7 @@ var loadAndEditTask = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             inventoryObject = resp;
@@ -47,6 +48,7 @@ var addRunTaskHost = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             $("#runTaskHostGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid'], 'host' : resp['host']});
@@ -84,6 +86,7 @@ var executeTask = function() {
         $.ajax({
             'url' : 'task/ajax_execute_task',
             'dataType' : 'json',
+            'method': 'POST',
             'data' : {'tskuuid' : inventoryObject.objuuid, 'hstuuid' : inventoryObject.hosts[i]},
             'success' : function(resp) {
                 //console.log(resp);
@@ -133,7 +136,7 @@ var editTaskHosts = function() {
         controller: {
             loadData: function(filter) {
                 return $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "/task/ajax_get_host_grid",
                     data: {'objuuid' : inventoryObject['objuuid']},
                     dataType: "JSON"

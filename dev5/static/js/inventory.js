@@ -23,6 +23,7 @@ var queueStateFlag = null;
                 return { 'objuuid' : node.id };
             },
             'dataType' : "json",
+            'method': 'POST',
         }
     },
     'search': {
@@ -54,6 +55,7 @@ $(document).on('dnd_stop.vakata', function (e, data) {
             $.ajax({
                 'url' : 'inventory/ajax_get_object',
                 'dataType' : 'json',
+                'method': 'POST',
                 'data' : {'objuuid' : data.data.nodes[0]},
                 'success' : function(resp) {
                     $('#inventory').jstree("deselect_all");
@@ -100,6 +102,7 @@ $(document).on('dnd_stop.vakata', function (e, data) {
                 'url' : 'inventory/ajax_get_object',
                 'dataType' : 'json',
                 'data' : {'objuuid' : nodes[i].id},
+                'method': 'POST',
                 'success' : function(resp) {
                     $('#inventory').jstree("deselect_all");
                     
@@ -236,6 +239,7 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
         $.ajax({
             'url' : 'inventory/ajax_context',
             'dataType' : 'json',
+            'method': 'POST',
             'data' : {
                 'objuuid' : data.node.id
             },
@@ -250,6 +254,7 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                             $.ajax({
                                 'url' : obj.item.route,
                                 'dataType' : 'json',
+                                'method': 'POST',
                                 'data' : obj.item.params,
                                 'success' : function(resp) {
                                     $('#inventory').jstree("deselect_all");
@@ -403,6 +408,7 @@ $('#inventory').on("move_node.jstree", function(event, data) {
         $.ajax({
             'url' : 'inventory/ajax_move',
             'dataType' : 'json',
+            'method': 'POST',
             'data' : {
                 'objuuid' : data.node.id,
                 'parent_objuuid' : data.node.parent
@@ -552,7 +558,7 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
                 document.getElementById('connectionStatus').innerHTML = '<font style="color:#F00">NO CONN</font>';
             });
         } else {
-            $http.get("messaging/ajax_get_messages").then(function (response) {
+            $http.post("messaging/ajax_get_messages").then(function (response) {
                 var messageData = '<table>';
                 var responseJSON = angular.fromJson(response)['data']['messages'];
                 for(item in responseJSON) {
@@ -566,6 +572,7 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
             $.ajax({
                 'url' : 'flags/ajax_get',
                 'dataType' : 'json',
+                'method': 'POST',
                 'data' : {
                     'key' : 'inventoryState'
                 },
@@ -580,6 +587,7 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
             $.ajax({
                 'url' : 'flags/ajax_get',
                 'dataType' : 'json',
+                'method': 'POST',
                 'data' : {
                     'key' : 'queueState'
                 },
@@ -601,6 +609,7 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
 var addMessage = function (message) {
     $.ajax({
         'url' : 'messaging/ajax_add_message',
+        'method': 'POST',
         'dataType' : 'json',
         'data' : {
             'message' : message
@@ -623,6 +632,7 @@ var setInventoryKey = function (key, div) {
 var touchInventory = function() {
     $.ajax({
         'url' : 'flags/ajax_touch',
+        'method': 'POST',
         'dataType' : 'json',
         'data' : {
             'key' : 'inventoryState'

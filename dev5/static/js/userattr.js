@@ -22,6 +22,7 @@ var loadUser = function() {
     $.ajax({
         'url' : '/auth/ajax_get_current_object',
         'dataType' : 'json',
+        'method': 'POST',
         'success' : function(resp) {
             addMessage('load user object success');
             userObject = resp;
@@ -47,6 +48,7 @@ var touchUsers = function() {
     $.ajax({
         'url' : '/flags/ajax_touch',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {
             'key' : 'usersState'
         },
@@ -78,7 +80,7 @@ usersApp.controller('usersCtrl', function($scope, $interval, $http, $sce) {
                 document.getElementById('connectionStatus').innerHTML = '<font style="color:#F00">NO CONN</font>';
             });
         } else {
-            $http.get("/messaging/ajax_get_messages").then(function (response) {
+            $http.post("/messaging/ajax_get_messages").then(function (response) {
                 var messageData = '<table>';
                 var responseJSON = angular.fromJson(response)['data']['messages'];
                 for(item in responseJSON) {
@@ -219,6 +221,7 @@ var addAttributeText = function(fieldName, userKey) {
 var addMessage = function (message) {
     $.ajax({
         'url' : '/messaging/ajax_add_message',
+        'method': 'POST',
         'dataType' : 'json',
         'data' : {
             'message' : message

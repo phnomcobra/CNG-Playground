@@ -27,6 +27,7 @@ var loadUser = function(objuuid) {
     $.ajax({
         'url' : '/auth/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {
             'objuuid' : objuuid
         },
@@ -75,7 +76,7 @@ var loadUserGrid = function(){
         controller: {
             loadData: function(filter) {
                 return $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "/auth/ajax_get_users_grid",
                     //data: {'objuuid' : userObject['objuuid']},
                     dataType: "JSON"
@@ -85,6 +86,7 @@ var loadUserGrid = function(){
                 $.ajax({
                     'url' : '/auth/ajax_create_user',
                     'dataType' : 'json',
+                    'method': 'POST',
                     'data' : {
                         'name' : item.name
                     },
@@ -105,6 +107,7 @@ var loadUserGrid = function(){
                 $.ajax({
                     'url' : '/auth/ajax_delete',
                     'dataType' : 'json',
+                    'method': 'POST',
                     'data' : {
                         'objuuid' : item.objuuid
                     },
@@ -138,6 +141,7 @@ var touchUsers = function() {
     $.ajax({
         'url' : '/flags/ajax_touch',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {
             'key' : 'usersState'
         },
@@ -173,6 +177,7 @@ usersApp.controller('usersCtrl', function($scope, $interval, $http, $sce) {
             $.ajax({
                 'url' : '/flags/ajax_get',
                 'dataType' : 'json',
+                'method': 'POST',
                 'data' : {
                     'key' : 'usersState'
                 },
@@ -328,6 +333,7 @@ var addMessage = function (message) {
     $.ajax({
         'url' : '/messaging/ajax_add_message',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {
             'message' : message
         },

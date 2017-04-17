@@ -11,6 +11,7 @@ var populateProcedureAttributes = function() {
     $.ajax({
         'url' : 'inventory/ajax_get_status_objects',
         'dataType' : 'json',
+        'method': 'POST',
         'success' : function(resp) {
             for(var i = 0; i < resp.length; i++) {
                 resp[i];
@@ -31,6 +32,7 @@ var addProcedureTask = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             $("#taskGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid']});
@@ -42,6 +44,7 @@ var addProcedureRFC = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             $("#RFCGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid'], 'title' : resp['title'], 'number' : resp['number']});
@@ -56,6 +59,7 @@ var loadAndEditProcedure = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             inventoryObject = resp;
@@ -111,7 +115,7 @@ var editProcedure = function() {
         controller: {
             loadData: function(filter) {
                 return $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "/procedure/ajax_get_task_grid",
                     data: {'objuuid' : inventoryObject['objuuid']},
                     dataType: "JSON"
@@ -182,7 +186,7 @@ var editProcedure = function() {
         controller: {
             loadData: function(filter) {
                 return $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "/procedure/ajax_get_host_grid",
                     data: {'objuuid' : inventoryObject['objuuid']},
                     dataType: "JSON"
@@ -227,7 +231,7 @@ var editProcedure = function() {
         controller: {
             loadData: function(filter) {
                 return $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "/rfc/ajax_get_rfc_grid",
                     data: {'objuuid' : inventoryObject['objuuid']},
                     dataType: "JSON"
@@ -447,6 +451,7 @@ var runProcedure = function () {
         $.ajax({
             'url' : 'procedure/ajax_queue_procedure',
             'dataType' : 'json',
+            'method': 'POST',
             'data' : {
                 'prcuuid' : inventoryObject.objuuid, 
                 'hstuuid' : inventoryObject.hosts[i]
@@ -466,6 +471,7 @@ var updateProcedureTimer = function() {
         $.ajax({
             'url' : 'flags/ajax_get',
             'dataType' : 'json',
+            'method': 'POST',
             'data' : {
                 //'key' : 'controller-' + inventoryObject.objuuid
                 'key' : 'results'
@@ -486,6 +492,7 @@ var updateProcedureStateData = function() {
         $.ajax({
             'url' : 'results/ajax_get_procedure',
             'dataType' : 'json',
+            'method': 'POST',
             'data' : {
                 'prcuuid' : inventoryObject.objuuid,
                 'hstuuid' : inventoryObject.hosts[i]

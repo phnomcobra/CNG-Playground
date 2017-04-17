@@ -21,6 +21,7 @@ var addControllerProcedure = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             $("#procedureGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid']});
@@ -32,6 +33,7 @@ var addControllerHost = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             $("#hostGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid'], 'host' : resp['host']});
@@ -54,6 +56,7 @@ var executeController = function() {
     $.ajax({
         'url' : 'controller/ajax_get_tiles',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : inventoryObject.objuuid},
         'success' : function(resp) {
             var table = document.getElementById('controllerTable');
@@ -256,6 +259,7 @@ var executeSelectedProcedures = function() {
                     $.ajax({
                         'url' : 'procedure/ajax_queue_procedure',
                         'dataType' : 'json',
+                        'method': 'POST',
                         'data' : {
                             'prcuuid' : $(this)[0].attributes['data-procedure-objuuid'].value, 
                             'hstuuid' : $(this)[0].attributes['data-host-objuuid'].value
@@ -332,6 +336,7 @@ var updateControllerTimer = function() {
         $.ajax({
             'url' : 'flags/ajax_get',
             'dataType' : 'json',
+            'method': 'POST',
             'data' : {
                 //'key' : 'controller-' + inventoryObject.objuuid
                 'key' : 'results'
@@ -354,6 +359,7 @@ var updateControllerStateData = function() {
     $.ajax({
         'url' : 'results/ajax_get_controller',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : inventoryObject.objuuid},
         'success' : function(resp) {
             controllerStateData = resp;
@@ -370,6 +376,7 @@ var loadAndEditController = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             inventoryObject = resp;
@@ -420,7 +427,7 @@ var editController = function() {
         controller: {
             loadData: function(filter) {
                 return $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "/controller/ajax_get_procedure_grid",
                     data: {'objuuid' : inventoryObject['objuuid']},
                     dataType: "JSON"
@@ -489,7 +496,7 @@ var editController = function() {
         controller: {
             loadData: function(filter) {
                 return $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "/controller/ajax_get_host_grid",
                     data: {'objuuid' : inventoryObject['objuuid']},
                     dataType: "JSON"

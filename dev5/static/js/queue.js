@@ -40,6 +40,7 @@ var drawQueue = function(resp) {
 var updateQueueState = function() {
     $.ajax({
         'url' : 'procedure/ajax_get_queue_grid',
+        'method': 'POST',
         'dataType' : 'json',
         'success' : function(resp) {
             drawQueue(resp);
