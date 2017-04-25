@@ -18,7 +18,12 @@ from ..model.document import Collection
 from ..model.auth import create_user, get_users_grid
 from .messaging import add_message
 from ..view.auth import login_view, admin_view, user_attr_view
-
+from ..model.eventlog import create_logon_event, \
+                             create_logout_event, \
+                             create_logon_failure_event, \
+                             create_user_create_event, \
+                             create_user_delete_event
+                             
 SESSION_KEY = '_cp_username'
 
 def check_credentials(username, password):
@@ -26,11 +31,15 @@ def check_credentials(username, password):
     
     for user in users.find(name = username):
         if user.object["enabled"] == 'false':
+            create_logon_failure_event("User {0} is disabled!".format(username))
             return "User {0} is disabled!".format(username)
         if user.object["password"] == password:
             return None
         else:
+            create_logon_failure_event("User {0} used incorrect password!".format(username))
             return "Incorrect password!"
+    
+    create_logon_failure_event("User {0} does not exist!".format(username))
     return "User {0} does not exist!".format(username)
 
 def check_auth(*args, **kwargs):
@@ -46,6 +55,7 @@ def check_auth(*args, **kwargs):
                 # A condition is just a callable that returns true or false
                 if not condition():
                     raise cherrypy.HTTPRedirect("/auth/login")
+                    
         else:
             raise cherrypy.HTTPRedirect("/auth/login")
     
@@ -107,9 +117,12 @@ class Auth(object):
         for user in users.find(name = username):
             user.object['session id'] = cherrypy.session.id
             user.set()
+            create_logon_event(user)
     
     def on_logout(self, username):
-        """Called on logout"""
+        users = Collection("users")
+        for user in users.find(name = username):
+            create_logout_event(user)
     
     @cherrypy.expose
     @require(member_of("admin"))
@@ -157,7 +170,9 @@ class Auth(object):
     def ajax_create_user(self, name):
         add_message("auth controller: create user: {0}".format(name))
         try:
-            return json.dumps(create_user(name).object)
+            target_user = create_user(name)
+            create_user_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], target_user)
+            return json.dumps(target_user.object)
         except Exception:
             add_message(traceback.format_exc())
     
@@ -166,6 +181,8 @@ class Auth(object):
     def ajax_delete(self, objuuid):
         add_message("auth controller: delete user object: {0}".format(objuuid))
         try:
+            create_user_delete_event(Collection("users").find(sessionid = cherrypy.session.id)[0], \
+                                     Collection("users").get_object(objuuid))
             Collection("users").get_object(objuuid).destroy()
             return json.dumps({"id" : objuuid})
         except Exception:

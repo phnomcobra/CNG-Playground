@@ -23,12 +23,17 @@ from ..model.terminal import create_session, \
                              write_file, \
                              send, \
                              recv
+from ..model.eventlog import create_terminal_upload_event, \
+                             create_terminal_event
 
 class Terminal(object):
     @cherrypy.expose
     def ajax_create_session(self, hstuuid):
         add_message("terminal controller: create terminal")
         try:
+            create_terminal_event(Collection("users").find(sessionid = cherrypy.session.id)[0], \
+                                  Collection("inventory").get_object(hstuuid))
+            
             return json.dumps({"ttyuuid" : create_session(hstuuid, Collection("users").find(sessionid = cherrypy.session.id)[0].object)})
         except Exception:
             add_message(traceback.format_exc())
@@ -65,5 +70,7 @@ class Terminal(object):
             write_file(ttyuuid, file)
         except Exception:
             add_message(traceback.format_exc())
+        
+        create_terminal_upload_event(Collection("users").find(sessionid = cherrypy.session.id)[0], file.filename)
         
         return json.dumps({})
