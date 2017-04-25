@@ -23,6 +23,7 @@ from .ramdocument import Collection as RAMCollection
 from .utils import sucky_uuid
 from ..controller.flags import touch_flag
 from ..controller.messaging import add_message
+from .eventlog import create_procedure_execute_event
 
 global global_jobs
 global global_jobs_lock
@@ -215,7 +216,9 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
     host = inventory.get_object(hstuuid)
     result.object['host'] = host.object
     result.object['procedure'] = inventory.get_object(prcuuid).object
-        
+
+    create_procedure_execute_event(session, inventory.get_object(prcuuid), host)    
+    
     tempmodule = new_module("tempmodule")
     
     winning_status = None
@@ -242,7 +245,7 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
             try:
                 result.object["output"].append("importing task {0}...".format(inventory.get_object(tskuuid).object["name"]))
                 
-                exec status_code_body + inventory.get_object(tskuuid).object["body"] in tempmodule.__dict__
+                exec inventory.get_object(tskuuid).object["body"] + "\n" + status_code_body in tempmodule.__dict__
                 task = tempmodule.Task()
                 
                 if continue_procedure:

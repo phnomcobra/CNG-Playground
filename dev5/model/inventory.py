@@ -145,6 +145,12 @@ def create_container(parent_objuuid, name = "New Container", objuuid = None):
                             "route" : "inventory/ajax_create_console",
                             "params" : {"objuuid" : container.objuuid}}
             },
+            "new schedule" : {
+                "label" : "New Schedule",
+                "action" : {"method" : "create schedule",
+                            "route" : "inventory/ajax_create_schedule",
+                            "params" : {"objuuid" : container.objuuid}}
+            },
             "delete" : {
                 "label" : "Delete",
                 "action" : {"method" : "delete node",
@@ -236,6 +242,59 @@ def create_task(parent_objuuid, name = "New Task", objuuid = None):
     task.set()
     return task
 
+def create_schedule(parent_objuuid, name = "New Schedule", objuuid = None):
+    collection = Collection("inventory")
+    schedule = collection.get_object(objuuid)
+    schedule.object = {
+        "type" : "schedule",
+        "parent" : parent_objuuid,
+        "children" : [],
+        "name" : name,
+        "description" : "",
+        "body" : "",
+        "enabled" : False,
+        "minutes" : "",
+        "hours" : "",
+        "dayofmonth" : "",
+        "dayofweek" : "",
+        "year" : "",
+        "icon" : "/images/schedule_icon.png",
+        "context" : {
+            "delete" : {
+                "label" : "Delete",
+                "action" : {"method" : "delete node",
+                            "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : schedule.objuuid}}
+            },
+            "edit" : {
+                "label" : "Edit",
+                "action" : {"method" : "edit schedule",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : schedule.objuuid}}
+            },
+            "copy" : {
+                "label" : "Copy",
+                "action" : {"method" : "copy node",
+                            "route" : "inventory/ajax_copy_object",
+                            "params" : {"objuuid" : schedule.objuuid}}
+            },
+            "create link" : {
+                "label" : "Create Link",
+                "action" : {"method" : "create link",
+                            "route" : "inventory/ajax_create_link",
+                            "params" : {"objuuid" : schedule.objuuid}}
+            }
+        },
+        "accepts" : []
+    }
+    
+    parent = collection.get_object(parent_objuuid)
+    parent.object["children"].append(schedule.objuuid)
+    parent.set()
+    
+    schedule.set()
+    return schedule
+    
 def create_procedure(parent_objuuid, name = "New Procedure", objuuid = None):
     collection = Collection("inventory")
     procedure = collection.get_object(objuuid)

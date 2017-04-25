@@ -12,7 +12,9 @@
 import traceback
 
 from .document import Collection
+from .ramdocument import Collection as RAMCollection
 from ..controller.messaging import add_message
+from .eventlog import create_task_execute_event
 
 from imp import new_module
 from time import time
@@ -28,7 +30,7 @@ class TaskError:
 
 def execute(tskuuid, hstuuid, session):
     inventory = Collection("inventory")
-    results = Collection("results")
+    results = RAMCollection("results")
     
     result = results.get_object()
     
@@ -48,6 +50,8 @@ def execute(tskuuid, hstuuid, session):
     host = inventory.get_object(hstuuid)
     result.object['host'] = host.object
     
+    create_task_execute_event(session, inventory.get_object(tskuuid), host)
+    
     tempmodule = new_module("tempmodule")
     
     try:
@@ -56,7 +60,8 @@ def execute(tskuuid, hstuuid, session):
         
         try:
             result.object['task'] = inventory.get_object(tskuuid).object
-            exec status_code_body + inventory.get_object(tskuuid).object["body"] in tempmodule.__dict__
+            inventory.get_object(tskuuid).object["body"] in tempmodule.__dict__
+            exec inventory.get_object(tskuuid).object["body"] + "\n" + status_code_body in tempmodule.__dict__
             task = tempmodule.Task()
             
             try:
