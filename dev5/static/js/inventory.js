@@ -271,6 +271,13 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         editTask();
                                         touchInventory();
                                         $('.nav-tabs a[href="#attributes"]').tab('show');
+                                    } else if(obj.item.method == 'create schedule') {
+                                        addMessage('create schedule success');
+                                        inventoryObject = resp;
+                                        createNode(resp);
+                                        editSchedule();
+                                        touchInventory();
+                                        $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'create rfc') {
                                         addMessage('create rfc success');
                                         inventoryObject = resp;
@@ -314,6 +321,11 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit task success");
                                         inventoryObject = resp;
                                         editTask();
+                                    } else if(obj.item.method == 'edit schedule') {
+                                        addMessage('edit schedule success');
+                                        inventoryObject = resp;
+                                        editSchedule();
+                                        $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'edit task hosts') {
                                         addMessage("edit task success");
                                         inventoryObject = resp;
