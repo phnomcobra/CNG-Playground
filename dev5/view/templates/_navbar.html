@@ -46,6 +46,14 @@
         <li><a href="/auth/userattr" class="active" data-toggle="modal">Set Credentials</a></li>
         <li><a href="/auth/admin" class="active" data-toggle="modal">Admin</a></li>
         <li><a href="/auth/logout" class="active" data-toggle="modal">Logout</a></li>
+        
+        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Event Log<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="#" onclick="loadEvents(3600);">Last Hour</a></li>
+                <li><a href="#" onclick="loadEvents(86400);">Last Day</a></li>
+                <li><a href="#" onclick="loadEvents(604800);">Last Week</a></li>
+            </ul>
+        </li>
       </ul>
       
       <ul class="nav navbar-nav navbar-right">
