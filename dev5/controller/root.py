@@ -18,6 +18,7 @@ from .inventory import Inventory
 from .messaging import Messaging
 from .procedure import Procedure
 from .controller import Controller
+from .eventlog import EventLog
 from .console import Console
 from .rfc import RFC
 from .results import Results
@@ -38,6 +39,7 @@ class Root(object):
     task = Task()
     auth = Auth()
     terminal = Terminal()
+    eventlog = EventLog()
     
     @cherrypy.expose
     @require()
