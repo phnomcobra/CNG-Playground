@@ -23,7 +23,8 @@ from .ramdocument import Collection as RAMCollection
 from .utils import sucky_uuid
 from ..controller.flags import touch_flag
 from ..controller.messaging import add_message
-from .eventlog import create_procedure_execute_event
+from .eventlog import create_procedure_execute_event, \
+                      create_task_execute_event
 
 global global_jobs
 global global_jobs_lock
@@ -168,18 +169,24 @@ def queue_procedure(hstuuid, prcuuid, session):
     
     jobuuid = sucky_uuid()
     
-    job = {
-        "jobuuid" : jobuuid,
-        "host" : inventory.get_object(hstuuid).object,
-        "procedure" : inventory.get_object(prcuuid).object,
-        "session" : session,
-        "process" : None,
-        "queue time" : time(),
-        "start time" : None,
-        "progress" : 0,
-    }
+    host = inventory.get_object(hstuuid)
+    procedure = inventory.get_object(prcuuid)
     
-    set_job(jobuuid, job)
+    if "type" in host.object and \
+       "type" in procedure.object:
+    
+        job = {
+            "jobuuid" : jobuuid,
+            "host" : host.object,
+            "procedure" : procedure.object,
+            "session" : session,
+            "process" : None,
+            "queue time" : time(),
+            "start time" : None,
+            "progress" : 0,
+        }
+        
+        set_job(jobuuid, job)
 
 class TaskError:
     def __init__(self, uuid):
@@ -257,6 +264,8 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
                         task = TaskError(tskuuid)
                     
                     task_result["stop"] = time()
+                    
+                    create_task_execute_event(session, inventory.get_object(tskuuid), host)
             except Exception:
                 task = TaskError(tskuuid)
                 result.object["output"] += traceback.format_exc().split("\n")

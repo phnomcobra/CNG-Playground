@@ -207,66 +207,76 @@ def create_terminal_upload_event(user, filename):
     event.set()
     return event
 
-def get_events_str():
+def get_events_str(max_age = None):
     output = ""
     
     events = Collection("events")
     
-    for evtuuid in events.list_objuuids():
-        event = events.get_object(evtuuid)
-        
-        output += "Event UUID: {0}\n".format(event.object["objuuid"])
-        
-        output += "Event Type: {0}\n".format(event.object["type"])
-        
-        output += "Timestamp: {0}\n".format(strftime('%Y-%m-%d %H:%M:%S', localtime(event.object["timestamp"])))
-        
-        if "schedule" in event.object:
-            try:
-                output += "Schedule: {0} {1}\n".format(event.object["schedule"]["objuuid"], \
-                                                       event.object["schedule"]["name"])
-            except Exception:
-                output += "Schedule: {0}\n".format(traceback.format_exc())
-        
-        if "user" in event.object:
-            try:
-                output += "User: {0} {1} {2}\n".format(event.object["user"]["name"], \
-                                                       event.object["user"]["first name"], \
-                                                       event.object["user"]["last name"])
-            except Exception:
-                output += "User: {0}\n".format(traceback.format_exc())
-        
-        if "message" in event.object:
-            output += "Message: {0}\n".format(event.object["message"])
-        
-        if "filename" in event.object:
-            output += "Filename: {0}\n".format(event.object["filename"])
-        
-        if "host" in event.object:
-            try:
-                output += "Host: {0} {1} {2}\n".format(event.object["host"]["objuuid"], \
-                                                       event.object["host"]["name"], \
-                                                       event.object["host"]["host"])
-            except Exception:
-                output += "Host: {0}\n".format(traceback.format_exc())
-        
-        if "procedure" in event.object:
-            try:
-                output += "Procedure: {0} {1}\n".format(event.object["procedure"]["objuuid"], \
-                                                        event.object["procedure"]["name"])
-            except Exception:
-                output += "Procedure: {0}\n".format(traceback.format_exc())
-        
-        if "task" in event.object:
-            try:
-                output += "Task: {0} {1}\n".format(event.object["task"]["objuuid"], \
-                                                   event.object["task"]["name"])
-            except Exception:
-                output += "Task: {0}\n".format(traceback.format_exc())
-        
-        output += "\n"
+    if max_age == None:
+        for evtuuid in events.list_objuuids():
+            output += get_event_str(events.get_object(evtuuid)) + "\n"
+    else:
+        for evtuuid in events.list_objuuids():
+            event = events.get_object(evtuuid)
+            if event.object["timestamp"] > time() - int(max_age):
+                output += get_event_str(event) + "\n"
     
     return output
+
+def get_event_str(event):
+    output = ""
+    
+    output += "Event UUID: {0}\n".format(event.object["objuuid"])
+        
+    output += "Event Type: {0}\n".format(event.object["type"])
+       
+    output += "Timestamp: {0}\n".format(strftime('%Y-%m-%d %H:%M:%S', localtime(event.object["timestamp"])))
+        
+    if "schedule" in event.object:
+        try:
+            output += "Schedule: {0} {1}\n".format(event.object["schedule"]["objuuid"], \
+                                                       event.object["schedule"]["name"])
+        except Exception:
+            output += "Schedule: {0}\n".format(traceback.format_exc())
+        
+    if "user" in event.object:
+        try:
+            output += "User: {0} {1} {2}\n".format(event.object["user"]["name"], \
+                                                   event.object["user"]["first name"], \
+                                                   event.object["user"]["last name"])
+        except Exception:
+            output += "User: {0}\n".format(traceback.format_exc())
+        
+    if "message" in event.object:
+        output += "Message: {0}\n".format(event.object["message"])
+        
+    if "filename" in event.object:
+        output += "Filename: {0}\n".format(event.object["filename"])
+        
+    if "host" in event.object:
+        try:
+            output += "Host: {0} {1} {2}\n".format(event.object["host"]["objuuid"], \
+                                                   event.object["host"]["name"], \
+                                                   event.object["host"]["host"])
+        except Exception:
+            output += "Host: {0}\n".format(traceback.format_exc())
+        
+    if "procedure" in event.object:
+        try:
+            output += "Procedure: {0} {1}\n".format(event.object["procedure"]["objuuid"], \
+                                                    event.object["procedure"]["name"])
+        except Exception:
+            output += "Procedure: {0}\n".format(traceback.format_exc())
+        
+    if "task" in event.object:
+        try:
+            output += "Task: {0} {1}\n".format(event.object["task"]["objuuid"], \
+                                               event.object["task"]["name"])
+        except Exception:
+            output += "Task: {0}\n".format(traceback.format_exc())
+    
+    return output
+
     
 def delete(objuuid):
     collection = Collection("events")
@@ -279,7 +289,7 @@ def worker():
         event = events.get_object(objuuid)
         
         try:
-            if time() - event.object["timestamp"] > 28800:
+            if time() - event.object["timestamp"] > 604800:
                 event.destroy()
         except Exception:
             event.destroy()
