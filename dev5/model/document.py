@@ -11,6 +11,8 @@
 #            Added mutex lock to set to resolve sqlite deadlocking
 # 12/05/2016 Added try statements to all mutating document methods
 # 12/06/2016 Added commits to finally blocks
+# 05/01/2017 Fixed bug with create attribute method. All collections and indexes
+#              with matching attribute names were being affected.
 ################################################################################
 
 import sqlite3
@@ -170,7 +172,7 @@ class Document:
                                 (str(coluuid), str(attribute), str(path)))
             self.connection.commit()
         
-            self.cursor.execute("delete from TBL_JSON_IDX where ATTRIBUTE = ?;", (str(attribute),))
+            self.cursor.execute("delete from TBL_JSON_IDX where ATTRIBUTE = ? and COLUUID = ?;", (str(attribute), str(coluuid)))
             self.connection.commit()
         
             self.cursor.execute("select OBJUUID, VALUE from TBL_JSON_OBJ where COLUUID = ?;", (str(coluuid),))
