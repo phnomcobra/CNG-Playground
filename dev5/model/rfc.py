@@ -7,10 +7,12 @@
 # (614) 692 2050
 #
 # 11/23/2016 Original construction
+# 05/30/2017 Fixed missing messaging import
 ################################################################################
 
 from .document import Collection
 from .utils import sucky_uuid
+from ..controller.messaging import add_message
 
 def get_rfc_grid(prcuuid):
     collection = Collection("inventory")

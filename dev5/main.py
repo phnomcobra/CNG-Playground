@@ -31,7 +31,8 @@ class BuiltinSsl(BuiltinSSLAdapter):
                 server_side = True, 
                 certfile = self.certificate,
                 keyfile = self.private_key,
-                ssl_version = ssl.PROTOCOL_TLSv1_2
+                ssl_version = ssl.PROTOCOL_TLSv1_2 #,
+                #cert_reqs = ssl.CERT_REQUIRED
             )
         except ssl.SSLError:
             e = sys.exc_info()[1]
