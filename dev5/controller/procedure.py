@@ -7,6 +7,7 @@
 # (614) 692 2050
 #
 # 10/16/2016 Original construction
+# 02/22/2017 Updated execute methods to pull session data from user objects
 ################################################################################
 
 import cherrypy
@@ -14,12 +15,12 @@ import json
 import traceback
 
 from .messaging import add_message
-
+from ..model.document import Collection
 from ..model.procedure import get_task_grid, \
-                              get_related_procedure_grid, \
-                              get_related_procedures, \
                               get_host_grid, \
-                              execute
+                              get_jobs_grid, \
+                              queue_procedure, \
+                              run_procedure
 
 class Procedure(object):
     @cherrypy.expose
@@ -39,25 +40,25 @@ class Procedure(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
-    def ajax_get_related_procedure_grid(self, objuuid):
-        add_message("procedure controller: get related procedure grid: {0}".format(objuuid))
-        try:
-            return json.dumps(get_related_procedure_grid(objuuid))
-        except Exception:
-            add_message(traceback.format_exc())
-    
-    @cherrypy.expose
-    def ajax_get_related_procedures(self, objuuid):
-        add_message("procedure controller: get procedures: {0}".format(objuuid))
-        try:
-            return json.dumps(get_related_procedures(objuuid))
-        except Exception:
-            add_message(traceback.format_exc())
-    
-    @cherrypy.expose
     def ajax_execute_procedure(self, prcuuid, hstuuid):
         add_message("procedure controller: execute procedure: hstuuid: {0}, prcuuid: {1}".format(hstuuid, prcuuid))
         try:
-            return json.dumps(execute(prcuuid, hstuuid, cherrypy.session))
+            return json.dumps(run_procedure(hstuuid, prcuuid, Collection("users").find(sessionid = cherrypy.session.id)[0].object))
+        except Exception:
+            add_message(traceback.format_exc())
+    
+    @cherrypy.expose
+    def ajax_queue_procedure(self, prcuuid, hstuuid):
+        add_message("procedure controller: queuing procedure: hstuuid: {0}, prcuuid: {1}".format(hstuuid, prcuuid))
+        try:
+            queue_procedure(hstuuid, prcuuid, Collection("users").find(sessionid = cherrypy.session.id)[0].object)
+            return json.dumps({})
+        except Exception:
+            add_message(traceback.format_exc())
+    
+    @cherrypy.expose
+    def ajax_get_queue_grid(self):
+        try:
+            return json.dumps(get_jobs_grid())
         except Exception:
             add_message(traceback.format_exc())

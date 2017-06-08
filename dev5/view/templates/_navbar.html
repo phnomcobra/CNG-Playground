@@ -7,18 +7,61 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="#">valarie</a>
+      <a class="navbar-brand" href="/">valarie</a>
     </div>
     <div id="navbar" class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
-        <li><a href="#import" class="active" onclick="$('#importFormInput').trigger('click');">Import</a></li>
-        <li><a href="#export" class="active" onclick="exportFromInventory()">Export</a></li>
-        <li><a href="#credModal" class="active" data-toggle="modal">Set Credentials</a></li>
-        <li><a href="#menu-toggle" id="menu-toggle">Toggle Menu</a></li>
-        <li><a href="#console" data-toggle="collapse">Toggle Console</a></li>
+        
+        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Inventory<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="#" onclick="$('#importJSONFormInput').trigger('click');">Import JSON</a></li>
+                <li><a href="#" onclick="$('#importZipFormInput').trigger('click');">Import Zip</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="#" onclick="exportJSONFromInventory()">Export JSON</a></li>
+                <li><a href="#" onclick="exportZipFromInventory()">Export Zip</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="#" onclick="selectDependencies()">Select Dependencies</a></li>
+                <li><a href="#" onclick="$('#inventory').jstree('deselect_all')">Clear Selected</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="#" onclick="filterSelectionByType('controller')">Filter Controllers</a></li>
+                <li><a href="#" onclick="filterSelectionByType('procedure')">Filter Procedures</a></li>
+                <li><a href="#" onclick="filterSelectionByType('rfc')">Filter RFCs</a></li>
+                <li><a href="#" onclick="filterSelectionByType('task')">Filter Tasks</a></li>
+                <li><a href="#" onclick="filterSelectionByType('host')">Filter Hosts</a></li>
+                <li><a href="#" onclick="filterSelectionByType('console')">Filter Consoles</a></li>
+                <li><a href="#" onclick="filterSelectionByType('status')">Filter Status Codes</a></li>
+                <li><a href="#" onclick="filterSelectionByType('link')">Filter Links</a></li>
+                <li role="separator" class="divider"></li>
+                <li><a href="#" onclick="$('#inventory').jstree('refresh')">Refresh</a></li>
+            </ul>
+        </li>
+        
+        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">View<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="#menu-toggle" id="menu-toggle">Toggle Menu</a></li>
+            </ul>
+        </li>
+        
+        <!--<li><a href="#credModal" class="active" data-toggle="modal">Set Credentials</a></li>-->
+        <li><a href="/auth/userattr" class="active" data-toggle="modal">Set Credentials</a></li>
+        <li><a href="/auth/admin" class="active" data-toggle="modal">Admin</a></li>
+        <li><a href="/auth/logout" class="active" data-toggle="modal">Logout</a></li>
+        
+        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#">Event Log<span class="caret"></span></a>
+            <ul class="dropdown-menu">
+                <li><a href="#" onclick="loadEvents(3600);">Last Hour</a></li>
+                <li><a href="#" onclick="loadEvents(86400);">Last Day</a></li>
+                <li><a href="#" onclick="loadEvents(604800);">Last Week</a></li>
+            </ul>
+        </li>
       </ul>
-      <ul class="nav navbar-nav navbar-right" id="menuBarDynamic">
+      
+      <ul class="nav navbar-nav navbar-right">
+        <li><p class="navbar-text" id="connectionStatus"></p></li>
       </ul>
+      
+      <ul class="nav navbar-nav navbar-right" id="menuBarDynamic"></ul>
+      
     </div><!--/.nav-collapse -->
   </div>
 </nav>

@@ -11,21 +11,52 @@
 #            Added mutex lock to set to resolve sqlite deadlocking
 # 12/05/2016 Added try statements to all mutating document methods
 # 12/06/2016 Added commits to finally blocks
+# 05/01/2017 Fixed bug with create attribute method. All collections and indexes
+#              with matching attribute names were being affected.
 ################################################################################
 
 import sqlite3
 import pickle
 import traceback
+import base64
+import hashlib
 
+from Crypto import Random
+from Crypto.Cipher import AES
 from threading import Lock
-
 from .utils import sucky_uuid
 
 global DOCUMENT_LOCK
 DOCUMENT_LOCK = Lock()
 
+class AESCipher(object):
+    def __init__(self, key): 
+        self.bs = 32
+        self.key = hashlib.sha256(key.encode()).digest()
+
+    def encrypt(self, raw):
+        raw = self._pad(raw)
+        iv = Random.new().read(AES.block_size)
+        cipher = AES.new(self.key, AES.MODE_CBC, iv)
+        return base64.b64encode(iv + cipher.encrypt(raw))
+
+    def decrypt(self, enc):
+        enc = base64.b64decode(enc)
+        iv = enc[:AES.block_size]
+        cipher = AES.new(self.key, AES.MODE_CBC, iv)
+        return self._unpad(cipher.decrypt(enc[AES.block_size:])).decode('utf-8')
+
+    def _pad(self, s):
+        return s + (self.bs - len(s) % self.bs) * chr(self.bs - len(s) % self.bs)
+
+    @staticmethod
+    def _unpad(s):
+        return s[:-ord(s[len(s)-1:])]
+
 class Document:
     def __init__(self):
+        self.cipher = AESCipher("this is the key")
+        
         DOCUMENT_LOCK.acquire()
         
         self.connection = sqlite3.connect("db.sqlite", 5)
@@ -70,7 +101,7 @@ class Document:
         try:
             DOCUMENT_LOCK.acquire()
             self.cursor.execute("insert into TBL_JSON_OBJ (COLUUID, OBJUUID, VALUE) values (?, ?, ?);", \
-                                (str(coluuid), str(objuuid), pickle.dumps({"objuuid" : objuuid, "coluuid" : coluuid})))
+                                (str(coluuid), str(objuuid), self.cipher.encrypt(pickle.dumps({"objuuid" : objuuid, "coluuid" : coluuid}))))
             self.connection.commit()
         except Exception:
             print traceback.format_exc()
@@ -84,7 +115,7 @@ class Document:
             object["objuuid"] = objuuid
             object["coluuid"] = coluuid
             self.cursor.execute("update TBL_JSON_OBJ set VALUE = ? where OBJUUID = ?;", \
-                                (pickle.dumps(object), str(objuuid)))
+                                (self.cipher.encrypt(pickle.dumps(object)), str(objuuid)))
             self.connection.commit()
 
             self.cursor.execute("delete from TBL_JSON_IDX where OBJUUID = ?;", (objuuid,))
@@ -100,8 +131,9 @@ class Document:
                                          str(attribute_name), \
                                          str(eval("str(self.get_object(objuuid)" + attributes[attribute_name] + ")"))))
                     self.connection.commit()
-                except Exception as e:
-                    print traceback.format_exc()
+                except Exception:
+                    #print traceback.format_exc()
+                    pass
         except Exception:
             print traceback.format_exc()
         finally:
@@ -111,7 +143,7 @@ class Document:
     def get_object(self, objuuid):
         self.cursor.execute("select VALUE from TBL_JSON_OBJ where OBJUUID = ?;", (str(objuuid),))
         self.connection.commit()
-        return pickle.loads(self.cursor.fetchall()[0][0])
+        return pickle.loads(self.cipher.decrypt(self.cursor.fetchall()[0][0]))
     
     def find_objects(self, coluuid, attribute, value):
         self.cursor.execute("select OBJUUID from TBL_JSON_IDX where ATTRIBUTE = ? and VALUE = ? and COLUUID = ?;", \
@@ -140,14 +172,14 @@ class Document:
                                 (str(coluuid), str(attribute), str(path)))
             self.connection.commit()
         
-            self.cursor.execute("delete from TBL_JSON_IDX where ATTRIBUTE = ?;", (str(attribute),))
+            self.cursor.execute("delete from TBL_JSON_IDX where ATTRIBUTE = ? and COLUUID = ?;", (str(attribute), str(coluuid)))
             self.connection.commit()
         
             self.cursor.execute("select OBJUUID, VALUE from TBL_JSON_OBJ where COLUUID = ?;", (str(coluuid),))
             self.connection.commit()
             objects = {}
             for row in self.cursor.fetchall():
-                objects[row[0]] = pickle.loads(row[1])
+                objects[row[0]] = pickle.loads(self.cipher.decrypt(row[1]))
         
             for objuuid in objects:
                 try:
@@ -307,6 +339,21 @@ class Collection(Document):
             objects.append(Object(self.coluuid, objuuid))
         
         return objects
+    
+    def find_objuuids(self, **kargs):
+        objuuid_sets = []
+        for attribute, value in kargs.iteritems():
+            objuuid_sets.append(Document.find_objects(self, self.coluuid, attribute, value))
+        
+        intersection = set(objuuid_sets[0])
+        for objuuids in objuuid_sets[1:]:
+            intersection = intersection.intersection(set(objuuids))
+        
+        objuuids = []
+        for objuuid in list(intersection):
+            objuuids.append(objuuid)
+        
+        return objuuids
 
     def get_object(self, objuuid = None):
         if not objuuid:

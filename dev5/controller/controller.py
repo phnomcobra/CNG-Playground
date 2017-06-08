@@ -13,6 +13,8 @@ import cherrypy
 import json
 import traceback
 
+from threading import Thread
+
 from ..model.controller import get_procedure_grid, get_host_grid, get_tiles
 from .messaging import add_message
 

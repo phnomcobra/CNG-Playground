@@ -1,5 +1,7 @@
 var controllerStateFlag = null;
 var controllerStateData;
+var showControllerDetails = false;
+var controllerStateUpdating = false;
 
 /*
 var touchController = function() {
@@ -20,6 +22,7 @@ var addControllerProcedure = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             $("#procedureGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid']});
@@ -31,6 +34,7 @@ var addControllerHost = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             $("#hostGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid'], 'host' : resp['host']});
@@ -39,66 +43,49 @@ var addControllerHost = function(objuuid) {
 }
 
 var executeController = function() {
-    document.getElementById('body').innerHTML = '<table id="controllerTable"></table>'
+    controllerStateUpdating = false;
+    
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
+    
+    document.getElementById('body').innerHTML = '<div id="controllerTableDiv" style="width:inherit;height:inherit"><table id="controllerTable"></table></div><div id="procedureResultAccordion" style="display:none"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
     
     initAttributes();
     addAttributeText('Controller UUID', 'objuuid');
     addAttributeTextBox('Controller Name', 'name');
     
-    dropdown = document.createElement("ul");
-    dropdown.setAttribute("class", "dropdown-menu");
-    
-    link = document.createElement("a");
-    link.setAttribute("href", "#");
-    link.setAttribute("class", "dropdown-toggle");
-    link.setAttribute("data-toggle", "dropdown");
-    link.setAttribute("role", "button");
-    link.setAttribute("aria-haspopup", "true");
-    link.setAttribute("aria-expanded", "false");
-    link.innerHTML = "Related Procedures <span class='caret'></span>";
-    
-    cell = document.createElement("li");
-    cell.setAttribute('class', 'dropdown');
-    cell.setAttribute('id', 'relatedProceduresDropDown');
-    cell.appendChild(link);
-    cell.appendChild(dropdown);
-    document.getElementById('menuBarDynamic').appendChild(cell);
-    
     $.ajax({
         'url' : 'controller/ajax_get_tiles',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : inventoryObject.objuuid},
         'success' : function(resp) {
             var table = document.getElementById('controllerTable');
             var row;
             var cell;
             
+            row = table.insertRow(-1);
+            cell = row.insertCell(-1);
+            for(var x = 0; x < resp.hosts.length; x++) {
+                cell = row.insertCell(-1);
+                cell.setAttribute('data-host-objuuid', resp.hosts[x].objuuid);
+                cell.setAttribute('data-selected', 'false');
+                cell.setAttribute('class', 'controllerHostCell');
+                cell.setAttribute('onclick', 'hostClick(this)');
+                cell.innerHTML = resp.hosts[x].name + '<br>' + resp.hosts[x].host;
+            }
+            
             for(var y = 0; y < resp.procedures.length; y++) {
                 row = table.insertRow(-1);
                 
-                $.ajax({
-                    'url' : 'procedure/ajax_get_related_procedures',
-                    'dataType' : 'json',
-                    'data' : {'objuuid' : resp.procedures[y].objuuid},
-                    'success' : function(resp) {
-                        for(var i = 0; i < resp.length; i++) {
-                            link = document.createElement("li");
-                            link.setAttribute('name', 'controller-command-' + resp[i].objuuid);
-                            link.setAttribute('class', 'controllerCommandCell');
-                            dropdown.appendChild(link);
-                                
-                            cell = document.createElement("a");
-                            cell.innerHTML = resp[i].name;
-                            cell.setAttribute('href', '#');
-                            cell.setAttribute("tabindex", "-1");
-                            cell.setAttribute('data-procedure-objuuid', resp[i].objuuid);
-                            cell.setAttribute('onclick', 'executeRelatedProcedure(this)');
-                                
-                            link.appendChild(cell);
-                        }
-                    }
-                });
+                cell = row.insertCell(-1);
+                cell.innerHTML = resp.procedures[y].name;
+                cell.setAttribute('data-procedure-objuuid', resp.procedures[y].objuuid);
+                cell.setAttribute('data-selected', 'false');
+                cell.setAttribute('onclick', 'procedureClick(this)');
+                cell.setAttribute('class', 'controllerProcedureCell');
                 
                 for(var x = 0; x < resp.hosts.length; x++) {
                     cell = row.insertCell(-1);
@@ -112,31 +99,43 @@ var executeController = function() {
                     cell.setAttribute('onclick', 'cellClick(this)');
                     cell.setAttribute('class', 'controllerCell');
                     
-                    cell.innerHTML = cell.getAttribute('data-procedure-name') + '<br>';
-                    cell.innerHTML += cell.getAttribute('data-host-name') + '<br>';
-                    cell.innerHTML += cell.getAttribute('data-host-host');
-                    
-                    cell.style.borderStyle = 'solid';
-                    cell.style.borderColor = '#000';
+                    cell.style.borderColor = '#CCC';
+                   
+                    document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + resp.hosts[x].objuuid + '-' + resp.procedures[y].objuuid + '"></div>';
+                    document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + resp.hosts[x].objuuid + '-' + resp.procedures[y].objuuid + '"></code></pre>';
                 }
             }
             
             updateControllerStateData();
             updateControllerTimer();
+            
+            $("#procedureResultAccordion").accordion({
+                collapsible: true,
+                heightStyle: "content",
+                active: false
+            });
         }
     });
     
     link = document.createElement("a");
     link.setAttribute("href", "#");
-    link.innerHTML = "Run All";
+    link.innerHTML = "Edit";
     cell = document.createElement("li");
-    cell.setAttribute('onclick', 'executeAllProcedures()');
+    cell.setAttribute('onclick', 'editController()');
     cell.appendChild(link);
     document.getElementById('menuBarDynamic').appendChild(cell);
     
     link = document.createElement("a");
     link.setAttribute("href", "#");
-    link.innerHTML = "Run Selected";
+    link.innerHTML = "Details";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', 'toggleControllerDetails()');
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.innerHTML = "Run";
     cell = document.createElement("li");
     cell.setAttribute('onclick', 'executeSelectedProcedures()');
     cell.appendChild(link);
@@ -159,49 +158,123 @@ var executeController = function() {
     document.getElementById('menuBarDynamic').appendChild(cell);
 }
 
-var cellClick = function(item) {
-    if(item.getAttribute('data-selected') == 'true') {
-        item.setAttribute('data-selected', false);
-        item.style.borderStyle = 'solid';
-        item.style.borderColor = '#000';
+var toggleControllerDetails = function(item) {
+    if(showControllerDetails) {
+        document.getElementById('controllerTableDiv').style.display = 'block';
+        document.getElementById('procedureResultAccordion').style.display = 'none';
+        showControllerDetails = false;
     } else {
-        item.setAttribute('data-selected', true);
-        item.style.borderStyle = 'solid';
-        item.style.borderColor = '#FFF';
-    }
-}
-
-var executeAllProcedures = function() {
-    $('#controllerTable tr').each(function(){
-        $(this).find('td').each(function(){
-            addMessage("executing " + $(this)[0].attributes['data-procedure-name'].value + " on " + $(this)[0].attributes['data-host-name'].value + "...");
-            
-            $.ajax({
-                'url' : 'procedure/ajax_execute_procedure',
-                'dataType' : 'json',
-                'data' : {
-                    'prcuuid' : $(this)[0].attributes['data-procedure-objuuid'].value, 
-                    'hstuuid' : $(this)[0].attributes['data-host-objuuid'].value
+        document.getElementById('controllerTableDiv').style.display = 'none';
+        document.getElementById('procedureResultAccordion').style.display = 'block';
+        showControllerDetails = true;
+        
+        $('#controllerTable tr').each(function(){
+            $(this).find('td').each(function(){
+                if($(this)[0].id) {
+                    if($(this)[0].attributes['data-selected'].value == 'true') {
+                        document.getElementById('section-header-' + $(this)[0].attributes['data-host-objuuid'].value + '-' + $(this)[0].attributes['data-procedure-objuuid'].value).style.display = 'block';
+                    } else {
+                        document.getElementById('section-header-' + $(this)[0].attributes['data-host-objuuid'].value + '-' + $(this)[0].attributes['data-procedure-objuuid'].value).style.display = 'none';
+                    }
                 }
             });
         });
-    });
+    }
+}
+
+var cellClick = function(item) {
+    if(item.getAttribute('data-selected') == 'true') {
+        item.setAttribute('data-selected', false);
+        item.style.borderColor = '#CCC';
+    } else {
+        item.setAttribute('data-selected', true);
+        item.style.borderColor = '#000';
+    }
+}
+
+var hostClick = function(item) {
+    if(item.getAttribute('data-selected') == 'true') {
+        item.setAttribute('data-selected', false);
+        
+        $('#controllerTable tr').each(function(){
+            $(this).find('td').each(function(){
+                if($(this)[0].id) {
+                    if($(this)[0].attributes['data-host-objuuid'].value == item.getAttribute('data-host-objuuid')) {
+                        $(this)[0].setAttribute('data-selected', false);
+                        $(this)[0].style.borderColor = '#CCC';
+                    }
+                }
+            });
+        });
+    } else {
+        item.setAttribute('data-selected', true);
+        
+        $('#controllerTable tr').each(function(){
+            $(this).find('td').each(function(){
+                if($(this)[0].id) {
+                    if($(this)[0].attributes['data-host-objuuid'].value == item.getAttribute('data-host-objuuid')) {
+                        $(this)[0].setAttribute('data-selected', true);
+                        $(this)[0].style.borderColor = '#000';
+                    }
+                }
+            });
+        });
+    }
+}
+
+var procedureClick = function(item) {
+    if(item.getAttribute('data-selected') == 'true') {
+        item.setAttribute('data-selected', false);
+        
+        $('#controllerTable tr').each(function(){
+            $(this).find('td').each(function(){
+                if($(this)[0].id) {
+                    if($(this)[0].attributes['data-procedure-objuuid'].value == item.getAttribute('data-procedure-objuuid')) {
+                        $(this)[0].setAttribute('data-selected', false);
+                        $(this)[0].style.borderColor = '#CCC';
+                    }
+                }
+            });
+        });
+    } else {
+        item.setAttribute('data-selected', true);
+        
+        $('#controllerTable tr').each(function(){
+            $(this).find('td').each(function(){
+                if($(this)[0].id) {
+                    if($(this)[0].attributes['data-procedure-objuuid'].value == item.getAttribute('data-procedure-objuuid')) {
+                        $(this)[0].setAttribute('data-selected', true);
+                        $(this)[0].style.borderColor = '#000';
+                    }
+                }
+            });
+        });
+    }
 }
 
 var executeSelectedProcedures = function() {
     $('#controllerTable tr').each(function(){
         $(this).find('td').each(function(){
-            if($(this)[0].attributes['data-selected'].value == 'true') {
-                addMessage("executing " + $(this)[0].attributes['data-procedure-name'].value + " on " + $(this)[0].attributes['data-host-name'].value + "...");
-            
-                $.ajax({
-                    'url' : 'procedure/ajax_execute_procedure',
-                    'dataType' : 'json',
-                    'data' : {
-                        'prcuuid' : $(this)[0].attributes['data-procedure-objuuid'].value, 
-                        'hstuuid' : $(this)[0].attributes['data-host-objuuid'].value
-                    }
-                });
+            if($(this)[0].id) {
+                if($(this)[0].attributes['data-selected'].value == 'true') {
+                    addMessage("queuing " + $(this)[0].attributes['data-procedure-name'].value + " on " + $(this)[0].attributes['data-host-name'].value + "...");
+                    
+                    $.ajax({
+                        'url' : 'procedure/ajax_queue_procedure',
+                        'dataType' : 'json',
+                        'method': 'POST',
+                        'data' : {
+                            'prcuuid' : $(this)[0].attributes['data-procedure-objuuid'].value, 
+                            'hstuuid' : $(this)[0].attributes['data-host-objuuid'].value
+                        },
+                        'success' : function(resp){
+                            //$('.nav-tabs a[href="#queue"]').tab('show');
+                        },
+                        'failure' : function(resp){
+                            $('.nav-tabs a[href="#console"]').tab('show');
+                        }
+                    });
+                }
             }
         });
     });
@@ -210,9 +283,10 @@ var executeSelectedProcedures = function() {
 var selectAllProcedures = function() {
     $('#controllerTable tr').each(function(){
         $(this).find('td').each(function(){
-            document.getElementById($(this)[0].id).setAttribute('data-selected', true);
-            document.getElementById($(this)[0].id).style.borderStyle = 'solid';
-            document.getElementById($(this)[0].id).style.borderColor = '#FFF';
+            if($(this)[0].id) {
+                document.getElementById($(this)[0].id).setAttribute('data-selected', true);
+                document.getElementById($(this)[0].id).style.borderColor = '#000';
+            }
         });
     });
 }
@@ -220,27 +294,9 @@ var selectAllProcedures = function() {
 var deselectAllProcedures = function() {
     $('#controllerTable tr').each(function(){
         $(this).find('td').each(function(){
-            document.getElementById($(this)[0].id).setAttribute('data-selected', false);
-            document.getElementById($(this)[0].id).style.borderStyle = 'solid';
-            document.getElementById($(this)[0].id).style.borderColor = '#000';
-        });
-    });
-}
-
-var executeRelatedProcedure = function(item) {
-    addMessage("executing procedure...");
-    
-    $('#controllerTable tr').each(function(){
-        $(this).find('td').each(function(){
-            if(document.getElementById($(this)[0].id).getAttribute('data-selected') == 'true') {
-                $.ajax({
-                    'url' : 'procedure/ajax_execute_procedure',
-                    'dataType' : 'json',
-                    'data' : {
-                        'prcuuid' : item.getAttribute('data-procedure-objuuid'), 
-                        'hstuuid' : document.getElementById($(this)[0].id).getAttribute('data-host-objuuid')
-                    }
-                });
+            if($(this)[0].id) {
+                document.getElementById($(this)[0].id).setAttribute('data-selected', false);
+                document.getElementById($(this)[0].id).style.borderColor = '#CCC';
             }
         });
     });
@@ -254,47 +310,53 @@ var drawCells = function(resultItems) {
         cell = document.getElementById('controller-cell-' + resultItems[i].host.objuuid + '-' + resultItems[i].procedure.objuuid);
 
         if(resultItems[i].stop) {
-            if(currentTime - resultItems[i].stop > 60) {
+            if(currentTime - resultItems[i].stop > 3600) {
                 cell.style.color = '#' + resultItems[i].status.sfg;
                 cell.style.backgroundColor = '#' + resultItems[i].status.sbg;
             } else {
                 cell.style.color = '#' + resultItems[i].status.cfg;
                 cell.style.backgroundColor = '#' + resultItems[i].status.cbg;
             }
-            cell.innerHTML = cell.getAttribute('data-procedure-name') + '<br>';
-            cell.innerHTML += cell.getAttribute('data-host-name') + '<br>';
-            cell.innerHTML += cell.getAttribute('data-host-host') + '<br>';
-            cell.innerHTML += resultItems[i].status.abbreviation + '<br>';
-            cell.innerHTML += Math.round(currentTime - resultItems[i].stop);
+            
+            cell.innerHTML = resultItems[i].status.abbreviation;
         } else {
             cell.style.color = '#' + resultItems[i].status.cfg;
             cell.style.backgroundColor = '#' + resultItems[i].status.cbg;
-            cell.innerHTML = cell.getAttribute('data-procedure-name') + '<br>';
-            cell.innerHTML += cell.getAttribute('data-host-name') + '<br>';
-            cell.innerHTML += cell.getAttribute('data-host-host') + '<br>';
-            cell.innerHTML += resultItems[i].status.abbreviation;
+            cell.innerHTML = resultItems[i].status.abbreviation;
         }
     }
 }
+
+var drawResults = function(resultItems) {
+    for(var i = 0; i < resultItems.length; i++) {
+        viewProcedureResult(resultItems[i]);
+    }
+}
+
 
 var updateControllerTimer = function() {
     if(document.getElementById('controllerTable')) {
         $.ajax({
             'url' : 'flags/ajax_get',
             'dataType' : 'json',
+            'method': 'POST',
             'data' : {
                 //'key' : 'controller-' + inventoryObject.objuuid
                 'key' : 'results'
             },
             'success' : function(resp) {
-                if(controllerStateFlag != resp.value) {
+                if(controllerStateFlag != resp.value && !controllerStateUpdating) {
                     controllerStateFlag = resp.value;
+                    controllerStateUpdating = true;
                     updateControllerStateData();
                 } else {
                     if(controllerStateData)
                         drawCells(controllerStateData);
                 }
-                setTimeout(updateControllerTimer, 1000);
+                
+                if(inventoryObject.type == 'controller') {
+                    setTimeout(updateControllerTimer, 1000);
+                }
             },
         });
     }
@@ -304,10 +366,30 @@ var updateControllerStateData = function() {
     $.ajax({
         'url' : 'results/ajax_get_controller',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : inventoryObject.objuuid},
         'success' : function(resp) {
+            controllerStateUpdating = false;
             controllerStateData = resp;
             drawCells(controllerStateData);
+            drawResults(controllerStateData);
+        }
+    });
+}
+
+var loadAndEditController = function(objuuid) {
+    document.getElementById('body').innerHTML = '';
+    document.getElementById('menuBarDynamic').innerHTML = '';
+    
+    $.ajax({
+        'url' : 'inventory/ajax_get_object',
+        'dataType' : 'json',
+        'method': 'POST',
+        'data' : {'objuuid' : objuuid},
+        'success' : function(resp) {
+            inventoryObject = resp;
+            editController();
+            expandToNode(inventoryObject.objuuid);
         }
     });
 }
@@ -317,29 +399,43 @@ var editController = function() {
     addAttributeText('Controller UUID', 'objuuid');
     addAttributeTextBox('Controller Name', 'name');
     
-    document.getElementById('body').innerHTML = '<div id="procedureGrid" style="padding:10px"></div><div id="hostGrid" style="padding:10px"></div>';
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
+    
+    document.getElementById('body').innerHTML = '<div id="procedureGrid" style="padding:10px;float:left"></div><div id="hostGrid" style="padding:10px;margin-left:50%"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
     
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.innerHTML = "Open";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', 'executeController()');
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
     $("#procedureGrid").jsGrid({
-        height: "calc(50% - 5px)",
-        width: "calc(100% - 5px)",
+        height: "calc(100% - 5px)",
+        width: "calc(50% - 10px)",
         autoload: true,
         
         deleteButton: true,
         confirmDeleting: false,
+        sorting: false,
         
         rowClass: function(item, itemIndex) {
             return "client-" + itemIndex;
         },
         
-        rowDoubleClick: function(args) {
+        editing: true,
+        onItemEditing: function(args) {
             loadAndEditProcedure(args.item.objuuid);
-        },
- 
+        },   
+
         controller: {
             loadData: function(filter) {
                 return $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "/controller/ajax_get_procedure_grid",
                     data: {'objuuid' : inventoryObject['objuuid']},
                     dataType: "JSON"
@@ -388,8 +484,8 @@ var editController = function() {
     });
     
     $("#hostGrid").jsGrid({
-        height: "calc(50% - 5px)",
-        width: "calc(100% - 5px)",
+        height: "calc(100% - 5px)",
+        width: "calc(50% - 10px)",
         autoload: true,
         
         deleteButton: true,
@@ -399,14 +495,16 @@ var editController = function() {
             return "client-" + itemIndex;
         },
         
-        rowDoubleClick: function(args) {
+        editing: true,
+        onItemEditing: function(args) {
             loadAndEditHost(args.item.objuuid);
-        },
+        },   
+        sorting: false,
  
         controller: {
             loadData: function(filter) {
                 return $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "/controller/ajax_get_host_grid",
                     data: {'objuuid' : inventoryObject['objuuid']},
                     dataType: "JSON"
@@ -454,4 +552,9 @@ var editController = function() {
             });
         }
     });
+    
+    loadRequiresGrid();
+    loadProvidesGrid();
+    
+    setTimeout(refreshJSGrids, 1000);
 }

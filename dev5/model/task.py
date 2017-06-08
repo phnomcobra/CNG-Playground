@@ -7,12 +7,15 @@
 # (614) 692 2050
 #
 # 11/30/2016 Original construction
+# 06/06/2017 Optimized JSON responses
 ################################################################################
 
 import traceback
 
 from .document import Collection
+from .ramdocument import Collection as RAMCollection
 from ..controller.messaging import add_message
+from .eventlog import create_task_execute_event
 
 from imp import new_module
 from time import time
@@ -28,10 +31,12 @@ class TaskError:
 
 def execute(tskuuid, hstuuid, session):
     inventory = Collection("inventory")
-    results = Collection("results")
+    results = RAMCollection("results")
+    
+    for result in results.find(hstuuid = hstuuid, tskuuid = tskuuid):
+        result.destroy()
     
     result = results.get_object()
-    
     
     result.object['start'] = time()
         
@@ -46,7 +51,12 @@ def execute(tskuuid, hstuuid, session):
             add_message(traceback.format_exc())
     
     host = inventory.get_object(hstuuid)
-    result.object['host'] = host.object
+    result.object['host'] = {}
+    result.object['host']['host'] = host.object['host']
+    result.object['host']['name'] = host.object['name']
+    result.object['host']['objuuid'] = hstuuid
+    
+    create_task_execute_event(session, inventory.get_object(tskuuid), host)
     
     tempmodule = new_module("tempmodule")
     
@@ -55,8 +65,16 @@ def execute(tskuuid, hstuuid, session):
         cli = tempmodule.Console(session = session, host = host.object["host"])
         
         try:
-            result.object['task'] = inventory.get_object(tskuuid).object
-            exec status_code_body + inventory.get_object(tskuuid).object["body"] in tempmodule.__dict__
+            inv_task = inventory.get_object(tskuuid)
+            
+            result.object['task'] = {}
+            result.object['task']["name"] = inv_task.object["name"]
+            result.object['task']["start"] = None
+            result.object['task']["stop"] = None
+            result.object['task']["tskuuid"] = tskuuid
+            
+            inv_task.object["body"] in tempmodule.__dict__
+            exec inv_task.object["body"] + "\n" + status_code_body in tempmodule.__dict__
             task = tempmodule.Task()
             
             try:
@@ -75,6 +93,15 @@ def execute(tskuuid, hstuuid, session):
     
     try:
         result.object['status'] = status_data[task.status]
+        
+        result.object['status'] = {}
+        result.object['status']["name"] = status_data[task.status]["name"]
+        result.object['status']["code"] = status_data[task.status]["code"]
+        result.object['status']["abbreviation"] = status_data[task.status]["abbreviation"]
+        result.object['status']["cfg"] = status_data[task.status]["cfg"]
+        result.object['status']["cbg"] = status_data[task.status]["cbg"]
+        result.object['status']["sfg"] = status_data[task.status]["sfg"]
+        result.object['status']["sbg"] = status_data[task.status]["sbg"]
     except Exception:
         add_message(traceback.format_exc())
         result.object['status'] = {"code" : task.status}

@@ -2,13 +2,17 @@ var editTask = function() {
     document.getElementById('body').innerHTML = '<div id="aceInstance"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
     
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
+    
     initAttributes();
     addAttributeText('Task UUID', 'objuuid');
     addAttributeTextBox('Task Name', 'name');
 
     var editor = new ace.edit(document.getElementById('aceInstance'));
     
-    editor.setTheme("ace/theme/twilight");
+    //editor.setTheme("ace/theme/twilight");
     editor.session.setMode("ace/mode/python");
     editor.setValue(inventoryObject['body']);
     editor.selection.moveTo(0, 0);
@@ -18,6 +22,9 @@ var editTask = function() {
         f.inventoryObject['body'] = f.getValue();
         f.inventoryObject['changed'] = true;
     });
+    
+    loadRequiresGrid();
+    loadProvidesGrid();
 }
 
 var loadAndEditTask = function(objuuid) {
@@ -27,10 +34,12 @@ var loadAndEditTask = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             inventoryObject = resp;
             editTask();
+            expandToNode(inventoryObject.objuuid);
         }
     });
 }
@@ -39,6 +48,7 @@ var addRunTaskHost = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             $("#runTaskHostGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid'], 'host' : resp['host']});
@@ -47,7 +57,7 @@ var addRunTaskHost = function(objuuid) {
 }
 
 var viewTaskResult = function(result) {
-    document.getElementById('section-header-' + result.host.objuuid).innerHTML = result.host.name + '<br>' + result.host.host + '<br>' + result.status.name;
+    document.getElementById('section-header-' + result.host.objuuid).innerHTML = result.host.name + ' - ' + result.host.host + ' - ' + result.status.name;
     
     for(var i = 0; i < result.output.length; i++)
         document.getElementById('section-body-' + result.host.objuuid).innerHTML += result.output[i] + '<br>';
@@ -61,6 +71,10 @@ var executeTask = function() {
     addAttributeText('Task UUID', 'objuuid');
     addAttributeTextBox('Task Name', 'name');
     
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
+    
     document.getElementById('body').innerHTML = '<div id="taskResultAccordion"></div>';
     
     for(var i = 0; i < inventoryObject.hosts.length; i++) {
@@ -72,6 +86,7 @@ var executeTask = function() {
         $.ajax({
             'url' : 'task/ajax_execute_task',
             'dataType' : 'json',
+            'method': 'POST',
             'data' : {'tskuuid' : inventoryObject.objuuid, 'hstuuid' : inventoryObject.hosts[i]},
             'success' : function(resp) {
                 //console.log(resp);
@@ -82,15 +97,21 @@ var executeTask = function() {
     
     $("#taskResultAccordion").accordion({
         collapsible: true,
-        heightStyle: "content",
-        active: false
+        heightStyle: "content"
     });
+    
+    loadRequiresGrid();
+    loadProvidesGrid();
 }
 
 var editTaskHosts = function() {
     initAttributes();
     addAttributeText('Task UUID', 'objuuid');
     addAttributeTextBox('Task Name', 'name');
+    
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
     
     document.getElementById('body').innerHTML = '<div id="hostGrid" style="padding:10px"></div>';
     
@@ -101,8 +122,10 @@ var editTaskHosts = function() {
         
         deleteButton: true,
         confirmDeleting: false,
+        sorting: false,
         
-        rowDoubleClick: function(args) {
+        editing: true,
+        onItemEditing: function(args) {
             loadAndEditHost(args.item.objuuid);
         },
         
@@ -113,7 +136,7 @@ var editTaskHosts = function() {
         controller: {
             loadData: function(filter) {
                 return $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "/task/ajax_get_host_grid",
                     data: {'objuuid' : inventoryObject['objuuid']},
                     dataType: "JSON"
@@ -136,4 +159,9 @@ var editTaskHosts = function() {
             {type : "control" }
         ],
     });
+    
+    loadRequiresGrid();
+    loadProvidesGrid();
+    
+    setTimeout(refreshJSGrids, 1000);
 }

@@ -8,7 +8,6 @@ var editConsole = function() {
 
     var editor = new ace.edit(document.getElementById('aceInstance'));
     
-    editor.setTheme("ace/theme/twilight");
     editor.session.setMode("ace/mode/python");
     editor.setValue(inventoryObject['body']);
     editor.selection.moveTo(0, 0);
@@ -18,6 +17,12 @@ var editConsole = function() {
         f.inventoryObject['body'] = f.getValue();
         f.inventoryObject['changed'] = true;
     });
+    
+    loadRequiresGrid();
+    loadProvidesGrid();
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
 }
 
 var loadAndEditConsole = function(objuuid) {
@@ -27,10 +32,12 @@ var loadAndEditConsole = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             inventoryObject = resp;
             editConsole();
+            expandToNode(inventoryObject.objuuid);
         }
     });
 }

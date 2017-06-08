@@ -9,9 +9,11 @@
 # 11/23/2016 Original construction
 ################################################################################
 
+from threading import Thread
+
 from .document import Collection
 from .utils import sucky_uuid
-from ..controller.flags import touch_flag
+from ..controller.messaging import add_message
 
 def get_procedure_grid(ctruuid):
     collection = Collection("inventory")

@@ -7,6 +7,7 @@
 # (614) 692 2050
 #
 # 11/30/2016 Original construction
+# 02/22/2017 Updated execute methods to pull session data from user objects
 ################################################################################
 
 import cherrypy
@@ -14,6 +15,7 @@ import json
 import traceback
 
 from ..model.task import get_host_grid, execute
+from ..model.document import Collection
 from .messaging import add_message
 
 class Task(object):
@@ -29,7 +31,7 @@ class Task(object):
     def ajax_execute_task(self, tskuuid, hstuuid):
         add_message("task controller: execute task: hstuuid: {0}, tskuuid: {1}".format(hstuuid, tskuuid))
         try:
-            return json.dumps(execute(tskuuid, hstuuid, cherrypy.session))
+            return json.dumps(execute(tskuuid, hstuuid, Collection("users").find(sessionid = cherrypy.session.id)[0].object))
         except Exception:
             add_message(traceback.format_exc())
         

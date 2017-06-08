@@ -7,10 +7,12 @@
 # (614) 692 2050
 #
 # 11/23/2016 Original construction
+# 05/30/2017 Fixed missing messaging import
 ################################################################################
 
 from .document import Collection
 from .utils import sucky_uuid
+from ..controller.messaging import add_message
 
 def get_rfc_grid(prcuuid):
     collection = Collection("inventory")
@@ -21,11 +23,6 @@ def get_rfc_grid(prcuuid):
     
     for rfcuuid in procedure.object["rfcs"]:
         rfc = collection.get_object(rfcuuid)
-        
-        grid_data.append({"name" : rfc.object["name"], \
-                          "number" : rfc.object["number"], \
-                          "title" : rfc.object["title"], \
-                          "objuuid" : rfc.object["objuuid"]})
         
         if "type" in rfc.object:
             grid_data.append({"name" : rfc.object["name"], \

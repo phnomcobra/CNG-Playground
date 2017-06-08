@@ -10,31 +10,38 @@
 ################################################################################
 
 import cherrypy
+import traceback
 
 from ..view.index import index_view
+
 from .inventory import Inventory
 from .messaging import Messaging
 from .procedure import Procedure
 from .controller import Controller
-from .credentials import Credentials
+from .eventlog import EventLog
 from .console import Console
-from .task import Task
 from .rfc import RFC
 from .results import Results
 from .flags import Flags
+from .task import Task
+from .terminal import Terminal
+from .auth import Auth, require, member_of
 
 class Root(object):
     inventory = Inventory()
     messaging = Messaging()
     procedure = Procedure()
     controller = Controller()
-    credentials = Credentials()
     console = Console()
     rfc = RFC()
-    task = Task()
     results = Results()
     flags = Flags()
-
+    task = Task()
+    auth = Auth()
+    terminal = Terminal()
+    eventlog = EventLog()
+    
     @cherrypy.expose
+    @require()
     def index(self):
         return index_view()

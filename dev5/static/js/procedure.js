@@ -1,3 +1,5 @@
+var procedureStateFlag = null;
+
 var populateProcedureAttributes = function() {
     initAttributes();
     
@@ -9,6 +11,7 @@ var populateProcedureAttributes = function() {
     $.ajax({
         'url' : 'inventory/ajax_get_status_objects',
         'dataType' : 'json',
+        'method': 'POST',
         'success' : function(resp) {
             for(var i = 0; i < resp.length; i++) {
                 resp[i];
@@ -29,20 +32,10 @@ var addProcedureTask = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             $("#taskGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid']});
-        }
-    });
-}
-
-var addProcedureRelated = function(objuuid) {
-    $.ajax({
-        'url' : 'inventory/ajax_get_object',
-        'dataType' : 'json',
-        'data' : {'objuuid' : objuuid},
-        'success' : function(resp) {
-            $("#relatedProcedureGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid']});
         }
     });
 }
@@ -51,6 +44,7 @@ var addProcedureRFC = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             $("#RFCGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid'], 'title' : resp['title'], 'number' : resp['number']});
@@ -65,39 +59,63 @@ var loadAndEditProcedure = function(objuuid) {
     $.ajax({
         'url' : 'inventory/ajax_get_object',
         'dataType' : 'json',
+        'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             inventoryObject = resp;
             editProcedure();
+            expandToNode(inventoryObject.objuuid);
         }
     });
 }
 
 var editProcedure = function() {
     populateProcedureAttributes();
-    document.getElementById('body').innerHTML = '<div id="taskGrid" style="padding:10px;float:left"></div><div id="hostGrid" style="padding:10px;margin-left:calc(50% - 5px)"></div><div id="RFCGrid" style="padding:10px;float:left"></div><div id="relatedProcedureGrid" style="padding:10px;margin-left:calc(50% - 5px)"></div>';
+    document.getElementById('body').innerHTML = '<div id="taskGrid" style="padding:10px;float:left"></div><div id="hostGrid" style="padding:10px; margin-left:50%"></div><div id="RFCGrid" style="padding:10px;margin-left:50%"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
     
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
+    
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.innerHTML = "Run";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', 'executeProcedure(); runProcedure();');
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.innerHTML = "Details";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', 'executeProcedure();');
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
     $("#taskGrid").jsGrid({
-        height: "calc(50% - 5px)",
+        height: "calc(100% - 5px)",
         width: "calc(50% - 5px)",
         autoload: true,
         
         deleteButton: true,
         confirmDeleting: false,
+        sorting: false,
         
         rowClass: function(item, itemIndex) {
             return "client-" + itemIndex;
         },
         
-        rowDoubleClick: function(args) {
+        editing: true,
+        onItemEditing: function(args) {
             loadAndEditTask(args.item.objuuid);
         },
         
         controller: {
             loadData: function(filter) {
                 return $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "/procedure/ajax_get_task_grid",
                     data: {'objuuid' : inventoryObject['objuuid']},
                     dataType: "JSON"
@@ -140,6 +158,8 @@ var editProcedure = function() {
                         inventoryObject['tasks'].push(items[i].objuuid);
                     }
                     inventoryObject['changed'] = true;
+                    
+                    setTimeout(function(){$("#taskGrid").jsGrid("loadData")}, 1000);
                 }
             });
         }
@@ -152,8 +172,10 @@ var editProcedure = function() {
         
         deleteButton: true,
         confirmDeleting: false,
+        sorting: false,
         
-        rowDoubleClick: function(args) {
+        editing: true,
+        onItemEditing: function(args) {
             loadAndEditHost(args.item.objuuid);
         },
         
@@ -164,7 +186,7 @@ var editProcedure = function() {
         controller: {
             loadData: function(filter) {
                 return $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "/procedure/ajax_get_host_grid",
                     data: {'objuuid' : inventoryObject['objuuid']},
                     dataType: "JSON"
@@ -200,14 +222,16 @@ var editProcedure = function() {
             return "client-" + itemIndex;
         },
         
-        rowDoubleClick: function(args) {
+        sorting: false,
+        editing: true,
+        onItemEditing: function(args) {
             loadAndEditRFC(args.item.objuuid);
         },
  
         controller: {
             loadData: function(filter) {
                 return $.ajax({
-                    type: "GET",
+                    type: "POST",
                     url: "/rfc/ajax_get_rfc_grid",
                     data: {'objuuid' : inventoryObject['objuuid']},
                     dataType: "JSON"
@@ -232,61 +256,38 @@ var editProcedure = function() {
         ]
     });
     
-    $("#relatedProcedureGrid").jsGrid({
-        height: "calc(50% - 5px)",
-        width: "calc(50% - 5px)",
-        autoload: true,
-        
-        deleteButton: true,
-        confirmDeleting: false,
-        
-        rowClass: function(item, itemIndex) {
-            return "client-" + itemIndex;
-        },
-        
-        rowDoubleClick: function(args) {
-            loadAndEditProcedure(args.item.objuuid);
-        },
- 
-        controller: {
-            loadData: function(filter) {
-                return $.ajax({
-                    type: "GET",
-                    url: "/procedure/ajax_get_related_procedure_grid",
-                    data: {'objuuid' : inventoryObject['objuuid']},
-                    dataType: "JSON"
-                });
-            },
-            insertItem: function(item) {
-                inventoryObject['procedures'].push(item.objuuid);
-                inventoryObject['changed'] = true;
-            },
-            deleteItem: function(item) {
-                inventoryObject['procedures'].splice(inventoryObject['procedures'].indexOf(item.objuuid), 1);
-                inventoryObject['changed'] = true;
-            }
-        },
-        
-        fields: [
-            {name : "name", type : "text", title : "Related Procedure Name"},
-            {name : "objuuid", type : "text", visible: false},
-            {type : "control" }
-        ],
-    });
+    loadRequiresGrid();
+    loadProvidesGrid();
+    
+    setTimeout(refreshJSGrids, 1000);
+}
+
+String.prototype.toHHMMSS = function () {
+    var sec_num = parseInt(this, 10); // don't forget the second param
+    var hours   = Math.floor(sec_num / 3600);
+    var minutes = Math.floor((sec_num - (hours * 3600)) / 60);
+    var seconds = sec_num - (hours * 3600) - (minutes * 60);
+
+    if (hours   < 10) {hours   = "0"+hours;}
+    if (minutes < 10) {minutes = "0"+minutes;}
+    if (seconds < 10) {seconds = "0"+seconds;}
+    return hours+':'+minutes+':'+seconds;
 }
 
 var viewProcedureResult = function(result) {
-    document.getElementById('section-header-' + result.host.objuuid).innerHTML = result.host.name + '<br>' + result.host.host + '<br>' + result.status.name;
+    document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML = result.procedure.name + '<br>' + result.host.name + ' ' + result.host.host + ' <br>' + new Date(result.stop * 1000) + ' [' + result.status.name + ']';
     
-    document.getElementById('section-body-' + result.host.objuuid).innerHTML = '<table id="section-body-procedure-header-' + result.host.objuuid + '"></table>';
+    document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML = '<table class="table" id="section-body-procedure-header-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
     
-    var table = document.getElementById('section-body-procedure-header-' + result.host.objuuid);
+    var table = document.getElementById('section-body-procedure-header-' + result.host.objuuid + '-' + result.procedure.objuuid);
     var row;
     var cell;
     
+    /*
     row = table.insertRow(-1);
     row.insertCell(-1).innerHTML = '<b>Procedure Name:</b>';
     row.insertCell(-1).innerHTML = result.procedure.name;
+    */
     
     row = table.insertRow(-1);
     row.insertCell(-1).innerHTML = '<b>Procedure Title:</b>';
@@ -296,25 +297,32 @@ var viewProcedureResult = function(result) {
     row.insertCell(-1).innerHTML = '<b>Procedure Description:</b>';
     row.insertCell(-1).innerHTML = result.procedure.description;
     
+    /*
     row = table.insertRow(-1);
     row.insertCell(-1).innerHTML = '<b>Procedure Start:</b>';
-    row.insertCell(-1).innerHTML = result.start;
+    row.insertCell(-1).innerHTML = new Date(result.start * 1000);
     
     row = table.insertRow(-1);
     row.insertCell(-1).innerHTML = '<b>Procedure Stop:</b>';
-    row.insertCell(-1).innerHTML = result.stop;
+    row.insertCell(-1).innerHTML = new Date(result.stop * 1000);
+    */
     
+    /*
     row = table.insertRow(-1);
     row.insertCell(-1).innerHTML = '<b>Procedure Status:</b>';
     row.insertCell(-1).innerHTML = result.status.name;
+    */
     
-    document.getElementById('section-body-' + result.host.objuuid).innerHTML += '<br><br><table id="section-body-rfcs-' + result.host.objuuid + '"></table>';
-    table = document.getElementById('section-body-rfcs-' + result.host.objuuid);
+    /*
+    document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br><br><table class="table" id="section-body-rfcs-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
+    table = document.getElementById('section-body-rfcs-' + result.host.objuuid + '-' + result.procedure.objuuid); 
+    */
     for(var i = 0; i < result.rfcs.length; i++) {
         row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>RFC Name:</b>';
+        row.insertCell(-1).innerHTML = '<b>RFC ' + result.rfcs[i].number + '</b>';
         row.insertCell(-1).innerHTML = result.rfcs[i].name;
         
+        /*
         row = table.insertRow(-1);
         row.insertCell(-1).innerHTML = '<b>RFC Number:</b>';
         row.insertCell(-1).innerHTML = result.rfcs[i].number;
@@ -337,49 +345,62 @@ var viewProcedureResult = function(result) {
         
         row = table.insertRow(-1);
         row.insertCell(-1).innerHTML = ' ';
+        */
     }
     
+    row = table.insertRow(-1);
+    row.insertCell(-1).innerHTML = '<b>Procedure Output:</b>';
+    cell = row.insertCell(-1);
+    for(var j = 0; j < result.output.length; j++)
+        cell.innerHTML += result.output[j] + '<br>';
+    
+    row = table.insertRow(-1);
+    row.insertCell(-1).innerHTML = '<b>Task Output:</b>';
+    row.insertCell(-1).innerHTML = '<div id="section-body-tasks-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></div>';
+    
+    //document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<div id="section-body-tasks-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></div>';
+    
     for(var i = 0; i < result.tasks.length; i++) {
-        document.getElementById('section-body-' + result.host.objuuid).innerHTML += '<br><br><table id="section-body-task-header-' + i + '-' + result.host.objuuid + '"></table>';
-        table = document.getElementById('section-body-task-header-' + i + '-' + result.host.objuuid);
-    
-        row = table.insertRow(-1);
-        cell = row.insertCell(-1);
-        cell.innerHTML = '<b>' + result.tasks[i].status.abbreviation + '</b>';
-        cell.style.color = '#' + result.tasks[i].status.cfg;
-        cell.style.backgroundColor = '#' + result.tasks[i].status.cbg;
+        title = document.createElement("div");
+        taskOutput = document.createElement("code");
+        taskOutput.setAttribute('style', 'width:100%');
         
-        cell = row.insertCell(-1);
-        cell.style.color = '#' + result.tasks[i].status.cfg;
-        cell.style.backgroundColor = '#' + result.tasks[i].status.cbg;
-    
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>Task Name:</b>';
-        row.insertCell(-1).innerHTML = result.tasks[i].name;
+        document.getElementById('section-body-tasks-' + result.host.objuuid + '-' + result.procedure.objuuid).appendChild(title);
+        document.getElementById('section-body-tasks-' + result.host.objuuid + '-' + result.procedure.objuuid).appendChild(taskOutput);
         
+        title.innerHTML = result.tasks[i].name + ' [Duration: ' + String(result.tasks[i].stop - result.tasks[i].start).toHHMMSS() + '] [' + result.tasks[i].status.name + ']';
+        title.style.color = '#' + result.tasks[i].status.cfg;
+        title.style.backgroundColor = '#' + result.tasks[i].status.cbg;
+        
+        /* cell = row.insertCell(-1);
+        cell.style.color = '#' + result.tasks[i].status.cfg;
+        cell.style.backgroundColor = '#' + result.tasks[i].status.cbg; */
+    
+        /*
         row = table.insertRow(-1);
         row.insertCell(-1).innerHTML = '<b>Task Start:</b>';
-        row.insertCell(-1).innerHTML = result.tasks[i].start;
+        row.insertCell(-1).innerHTML = new Date(result.tasks[i].start * 1000);
         
         row = table.insertRow(-1);
         row.insertCell(-1).innerHTML = '<b>Task Stop:</b>';
-        row.insertCell(-1).innerHTML = result.tasks[i].stop;
+        row.insertCell(-1).innerHTML = new Date(result.tasks[i].stop * 1000);
+        */
         
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>Task Status:</b>';
-        row.insertCell(-1).innerHTML = result.tasks[i].status.name;
-        
-        row = table.insertRow(-1);
-        row.insertCell(-1).innerHTML = '<b>Task Output:</b>';
-        cell = row.insertCell(-1);
         for(var j = 0; j < result.tasks[i].output.length; j++)
-            cell.innerHTML += result.tasks[i].output[j] + '<br>';
+            taskOutput.innerHTML += result.tasks[i].output[j] + '<br>';
         
-        document.getElementById('section-body-' + result.host.objuuid).innerHTML += '<br>';
+        //document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML += '<br>';
     }
     
-    document.getElementById('section-header-' + result.host.objuuid).style.color = '#' + result.status.cfg;
-    document.getElementById('section-header-' + result.host.objuuid).style.backgroundColor = '#' + result.status.cbg;
+    $('#section-body-tasks-' + result.host.objuuid + '-' + result.procedure.objuuid).accordion({
+        collapsible: true,
+        heightStyle: "content",
+        active: false
+    });
+    
+    
+    document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).style.color = '#' + result.status.cfg;
+    document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).style.backgroundColor = '#' + result.status.cbg;
 }
 
 var executeProcedure = function() {
@@ -388,26 +409,100 @@ var executeProcedure = function() {
     document.getElementById('body').innerHTML = '<div id="procedureResultAccordion"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
     
+    document.title = inventoryObject.name;
+    document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
+    $('.nav-tabs a[href="#body"]').tab('show');
+    
     for(var i = 0; i < inventoryObject.hosts.length; i++) {
-        addMessage('executing ' + inventoryObject.name + ' hstuuid: ' + inventoryObject.hosts[i]);
-        
-        document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + inventoryObject.hosts[i] + '"></div>';
-        document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + inventoryObject.hosts[i] + '"></code></pre>';
-        
-        $.ajax({
-            'url' : 'procedure/ajax_execute_procedure',
-            'dataType' : 'json',
-            'data' : {'prcuuid' : inventoryObject.objuuid, 'hstuuid' : inventoryObject.hosts[i]},
-            'success' : function(resp) {
-                //console.log(resp);
-                viewProcedureResult(resp);
-            }
-        });
+        document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + inventoryObject.hosts[i] + '-' + inventoryObject.objuuid + '"></div>';
+        document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + inventoryObject.hosts[i] + '-' + inventoryObject.objuuid + '"></code></pre>';
     }
     
     $("#procedureResultAccordion").accordion({
         collapsible: true,
-        heightStyle: "content",
-        active: false
+        heightStyle: "content"
     });
+    
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.innerHTML = "Run";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', 'runProcedure()');
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    link = document.createElement("a");
+    link.setAttribute("href", "#");
+    link.innerHTML = "Edit";
+    cell = document.createElement("li");
+    cell.setAttribute('onclick', 'editProcedure()');
+    cell.appendChild(link);
+    document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    updateProcedureTimer();
+    updateProcedureStateData();
+    
+    loadRequiresGrid();
+    loadProvidesGrid();
+}
+
+var runProcedure = function () {
+    for(var i = 0; i < inventoryObject.hosts.length; i++) {
+        $.ajax({
+            'url' : 'procedure/ajax_queue_procedure',
+            'dataType' : 'json',
+            'method': 'POST',
+            'data' : {
+                'prcuuid' : inventoryObject.objuuid, 
+                'hstuuid' : inventoryObject.hosts[i]
+            },
+            'success' : function(resp){
+                //$('.nav-tabs a[href="#queue"]').tab('show');
+            },
+            'failure' : function(resp){
+                $('.nav-tabs a[href="#console"]').tab('show');
+            }
+        });
+    }
+}
+
+var updateProcedureTimer = function() {
+    if(document.getElementById('procedureResultAccordion')) {
+        $.ajax({
+            'url' : 'flags/ajax_get',
+            'dataType' : 'json',
+            'method': 'POST',
+            'data' : {
+                //'key' : 'controller-' + inventoryObject.objuuid
+                'key' : 'results'
+            },
+            'success' : function(resp) {
+                if(procedureStateFlag != resp.value) {
+                    procedureStateFlag = resp.value;
+                    updateProcedureStateData();
+                }
+                
+                if(inventoryObject.type == 'procedure') {
+                    setTimeout(updateProcedureTimer, 1000);
+                }
+            },
+        });
+    }
+}
+
+var updateProcedureStateData = function() {
+    for(var i = 0; i < inventoryObject.hosts.length; i++) {
+        $.ajax({
+            'url' : 'results/ajax_get_procedure',
+            'dataType' : 'json',
+            'method': 'POST',
+            'data' : {
+                'prcuuid' : inventoryObject.objuuid,
+                'hstuuid' : inventoryObject.hosts[i]
+            },
+            'success' : function(resp) {
+                viewProcedureResult(resp);
+            }
+        });
+    }
 }
