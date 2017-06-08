@@ -7,6 +7,8 @@
 # (614) 692 2050
 #
 # 11/22/2016 Original construction
+# 06/05/2017 Replaced sleep with timer object
+# 06/06/2017 Optimized JSON responses
 ################################################################################
 
 MAX_JOBS = 10
@@ -14,8 +16,8 @@ MAX_JOBS_PER_HOST = 2
 
 import traceback
 
-from threading import Lock, Thread
-from time import time, sleep
+from threading import Lock, Thread, Timer
+from time import time
 from imp import new_module
 
 from .document import Collection
@@ -101,6 +103,8 @@ def del_job(jobuuid):
 
         
 def worker():
+    Timer(1, worker).start()
+    
     global_job_lock.acquire()
     
     running_jobs_count = 0
@@ -137,10 +141,6 @@ def worker():
         add_message("queue exception\n{0}".format(traceback.format_exc()))
 
     global_job_lock.release()
-    
-    sleep(1)
-    
-    Thread(target = worker).start()
 
 def get_jobs_grid():
     grid_data = []
@@ -203,6 +203,9 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
     inventory = Collection("inventory")
     results = RAMCollection("results")
     
+    for result in results.find(hstuuid = hstuuid, prcuuid = prcuuid):
+        result.destroy()
+    
     result = results.get_object()
     
     result.object['start'] = time()
@@ -221,9 +224,11 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
             result.object["output"] += traceback.format_exc().split("\n")
     
     host = inventory.get_object(hstuuid)
-    result.object['host'] = host.object
-    result.object['procedure'] = inventory.get_object(prcuuid).object
-
+    result.object['host'] = {}
+    result.object['host']['host'] = host.object['host']
+    result.object['host']['name'] = host.object['name']
+    result.object['host']['objuuid'] = hstuuid
+    
     create_procedure_execute_event(session, inventory.get_object(prcuuid), host)    
     
     tempmodule = new_module("tempmodule")
@@ -233,9 +238,68 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
     
     result.object["tasks"] = []
     
+    procedure = inventory.get_object(prcuuid)
+    result.object['procedure'] = {}
+    result.object['procedure']['name'] = procedure.object['name']
+    result.object['procedure']['title'] = procedure.object['title']
+    result.object['procedure']['description'] = procedure.object['description']
+    result.object['procedure']['objuuid'] = prcuuid
+    
     result.object['rfcs'] = []
-    for rfcuuid in inventory.get_object(prcuuid).object["rfcs"]:
+    for rfcuuid in procedure.object["rfcs"]:
         result.object['rfcs'].append(inventory.get_object(rfcuuid).object)
+    
+    try:
+        tskuuids = procedure.object["tasks"]
+    except Exception:
+        add_message(traceback.format_exc())
+        
+    try:
+        for seq_num, tskuuid in enumerate(tskuuids):
+            task_result = {}
+            task_result["name"] = inventory.get_object(tskuuid).object["name"]
+            task_result["start"] = None
+            task_result["stop"] = None
+            task_result["tskuuid"] = tskuuid
+            
+            try:
+                exec inventory.get_object(tskuuid).object["body"] + "\n" + status_code_body in tempmodule.__dict__
+                task = tempmodule.Task()
+            except Exception:
+                task = TaskError(tskuuid)
+            
+            task_result["output"] = task.output
+            try:
+                task_result["status"] = {}
+                task_result["status"]["name"] = status_data[task.status]["name"]
+                task_result["status"]["code"] = status_data[task.status]["code"]
+                task_result["status"]["abbreviation"] = status_data[task.status]["abbreviation"]
+                task_result["status"]["cfg"] = status_data[task.status]["cfg"]
+                task_result["status"]["cbg"] = status_data[task.status]["cbg"]
+                task_result["status"]["sfg"] = status_data[task.status]["sfg"]
+                task_result["status"]["sbg"] = status_data[task.status]["sbg"]
+            except Exception:
+                task_result['status'] = {"code" : task.status}
+            
+            result.object['tasks'].append(task_result)
+        
+        result.object['status'] = {
+            "name" : "Executing",
+            "code" : 0,
+            "abbreviation" : "EXEC",
+            "cfg" : "000000",
+            "cbg" : "FFFFFF",
+            "sfg" : "000000",
+            "sbg" : "999999"
+        }
+        
+        result.object['stop'] = None
+        result.set()
+        touch_flag("results")
+    except Exception:
+        add_message(traceback.format_exc())
+    
+    procedure_status = None
     
     try:
         try:
@@ -245,13 +309,13 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
         except Exception:
             result.object["output"] += traceback.format_exc().split("\n")
         
-        tskuuids = inventory.get_object(prcuuid).object["tasks"]
         for seq_num, tskuuid in enumerate(tskuuids):
-            task_result = inventory.get_object(tskuuid).object
+            task_result = {}
+            task_result["name"] = inventory.get_object(tskuuid).object["name"]
+            task_result["start"] = None
+            task_result["stop"] = None
             
             try:
-                result.object["output"].append("importing task {0}...".format(inventory.get_object(tskuuid).object["name"]))
-                
                 exec inventory.get_object(tskuuid).object["body"] + "\n" + status_code_body in tempmodule.__dict__
                 task = tempmodule.Task()
                 
@@ -272,9 +336,19 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
             
             task_result["output"] = task.output
             try:
-                task_result["status"] = status_data[task.status]
+                task_result["output"] = task.output
+            
+                task_result["status"] = {}
+                task_result["status"]["name"] = status_data[task.status]["name"]
+                task_result["status"]["code"] = status_data[task.status]["code"]
+                task_result["status"]["abbreviation"] = status_data[task.status]["abbreviation"]
+                task_result["status"]["cfg"] = status_data[task.status]["cfg"]
+                task_result["status"]["cbg"] = status_data[task.status]["cbg"]
+                task_result["status"]["sfg"] = status_data[task.status]["sfg"]
+                task_result["status"]["sbg"] = status_data[task.status]["sbg"]
+            
                 try:
-                    continue_flag = inventory.get_object(prcuuid).object["continue {0}".format(task.status)]
+                    continue_flag = procedure.object["continue {0}".format(task.status)]
                     
                     if continue_flag == 'false':
                         continue_flag = False
@@ -287,24 +361,28 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
                 task_result['status'] = {"code" : task.status}
                 continue_procedure = False
                 
-            result.object['tasks'].append(task_result)
+            result.object['tasks'][seq_num] = task_result
             
             if winning_status == None:
                 winning_status = task.status
-                result.object['status'] = task_result['status']
+                procedure_status = task_result['status']
             elif task.status < winning_status:
                 winning_status = task.status
-                result.object['status'] = task_result['status']
+                procedure_status = task_result['status']
             
             if jobuuid:
                 update_job(jobuuid, "progress", float(seq_num + 1) / float(len(tskuuids)))
+            
+            result.object['stop'] = time()
+            result.set()
+            touch_flag("results")
+        
+        if procedure_status != None:
+            result.object['status'] = procedure_status
+            result.set()
+            touch_flag("results")
     except Exception:
         add_message(traceback.format_exc())
-        
-    result.object['stop'] = time()
-
-    result.set()
-    touch_flag("results")
     
     return result.object
 

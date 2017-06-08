@@ -323,7 +323,7 @@ def create_procedure(parent_objuuid, name = "New Procedure", objuuid = None):
                             "params" : {"objuuid" : procedure.objuuid}}
             },
             "run" : {
-                "label" : "Run",
+                "label" : "Open",
                 "action" : {"method" : "run procedure",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : procedure.objuuid}}
@@ -427,7 +427,7 @@ def create_controller(parent_objuuid, name = "New Controller", objuuid = None):
                             "params" : {"objuuid" : controller.objuuid}}
             },
             "run" : {
-                "label" : "Run",
+                "label" : "Open",
                 "action" : {"method" : "run controller",
                             "route" : "inventory/ajax_get_object",
                             "params" : {"objuuid" : controller.objuuid}}

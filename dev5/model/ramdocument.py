@@ -7,6 +7,7 @@
 # (614) 692 2050
 #
 # 12/23/2016 Original construction
+# 06/06/2017 Fixed bug with object setting and index refreshing
 ################################################################################
 
 import pickle
@@ -59,11 +60,14 @@ class Document:
             
             RAM_DOCUMENT["TBL_JSON_OBJ"]["-".join([coluuid, objuuid])] = pickle.dumps(object)
             
+            keys = []
             for key, value in RAM_DOCUMENT["TBL_JSON_IDX"].iteritems():
                 if objuuid in key:
-                    del RAM_DOCUMENT["TBL_JSON_IDX"][key]
-
+                    keys.append(key)
             
+            for key in keys:
+                del RAM_DOCUMENT["TBL_JSON_IDX"][key]
+
             attributes = {}
             for key, value in RAM_DOCUMENT["TBL_JSON_ATTR"].iteritems():
                 if value["coluuid"] == coluuid:
