@@ -1,6 +1,7 @@
 var controllerStateFlag = null;
 var controllerStateData;
 var showControllerDetails = false;
+var controllerStateUpdating = false;
 
 /*
 var touchController = function() {
@@ -42,6 +43,8 @@ var addControllerHost = function(objuuid) {
 }
 
 var executeController = function() {
+    controllerStateUpdating = false;
+    
     document.title = inventoryObject.name;
     document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
     $('.nav-tabs a[href="#body"]').tab('show');
@@ -307,7 +310,7 @@ var drawCells = function(resultItems) {
         cell = document.getElementById('controller-cell-' + resultItems[i].host.objuuid + '-' + resultItems[i].procedure.objuuid);
 
         if(resultItems[i].stop) {
-            if(currentTime - resultItems[i].stop > 14400) {
+            if(currentTime - resultItems[i].stop > 3600) {
                 cell.style.color = '#' + resultItems[i].status.sfg;
                 cell.style.backgroundColor = '#' + resultItems[i].status.sbg;
             } else {
@@ -342,13 +345,17 @@ var updateControllerTimer = function() {
                 'key' : 'results'
             },
             'success' : function(resp) {
-                setTimeout(updateControllerTimer, 1000);
-                if(controllerStateFlag != resp.value) {
+                if(controllerStateFlag != resp.value && !controllerStateUpdating) {
                     controllerStateFlag = resp.value;
+                    controllerStateUpdating = true;
                     updateControllerStateData();
                 } else {
                     if(controllerStateData)
                         drawCells(controllerStateData);
+                }
+                
+                if(inventoryObject.type == 'controller') {
+                    setTimeout(updateControllerTimer, 1000);
                 }
             },
         });
@@ -362,6 +369,7 @@ var updateControllerStateData = function() {
         'method': 'POST',
         'data' : {'objuuid' : inventoryObject.objuuid},
         'success' : function(resp) {
+            controllerStateUpdating = false;
             controllerStateData = resp;
             drawCells(controllerStateData);
             drawResults(controllerStateData);
@@ -400,7 +408,7 @@ var editController = function() {
     
     link = document.createElement("a");
     link.setAttribute("href", "#");
-    link.innerHTML = "Run";
+    link.innerHTML = "Open";
     cell = document.createElement("li");
     cell.setAttribute('onclick', 'executeController()');
     cell.appendChild(link);

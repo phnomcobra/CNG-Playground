@@ -481,7 +481,10 @@ var updateProcedureTimer = function() {
                     procedureStateFlag = resp.value;
                     updateProcedureStateData();
                 }
-                setTimeout(updateProcedureTimer, 1000);
+                
+                if(inventoryObject.type == 'procedure') {
+                    setTimeout(updateProcedureTimer, 1000);
+                }
             },
         });
     }

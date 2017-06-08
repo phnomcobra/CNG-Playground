@@ -2,7 +2,6 @@ var drawQueue = function(resp) {
     queue = document.getElementById('queue');
     queue.innerHTML = '<table class="table" id="queueTable"></table>';
     
-    console.log(resp);
     var table = document.getElementById('queueTable');
     var row;
     var cell;
