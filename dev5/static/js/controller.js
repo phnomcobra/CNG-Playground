@@ -345,6 +345,10 @@ var updateControllerTimer = function() {
                 'key' : 'results'
             },
             'success' : function(resp) {
+                if(inventoryObject.type == 'controller') {
+                    setTimeout(updateControllerTimer, 1000);
+                }
+
                 if(controllerStateFlag != resp.value && !controllerStateUpdating) {
                     controllerStateFlag = resp.value;
                     controllerStateUpdating = true;
@@ -352,10 +356,6 @@ var updateControllerTimer = function() {
                 } else {
                     if(controllerStateData)
                         drawCells(controllerStateData);
-                }
-                
-                if(inventoryObject.type == 'controller') {
-                    setTimeout(updateControllerTimer, 1000);
                 }
             },
         });
