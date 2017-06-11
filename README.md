@@ -1,4 +1,4 @@
-# Project Name
+# ValARIE WebApp
 
 TODO: Write a project description
 
@@ -7,6 +7,15 @@ TODO: Write a project description
 ValARIE Web App is best leveraged through the use of `virtualenv` and is the recommended method
 for running, testing, and contributing. 
 
+Install virtualenv: `pip install virtualenv`
+
+Create a virtualenv: `virtualenv env`
+
+Activate virtualenv: `env/bin/activate`
+
+Install project requirements: `pip install -r requirements.txt` 
+
+That's it. You're ready to go! 
 
 ## Usage
 
