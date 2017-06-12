@@ -15,9 +15,12 @@ Activate virtualenv: `env/bin/activate`
 
 Install project requirements: `pip install -r requirements.txt` 
 
+Cut some certs: `openssl req -x509 -newkey rsa:4096 -keyout privkey.pem -out cert.pem -days 365 -nodes`
+
 That's it. You're ready to go! 
 
 ## Usage
+Fire up the CherryPy server: `python start.py`
 
 TODO: Write usage instructions
 
