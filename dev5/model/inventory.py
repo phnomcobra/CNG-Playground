@@ -139,6 +139,12 @@ def create_container(parent_objuuid, name = "New Container", objuuid = None):
                             "route" : "inventory/ajax_create_host",
                             "params" : {"objuuid" : container.objuuid}}
             },
+            "new host group" : {
+                "label" : "New Host Group",
+                "action" : {"method" : "create host group",
+                            "route" : "inventory/ajax_create_host_group",
+                            "params" : {"objuuid" : container.objuuid}}
+            },
             "new console" : {
                 "label" : "New Console",
                 "action" : {"method" : "create console",
@@ -241,6 +247,52 @@ def create_task(parent_objuuid, name = "New Task", objuuid = None):
     
     task.set()
     return task
+
+def create_host_group(parent_objuuid, name = "New Host Group", objuuid = None):
+    collection = Collection("inventory")
+    group = collection.get_object(objuuid)
+    group.object = {
+        "type" : "host group",
+        "parent" : parent_objuuid,
+        "children" : [],
+        "name" : name,
+        "hosts" : [],
+        "icon" : "/images/host_group_icon.png",
+        "context" : {
+            "delete" : {
+                "label" : "Delete",
+                "action" : {"method" : "delete node",
+                            "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : group.objuuid}}
+            },
+            "edit" : {
+                "label" : "Edit",
+                "action" : {"method" : "edit host group",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : group.objuuid}}
+            },
+            "copy" : {
+                "label" : "Copy",
+                "action" : {"method" : "copy node",
+                            "route" : "inventory/ajax_copy_object",
+                            "params" : {"objuuid" : group.objuuid}}
+            },
+            "create link" : {
+                "label" : "Create Link",
+                "action" : {"method" : "create link",
+                            "route" : "inventory/ajax_create_link",
+                            "params" : {"objuuid" : group.objuuid}}
+            }
+        },
+        "accepts" : []
+    }
+    
+    parent = collection.get_object(parent_objuuid)
+    parent.object["children"].append(group.objuuid)
+    parent.set()
+    
+    group.set()
+    return group
 
 def create_schedule(parent_objuuid, name = "New Schedule", objuuid = None):
     collection = Collection("inventory")

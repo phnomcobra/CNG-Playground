@@ -62,7 +62,21 @@ def get_host_grid(prcuuid):
         host = collection.get_object(hstuuid)
         
         if "type" in host.object:
-            grid_data.append({"name" : host.object["name"], "host" : host.object["host"], "objuuid" : host.object["objuuid"]})
+            if host.object["type"] == "host":
+                grid_data.append({"type" : host.object["type"], \
+                                  "name" : host.object["name"], \
+                                  "host" : host.object["host"], \
+                                  "objuuid" : host.object["objuuid"]})
+            elif host.object["type"] == "host group":
+                hosts = []
+                
+                for uuid in host.object["hosts"]:
+                    hosts.append(collection.get_object(uuid).object["name"])
+                
+                grid_data.append({"type" : host.object["type"], \
+                                  "name" : host.object["name"], \
+                                  "host" : str("<br>").join(hosts), \
+                                  "objuuid" : host.object["objuuid"]})
         else:
             add_message("host {0} is missing!".format(hstuuid))
             grid_data.append({"name" : "MISSING!", "host" : "?.?.?.?", "objuuid" : hstuuid})
@@ -174,19 +188,22 @@ def queue_procedure(hstuuid, prcuuid, session):
     
     if "type" in host.object and \
        "type" in procedure.object:
-    
-        job = {
-            "jobuuid" : jobuuid,
-            "host" : host.object,
-            "procedure" : procedure.object,
-            "session" : session,
-            "process" : None,
-            "queue time" : time(),
-            "start time" : None,
-            "progress" : 0,
-        }
+        if host.object["type"] == "host":
+            job = {
+                "jobuuid" : jobuuid,
+                "host" : host.object,
+                "procedure" : procedure.object,
+                "session" : session,
+                "process" : None,
+                "queue time" : time(),
+                "start time" : None,
+                "progress" : 0,
+            }
         
-        set_job(jobuuid, job)
+            set_job(jobuuid, job)
+        elif host.object["type"] == "host group":
+            for hstuuid in host.object["hosts"]:
+                queue_procedure(hstuuid, prcuuid, session)
 
 class TaskError:
     def __init__(self, uuid):

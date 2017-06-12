@@ -26,11 +26,25 @@ def delete(objuuid):
 def get_controller_results(ctruuid):
     results = RAMCollection("results")
     
-    controller = Collection("inventory").get_object(ctruuid)
+    collection = Collection("inventory")
+    
+    controller = collection.get_object(ctruuid)
     
     controller_results = []
     
+    hstuuids = []
     for hstuuid in controller.object["hosts"]:
+        o = collection.get_object(hstuuid)
+        
+        if o.object["type"] == "host":
+            if hstuuid not in hstuuids:
+                hstuuids.append(hstuuid)
+        elif o.object["type"] == "host group":
+            for uuid in o.object["hosts"]:
+                if uuid not in hstuuids:
+                    hstuuids.append(uuid)
+    
+    for hstuuid in hstuuids:
         for prcuuid in controller.object["procedures"]:
             try:
                 controller_results.append(results.find(hstuuid = hstuuid, prcuuid = prcuuid)[0].object)
@@ -40,10 +54,30 @@ def get_controller_results(ctruuid):
     return controller_results
 
 def get_procedure_result(prcuuid, hstuuid):
-    try:
-        return RAMCollection("results").find(hstuuid = hstuuid, prcuuid = prcuuid)[0].object
-    except IndexError:
-        return None
+    collection = Collection("inventory")
+    
+    results = RAMCollection("results")
+    
+    result_objects = []
+    
+    host = collection.get_object(hstuuid)
+        
+    hstuuids = []
+    if host.object["type"] == "host":
+        if hstuuid not in hstuuids:
+            hstuuids.append(hstuuid)
+    elif host.object["type"] == "host group":
+        for hstuuid in host.object["hosts"]:
+            if hstuuid not in hstuuids:
+                hstuuids.append(hstuuid)
+
+    for hstuuid in hstuuids:
+        try:
+            result_objects.append(results.find(hstuuid = hstuuid, prcuuid = prcuuid)[0].object)
+        except IndexError:
+            pass
+    
+    return result_objects
     
 
 def worker():
