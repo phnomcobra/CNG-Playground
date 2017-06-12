@@ -1,0 +1,5 @@
+cherrypy==8.8.0
+jinja2
+pycrypto
+paramiko
+pymysql
