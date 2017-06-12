@@ -126,7 +126,11 @@ var editTaskHosts = function() {
         
         editing: true,
         onItemEditing: function(args) {
-            loadAndEditHost(args.item.objuuid);
+            if(args.item.type == 'host') {
+                loadAndEditHost(args.item.objuuid);
+            } else if (args.item.type == 'host group') {
+                loadAndEditHostGroup(args.item.objuuid);
+            }
         },
         
         rowClass: function(item, itemIndex) {

@@ -37,7 +37,11 @@ var addControllerHost = function(objuuid) {
         'method': 'POST',
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
-            $("#hostGrid").jsGrid("insertItem", {'name' : resp['name'], 'objuuid' : resp['objuuid'], 'host' : resp['host']});
+            if(resp.type == 'host') {
+                $("#hostGrid").jsGrid("insertItem", {'type' : resp['type'], 'name' : resp['name'], 'objuuid' : resp['objuuid'], 'host' : resp['host']});
+            } else if(resp.type == 'host group') {
+                $("#hostGrid").jsGrid("insertItem", {'type' : resp['type'], 'name' : resp['name'], 'objuuid' : resp['objuuid'], 'host' : resp['hosts'].join('<br>')});
+            }
         }
     });
 }
@@ -497,7 +501,11 @@ var editController = function() {
         
         editing: true,
         onItemEditing: function(args) {
-            loadAndEditHost(args.item.objuuid);
+            if(args.item.type == 'host') {
+                loadAndEditHost(args.item.objuuid);
+            } else if (args.item.type == 'host group') {
+                loadAndEditHostGroup(args.item.objuuid);
+            }
         },   
         sorting: false,
  

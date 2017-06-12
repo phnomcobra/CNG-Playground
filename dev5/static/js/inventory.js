@@ -70,6 +70,10 @@ $(document).on('dnd_stop.vakata', function (e, data) {
                               inventoryObject['hosts'].indexOf(resp['objuuid']) == -1 &&
                               document.getElementById('hostGrid')) {
                         addControllerHost(resp['objuuid']);
+                    } else if(resp['type'] == 'host group' &&
+                              inventoryObject['hosts'].indexOf(resp['objuuid']) == -1 &&
+                              document.getElementById('hostGrid')) {
+                        addControllerHost(resp['objuuid']);
                     } else if(resp['type'] == 'procedure' &&
                               inventoryObject['procedures'].indexOf(resp['objuuid']) == -1 &&
                               document.getElementById('procedureGrid')) {
@@ -276,6 +280,12 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         createNode(resp);
                                         editTask();
                                         $('.nav-tabs a[href="#attributes"]').tab('show');
+                                    } else if(obj.item.method == 'create host group') {
+                                        addMessage('create host group success');
+                                        inventoryObject = resp;
+                                        createNode(resp);
+                                        editHostGroup();
+                                        $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'create schedule') {
                                         addMessage('create schedule success');
                                         inventoryObject = resp;
@@ -328,6 +338,10 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit task success");
                                         inventoryObject = resp;
                                         editTaskHosts();
+                                    } else if(obj.item.method == 'edit host group') {
+                                        addMessage("edit task success");
+                                        inventoryObject = resp;
+                                        editHostGroup();
                                     } else if(obj.item.method == 'edit container') {
                                         addMessage("edit container success");
                                         inventoryObject = resp;

@@ -176,7 +176,11 @@ var editProcedure = function() {
         
         editing: true,
         onItemEditing: function(args) {
-            loadAndEditHost(args.item.objuuid);
+            if(args.item.type == 'host') {
+                loadAndEditHost(args.item.objuuid);
+            } else if (args.item.type == 'host group') {
+                loadAndEditHostGroup(args.item.objuuid);
+            }
         },
         
         rowClass: function(item, itemIndex) {
@@ -403,6 +407,18 @@ var viewProcedureResult = function(result) {
     document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).style.backgroundColor = '#' + result.status.cbg;
 }
 
+var insertProcedureResultDiv = function(hstuuid) {
+    document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + hstuuid + '-' + inventoryObject.objuuid + '"></div>';
+    document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + hstuuid + '-' + inventoryObject.objuuid + '"></code></pre>';
+}
+
+var initProcedureResultAccordion = function() {
+    $("#procedureResultAccordion").accordion({
+        collapsible: true,
+        heightStyle: "content"
+    });
+}
+
 var executeProcedure = function() {
     populateProcedureAttributes();
     
@@ -414,14 +430,22 @@ var executeProcedure = function() {
     $('.nav-tabs a[href="#body"]').tab('show');
     
     for(var i = 0; i < inventoryObject.hosts.length; i++) {
-        document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + inventoryObject.hosts[i] + '-' + inventoryObject.objuuid + '"></div>';
-        document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + inventoryObject.hosts[i] + '-' + inventoryObject.objuuid + '"></code></pre>';
+        $.ajax({
+            'url' : 'inventory/ajax_get_object',
+            'dataType' : 'json',
+            'method': 'POST',
+            'data' : {'objuuid' : inventoryObject.hosts[i]},
+            'success' : function(resp) {
+                if(resp.type == 'host') {
+                    insertProcedureResultDiv(resp.objuuid);
+                } else if(resp.type == 'host group') {
+                    for(var j = 0; j < resp.hosts.length; j++) {
+                        insertProcedureResultDiv(resp.hosts[j]);
+                    }
+                }
+            }
+        });
     }
-    
-    $("#procedureResultAccordion").accordion({
-        collapsible: true,
-        heightStyle: "content"
-    });
     
     link = document.createElement("a");
     link.setAttribute("href", "#");
@@ -438,6 +462,8 @@ var executeProcedure = function() {
     cell.setAttribute('onclick', 'editProcedure()');
     cell.appendChild(link);
     document.getElementById('menuBarDynamic').appendChild(cell);
+    
+    setTimeout(initProcedureResultAccordion, 1000);
     
     updateProcedureTimer();
     updateProcedureStateData();
@@ -501,7 +527,10 @@ var updateProcedureStateData = function() {
                 'hstuuid' : inventoryObject.hosts[i]
             },
             'success' : function(resp) {
-                viewProcedureResult(resp);
+                for(var j = 0; j < resp.length; j++) {
+                    viewProcedureResult(resp[j]);
+                    
+                }
             }
         });
     }
