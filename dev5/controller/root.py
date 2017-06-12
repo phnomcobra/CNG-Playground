@@ -16,6 +16,7 @@ from ..view.index import index_view
 
 from .inventory import Inventory
 from .messaging import Messaging
+from .hostgroup import HostGroup
 from .procedure import Procedure
 from .controller import Controller
 from .eventlog import EventLog
@@ -40,6 +41,7 @@ class Root(object):
     auth = Auth()
     terminal = Terminal()
     eventlog = EventLog()
+    hostgroup = HostGroup()
     
     @cherrypy.expose
     @require()

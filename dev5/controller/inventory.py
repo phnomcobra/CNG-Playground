@@ -43,6 +43,7 @@ from ..model.inventory import get_child_nodes, \
                               create_schedule, \
                               create_status_code, \
                               create_host, \
+                              create_host_group, \
                               create_console, \
                               get_dependencies, \
                               copy_object, \
@@ -129,6 +130,19 @@ class Inventory(object):
             create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], host)
         
             return json.dumps(host.object)
+        except Exception:
+            add_message(traceback.format_exc())
+    
+    @cherrypy.expose
+    @require()
+    def ajax_create_host_group(self, objuuid):
+        add_message("inventory controller: create host group: {0}".format(objuuid))
+        try:
+            group = create_host_group(objuuid, "New Host Group")
+            
+            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], group)
+        
+            return json.dumps(group.object)
         except Exception:
             add_message(traceback.format_exc())
     
