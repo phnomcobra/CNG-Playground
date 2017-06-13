@@ -848,7 +848,8 @@ def get_provided_objects_grid(objuuid):
                 if collection.get_object(hstuuid).object["console"] == objuuid:
                     required_objuuids.append(hstuuid)
 
-        elif object["type"] in ["host", "host group"]:
+        elif object["type"] == "host" or \
+             object["type"] == "host group":
             for tskuuid in collection.find_objuuids(type = "task"):
                 if objuuid in collection.get_object(tskuuid).object["hosts"]:
                     required_objuuids.append(tskuuid)
