@@ -17,6 +17,8 @@ var loadRequiresGrid = function(){
                 loadAndEditProcedure(args.item.objuuid);
             } else if(args.item.type == "controller") {
                 loadAndEditController(args.item.objuuid);
+            } else if(args.item.type == "host group") {
+                loadAndEditHostGroup(args.item.objuuid);
             }
         },
         
@@ -62,6 +64,8 @@ var loadProvidesGrid = function(){
                 loadAndEditProcedure(args.item.objuuid);
             } else if(args.item.type == "controller") {
                 loadAndEditController(args.item.objuuid);
+            } else if(args.item.type == "host group") {
+                loadAndEditHostGroup(args.item.objuuid);
             }
         },
         

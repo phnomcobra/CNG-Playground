@@ -212,6 +212,31 @@ var editProcedure = function() {
             {name : "objuuid", type : "text", visible: false},
             {type : "control" }
         ],
+        
+        onRefreshed: function() {
+            var $gridData = $("#hostGrid .jsgrid-grid-body tbody");
+ 
+            $gridData.sortable({
+                update: function(e, ui) {
+                    // array of indexes
+                    var clientIndexRegExp = /\s*client-(\d+)\s*/;
+                    var indexes = $.map($gridData.sortable("toArray", { attribute: "class" }), function(classes) {
+                        return clientIndexRegExp.exec(classes)[1];
+                    });
+ 
+                    // arrays of items
+                    var items = $.map($gridData.find("tr"), function(row) {
+                        return $(row).data("JSGridItem");
+                    });
+                    
+                    inventoryObject['hosts'] = [];
+                    for(var i in items) {
+                        inventoryObject['hosts'].push(items[i].objuuid);
+                    }
+                    inventoryObject['changed'] = true;
+                }
+            });
+        }
     });
     
     $("#RFCGrid").jsGrid({
@@ -408,8 +433,10 @@ var viewProcedureResult = function(result) {
 }
 
 var insertProcedureResultDiv = function(hstuuid) {
-    document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + hstuuid + '-' + inventoryObject.objuuid + '"></div>';
-    document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + hstuuid + '-' + inventoryObject.objuuid + '"></code></pre>';
+    if(!document.getElementById('section-header-' + hstuuid + '-' + inventoryObject.objuuid)) {
+        document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + hstuuid + '-' + inventoryObject.objuuid + '"></div>';
+        document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + hstuuid + '-' + inventoryObject.objuuid + '"></code></pre>';
+    }
 }
 
 var initProcedureResultAccordion = function() {
@@ -419,7 +446,32 @@ var initProcedureResultAccordion = function() {
     });
 }
 
+var discoveredHostGroups = [];
+
+var populateProcedureResultDivs = function(hstuuid) {
+    $.ajax({
+        'url' : 'inventory/ajax_get_object',
+        'dataType' : 'json',
+        'method': 'POST',
+        'data' : {'objuuid' : hstuuid},
+        'success' : function(resp) {
+            if(resp.type == 'host') {
+                insertProcedureResultDiv(resp.objuuid);
+            } else if(resp.type == 'host group') {
+                if(discoveredHostGroups.indexOf(resp.objuuid) == -1) {
+                    for(var j = 0; j < resp.hosts.length; j++) {
+                        populateProcedureResultDivs(resp.hosts[j]);
+                    }
+                }
+                discoveredHostGroups.push(resp.objuuid);
+            }
+        }
+    });
+}
+
 var executeProcedure = function() {
+    discoveredHostGroups = [];
+    
     populateProcedureAttributes();
     
     document.getElementById('body').innerHTML = '<div id="procedureResultAccordion"></div>';
@@ -430,21 +482,7 @@ var executeProcedure = function() {
     $('.nav-tabs a[href="#body"]').tab('show');
     
     for(var i = 0; i < inventoryObject.hosts.length; i++) {
-        $.ajax({
-            'url' : 'inventory/ajax_get_object',
-            'dataType' : 'json',
-            'method': 'POST',
-            'data' : {'objuuid' : inventoryObject.hosts[i]},
-            'success' : function(resp) {
-                if(resp.type == 'host') {
-                    insertProcedureResultDiv(resp.objuuid);
-                } else if(resp.type == 'host group') {
-                    for(var j = 0; j < resp.hosts.length; j++) {
-                        insertProcedureResultDiv(resp.hosts[j]);
-                    }
-                }
-            }
-        });
+        populateProcedureResultDivs(inventoryObject.hosts[i]);
     }
     
     link = document.createElement("a");

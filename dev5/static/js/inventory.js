@@ -91,6 +91,10 @@ $(document).on('dnd_stop.vakata', function (e, data) {
                                   inventoryObject['hosts'].indexOf(resp['target']) == -1 &&
                                   document.getElementById('hostGrid')) {
                             addControllerHost(resp['target']);
+                        } else if(resp['target type'] == 'host group' &&
+                                  inventoryObject['hosts'].indexOf(resp['target']) == -1 &&
+                                  document.getElementById('hostGrid')) {
+                            addControllerHost(resp['target']);
                         } else if(resp['target type'] == 'procedure' &&
                                   inventoryObject['procedures'].indexOf(resp['target']) == -1 &&
                                   document.getElementById('procedureGrid')) {
@@ -120,6 +124,10 @@ $(document).on('dnd_stop.vakata', function (e, data) {
                               inventoryObject['hosts'].indexOf(resp['objuuid']) == -1 &&
                               document.getElementById('hostGrid')) {
                         addControllerHost(resp['objuuid']);
+                    } else if(resp['type'] == 'host group' &&
+                              inventoryObject['hosts'].indexOf(resp['objuuid']) == -1 &&
+                              document.getElementById('hostGrid')) {
+                        addControllerHost(resp['objuuid']);
                     } else if(resp['type'] == 'procedure' &&
                               inventoryObject['procedures'].indexOf(resp['objuuid']) == -1 &&
                               document.getElementById('procedureGrid')) {
@@ -134,6 +142,10 @@ $(document).on('dnd_stop.vakata', function (e, data) {
                                   document.getElementById('RFCGrid')) {
                             addProcedureRFC(resp['target']);
                         } else if(resp['target type'] == 'host' &&
+                                  inventoryObject['hosts'].indexOf(resp['target']) == -1 &&
+                                  document.getElementById('hostGrid')) {
+                            addControllerHost(resp['target']);
+                        } else if(resp['target type'] == 'host group' &&
                                   inventoryObject['hosts'].indexOf(resp['target']) == -1 &&
                                   document.getElementById('hostGrid')) {
                             addControllerHost(resp['target']);

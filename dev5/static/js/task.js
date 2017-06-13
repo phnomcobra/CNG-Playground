@@ -1,3 +1,5 @@
+var executedHosts = [];
+
 var editTask = function() {
     document.getElementById('body').innerHTML = '<div id="aceInstance"></div>';
     document.getElementById('menuBarDynamic').innerHTML = '';
@@ -66,6 +68,50 @@ var viewTaskResult = function(result) {
     document.getElementById('section-header-' + result.host.objuuid).style.backgroundColor = '#' + result.status.cbg;
 }
 
+var executeTaskOnHost = function(hstuuid) {
+    executedHosts.push(hstuuid);
+    
+    $.ajax({
+        'url' : 'inventory/ajax_get_object',
+        'dataType' : 'json',
+        'method': 'POST',
+        'data' : {'objuuid' : hstuuid},
+        'success' : function(resp) {
+            if(resp.type == 'host') {
+                if(!document.getElementById('section-header-' + resp.objuuid)) {
+                    document.getElementById('taskResultAccordion').innerHTML += '<div id="section-header-' + resp.objuuid + '"></div>';
+                    document.getElementById('taskResultAccordion').innerHTML += '<pre><code id="section-body-' + resp.objuuid + '"></code></pre>';
+                    
+                    addMessage('executing ' + inventoryObject.name + ' host: ' + resp.name + ' (' + resp.host + ')');
+        
+                    $.ajax({
+                        'url' : 'task/ajax_execute_task',
+                        'dataType' : 'json',
+                        'method': 'POST',
+                        'data' : {'tskuuid' : inventoryObject.objuuid, 'hstuuid' : resp.objuuid},
+                        'success' : function(resp) {
+                            viewTaskResult(resp);
+                        }
+                    });
+                }
+            } else if(resp.type == 'host group') { 
+                for(var j = 0; j < resp.hosts.length; j++) {
+                    if(executedHosts.indexOf(resp.hosts[j]) == -1) {
+                        executeTaskOnHost(resp.hosts[j]);
+                    }
+                }
+            }
+        }
+    });
+}
+
+var initTaskResultAccordion = function() {
+    $("#taskResultAccordion").accordion({
+        collapsible: true,
+        heightStyle: "content"
+    });
+}
+
 var executeTask = function() {
     initAttributes();
     addAttributeText('Task UUID', 'objuuid');
@@ -77,28 +123,13 @@ var executeTask = function() {
     
     document.getElementById('body').innerHTML = '<div id="taskResultAccordion"></div>';
     
+    executedHosts = [];
+    
     for(var i = 0; i < inventoryObject.hosts.length; i++) {
-        addMessage('executing ' + inventoryObject.name + ' hstuuid: ' + inventoryObject.hosts[i]);
-        
-        document.getElementById('taskResultAccordion').innerHTML += '<div id="section-header-' + inventoryObject.hosts[i] + '"></div>';
-        document.getElementById('taskResultAccordion').innerHTML += '<pre><code id="section-body-' + inventoryObject.hosts[i] + '"></code></pre>';
-        
-        $.ajax({
-            'url' : 'task/ajax_execute_task',
-            'dataType' : 'json',
-            'method': 'POST',
-            'data' : {'tskuuid' : inventoryObject.objuuid, 'hstuuid' : inventoryObject.hosts[i]},
-            'success' : function(resp) {
-                //console.log(resp);
-                viewTaskResult(resp);
-            }
-        });
+        executeTaskOnHost(inventoryObject.hosts[i]);
     }
     
-    $("#taskResultAccordion").accordion({
-        collapsible: true,
-        heightStyle: "content"
-    });
+    setTimeout(initTaskResultAccordion, 1000);
     
     loadRequiresGrid();
     loadProvidesGrid();
@@ -162,6 +193,31 @@ var editTaskHosts = function() {
             {name : "objuuid", type : "text", visible: false},
             {type : "control" }
         ],
+        
+        onRefreshed: function() {
+            var $gridData = $("#hostGrid .jsgrid-grid-body tbody");
+ 
+            $gridData.sortable({
+                update: function(e, ui) {
+                    // array of indexes
+                    var clientIndexRegExp = /\s*client-(\d+)\s*/;
+                    var indexes = $.map($gridData.sortable("toArray", { attribute: "class" }), function(classes) {
+                        return clientIndexRegExp.exec(classes)[1];
+                    });
+ 
+                    // arrays of items
+                    var items = $.map($gridData.find("tr"), function(row) {
+                        return $(row).data("JSGridItem");
+                    });
+                    
+                    inventoryObject['hosts'] = [];
+                    for(var i in items) {
+                        inventoryObject['hosts'].push(items[i].objuuid);
+                    }
+                    inventoryObject['changed'] = true;
+                }
+            });
+        }
     });
     
     loadRequiresGrid();
