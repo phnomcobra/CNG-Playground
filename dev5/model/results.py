@@ -23,6 +23,22 @@ def delete(objuuid):
     collection = RAMCollection("results")
     collection.get_object(objuuid).destroy()
 
+def get_hosts(hstuuid, hstuuids, grpuuids, inventory):
+    o = inventory.get_object(hstuuid)
+        
+    if o.object["type"] == "host":
+        if hstuuid not in hstuuids:
+            hstuuids.append(hstuuid)
+    elif o.object["type"] == "host group":
+        for uuid in o.object["hosts"]:
+            if inventory.get_object(uuid).object["type"] == "host group":
+                if uuid not in grpuuids:
+                    grpuuids.append(uuid)
+                    get_hosts(uuid, hstuuids, grpuuids, inventory)
+            elif inventory.get_object(uuid).object["type"] == "host":
+                if uuid not in hstuuids:
+                    hstuuids.append(uuid)
+    
 def get_controller_results(ctruuid):
     results = RAMCollection("results")
     
@@ -33,16 +49,9 @@ def get_controller_results(ctruuid):
     controller_results = []
     
     hstuuids = []
+    grpuuids = []
     for hstuuid in controller.object["hosts"]:
-        o = collection.get_object(hstuuid)
-        
-        if o.object["type"] == "host":
-            if hstuuid not in hstuuids:
-                hstuuids.append(hstuuid)
-        elif o.object["type"] == "host group":
-            for uuid in o.object["hosts"]:
-                if uuid not in hstuuids:
-                    hstuuids.append(uuid)
+        get_hosts(hstuuid, hstuuids, grpuuids, collection)
     
     for hstuuid in hstuuids:
         for prcuuid in controller.object["procedures"]:
@@ -63,13 +72,8 @@ def get_procedure_result(prcuuid, hstuuid):
     host = collection.get_object(hstuuid)
         
     hstuuids = []
-    if host.object["type"] == "host":
-        if hstuuid not in hstuuids:
-            hstuuids.append(hstuuid)
-    elif host.object["type"] == "host group":
-        for hstuuid in host.object["hosts"]:
-            if hstuuid not in hstuuids:
-                hstuuids.append(hstuuid)
+    grpuuids = []
+    get_hosts(hstuuid, hstuuids, grpuuids, collection)
 
     for hstuuid in hstuuids:
         try:

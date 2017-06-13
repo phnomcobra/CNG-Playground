@@ -813,6 +813,8 @@ def get_required_objects_grid(objuuid):
             required_objuuids.append(object["console"])
         elif object["type"] == "task":
             required_objuuids += object["hosts"]
+        elif object["type"] == "host group":
+            required_objuuids += object["hosts"]
         elif object["type"] == "procedure":
             required_objuuids += object["hosts"]
             required_objuuids += object["rfcs"]
@@ -846,7 +848,7 @@ def get_provided_objects_grid(objuuid):
                 if collection.get_object(hstuuid).object["console"] == objuuid:
                     required_objuuids.append(hstuuid)
 
-        elif object["type"] == "host":
+        elif object["type"] in ["host", "host group"]:
             for tskuuid in collection.find_objuuids(type = "task"):
                 if objuuid in collection.get_object(tskuuid).object["hosts"]:
                     required_objuuids.append(tskuuid)
@@ -858,7 +860,11 @@ def get_provided_objects_grid(objuuid):
             for ctruuid in collection.find_objuuids(type = "controller"):
                 if objuuid in collection.get_object(ctruuid).object["hosts"]:
                     required_objuuids.append(ctruuid)
-
+            
+            for grpuuid in collection.find_objuuids(type = "host group"):
+                if objuuid in collection.get_object(grpuuid).object["hosts"]:
+                    required_objuuids.append(grpuuid)
+        
         elif object["type"] == "rfc":
             for prcuuid in collection.find_objuuids(type = "procedure"):
                 if objuuid in collection.get_object(prcuuid).object["rfcs"]:

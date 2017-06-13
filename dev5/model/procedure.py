@@ -176,19 +176,38 @@ def get_jobs_grid():
     
     return grid_data
 
-def queue_procedure(hstuuid, prcuuid, session):
-    add_message("Queued host: {0}, procedure {1}...".format(hstuuid, prcuuid))
+def get_hosts(hstuuid, hstuuids, grpuuids, inventory):
+    o = inventory.get_object(hstuuid)
+        
+    if o.object["type"] == "host":
+        if hstuuid not in hstuuids:
+            hstuuids.append(hstuuid)
+    elif o.object["type"] == "host group":
+        for uuid in o.object["hosts"]:
+            if inventory.get_object(uuid).object["type"] == "host group":
+                if uuid not in grpuuids:
+                    grpuuids.append(uuid)
+                    get_hosts(uuid, hstuuids, grpuuids, inventory)
+            elif inventory.get_object(uuid).object["type"] == "host":
+                if uuid not in hstuuids:
+                    hstuuids.append(uuid)
     
+def queue_procedure(hstuuid, prcuuid, session):
     inventory = Collection("inventory")
     
-    jobuuid = sucky_uuid()
-    
-    host = inventory.get_object(hstuuid)
     procedure = inventory.get_object(prcuuid)
     
-    if "type" in host.object and \
-       "type" in procedure.object:
+    hstuuids = []
+    grpuuids = []
+    get_hosts(hstuuid, hstuuids, grpuuids, inventory)
+    
+    for hstuuid in hstuuids:
+        add_message("Queued host: {0}, procedure {1}...".format(hstuuid, prcuuid))
+        
+        host = inventory.get_object(hstuuid)
         if host.object["type"] == "host":
+            jobuuid = sucky_uuid()
+            
             job = {
                 "jobuuid" : jobuuid,
                 "host" : host.object,
@@ -201,10 +220,7 @@ def queue_procedure(hstuuid, prcuuid, session):
             }
         
             set_job(jobuuid, job)
-        elif host.object["type"] == "host group":
-            for hstuuid in host.object["hosts"]:
-                queue_procedure(hstuuid, prcuuid, session)
-
+    
 class TaskError:
     def __init__(self, uuid):
         self.output = ['<font color="red">'] + traceback.format_exc().split("\n") + ["</font>"]
