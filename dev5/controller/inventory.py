@@ -341,6 +341,8 @@ class Inventory(object):
             cherrypy.response.headers['Content-Disposition'] = 'attachment; filename=export.{0}.json'.format(time())
             
             create_inventory_export_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids.split(","))
+
+            add_message("INVENTORY EXPORT COMPLETE")
             
             return serve_fileobj(json.dumps(inventory))
         except Exception:
@@ -369,7 +371,9 @@ class Inventory(object):
                 zf.writestr('inventory.json', json.dumps(inventory))
             
             create_inventory_export_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids.split(","))
-            
+
+            add_message("INVENTORY EXPORT COMPLETE")
+
             return serve_fileobj(mem_file.getvalue())
         except Exception:
             add_message(traceback.format_exc())
@@ -396,7 +400,7 @@ class Inventory(object):
     @require()
     def import_objects_json(self, file):
         add_message("inventory controller: importing inventory objects...")
-        
+
         try:
             objects = json.loads(file.file.read())
         
@@ -409,6 +413,8 @@ class Inventory(object):
             create_inventory_import_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids)
         except Exception:
             add_message(traceback.format_exc())
+
+        add_message("INVENTORY IMPORT COMPLETE")
         
         return json.dumps({})
     
@@ -431,5 +437,7 @@ class Inventory(object):
             create_inventory_import_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids)
         except Exception:
             add_message(traceback.format_exc())
+
+        add_message("INVENTORY IMPORT COMPLETE")
         
         return json.dumps({})
