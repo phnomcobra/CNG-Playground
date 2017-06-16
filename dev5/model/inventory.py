@@ -900,6 +900,10 @@ def import_objects(objects):
     container = create_container("#", "Imported Objects")
     
     objuuids = collection.list_objuuids()    
+    
+    obj_ttl = len(objects)
+    obj_cnt = 1
+    
     for objuuid, object in objects.iteritems():
         try:
             current = collection.get_object(objuuid)
@@ -933,7 +937,9 @@ def import_objects(objects):
                         
             current.set()
             
-            add_message("imported: {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"]))
+            add_message("imported ({3} of {4}): {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"], obj_cnt, obj_ttl))
+            obj_cnt = obj_cnt + 1
+            
         except Exception:
             add_message(traceback.format_exc())
             
