@@ -109,6 +109,12 @@ def create_container(parent_objuuid, name = "New Container", objuuid = None):
                             "route" : "inventory/ajax_create_task",
                             "params" : {"objuuid" : container.objuuid}}
             },
+            "new text file" : {
+                "label" : "New Text File",
+                "action" : {"method" : "create text file",
+                            "route" : "inventory/ajax_create_text_file",
+                            "params" : {"objuuid" : container.objuuid}}
+            },
             "new procedure" : {
                 "label" : "New Procedure",
                 "action" : {"method" : "create procedure",
@@ -247,6 +253,53 @@ def create_task(parent_objuuid, name = "New Task", objuuid = None):
     
     task.set()
     return task
+
+def create_text_file(parent_objuuid, name = "New Text File", objuuid = None):
+    collection = Collection("inventory")
+    text_file = collection.get_object(objuuid)
+    text_file.object = {
+        "type" : "text file",
+        "parent" : parent_objuuid,
+        "children" : [],
+        "name" : name,
+        "body" : "",
+        "language" : "plain_text",
+        "icon" : "/images/text_file_icon.png",
+        "context" : {
+            "delete" : {
+                "label" : "Delete",
+                "action" : {"method" : "delete node",
+                            "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : text_file.objuuid}}
+            },
+            "edit" : {
+                "label" : "Edit",
+                "action" : {"method" : "edit text file",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : text_file.objuuid}}
+            },
+            "copy" : {
+                "label" : "Copy",
+                "action" : {"method" : "copy node",
+                            "route" : "inventory/ajax_copy_object",
+                            "params" : {"objuuid" : text_file.objuuid}}
+            },
+            "create link" : {
+                "label" : "Create Link",
+                "action" : {"method" : "create link",
+                            "route" : "inventory/ajax_create_link",
+                            "params" : {"objuuid" : text_file.objuuid}}
+            }
+        },
+        "accepts" : []
+    }
+    
+    parent = collection.get_object(parent_objuuid)
+    parent.object["children"].append(text_file.objuuid)
+    parent.set()
+    
+    text_file.set()
+    return text_file
 
 def create_host_group(parent_objuuid, name = "New Host Group", objuuid = None):
     collection = Collection("inventory")
@@ -899,10 +952,10 @@ def import_objects(objects):
             
     container = create_container("#", "Imported Objects")
     
-    objuuids = collection.list_objuuids()    
-    
+    objuuids = collection.list_objuuids()
+
     obj_ttl = len(objects)
-    obj_cnt = 1
+    obj_cnt = 1    
     
     for objuuid, object in objects.iteritems():
         try:
@@ -939,7 +992,6 @@ def import_objects(objects):
             
             add_message("imported ({3} of {4}): {0}, type: {1}, name: {2}".format(objuuid, object["type"], object["name"], obj_cnt, obj_ttl))
             obj_cnt = obj_cnt + 1
-            
         except Exception:
             add_message(traceback.format_exc())
             

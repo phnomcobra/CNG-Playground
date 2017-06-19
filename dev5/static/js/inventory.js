@@ -292,6 +292,12 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         createNode(resp);
                                         editTask();
                                         $('.nav-tabs a[href="#attributes"]').tab('show');
+                                    } else if(obj.item.method == 'create text file') {
+                                        addMessage('create text file success');
+                                        inventoryObject = resp;
+                                        createNode(resp);
+                                        editTextFile();
+                                        $('.nav-tabs a[href="#attributes"]').tab('show');
                                     } else if(obj.item.method == 'create host group') {
                                         addMessage('create host group success');
                                         inventoryObject = resp;
@@ -341,6 +347,10 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit task success");
                                         inventoryObject = resp;
                                         editTask();
+                                    } else if(obj.item.method == 'edit text file') {
+                                        addMessage("edit text file success");
+                                        inventoryObject = resp;
+                                        editTextFile();
                                     } else if(obj.item.method == 'edit schedule') {
                                         addMessage('edit schedule success');
                                         inventoryObject = resp;
@@ -567,6 +577,19 @@ var addAttributeText = function(fieldName, inventoryKey) {
     attributeCell.innerHTML = '<div id="' + id + '"></div>';
     document.getElementById(id).innerHTML = inventoryObject[inventoryKey];
 }
+
+var addAttributeStatic = function(fieldName, value) {
+    var attributeTable = document.getElementById("attributesTable");
+    var attributeRow = attributeTable.insertRow(-1);
+    var attributeCell;
+    
+    attributeCell = attributeRow.insertCell(-1);
+    attributeCell.innerHTML = fieldName;
+    
+    attributeCell = attributeRow.insertCell(-1);
+    attributeCell.innerHTML = value;
+}
+
 
 var inventoryApp = angular.module('inventoryApp', []);
 inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce) {
