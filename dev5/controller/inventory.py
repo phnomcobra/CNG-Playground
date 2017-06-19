@@ -356,6 +356,8 @@ class Inventory(object):
             
             create_inventory_export_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids.split(","))
             
+            add_message("INVENTORY EXPORT COMPLETE")
+            
             return serve_fileobj(json.dumps(inventory))
         except Exception:
             add_message(traceback.format_exc())
@@ -383,6 +385,8 @@ class Inventory(object):
                 zf.writestr('inventory.json', json.dumps(inventory))
             
             create_inventory_export_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids.split(","))
+            
+            add_message("INVENTORY EXPORT COMPLETE")
             
             return serve_fileobj(mem_file.getvalue())
         except Exception:
@@ -424,6 +428,8 @@ class Inventory(object):
         except Exception:
             add_message(traceback.format_exc())
         
+        add_message("INVENTORY IMPORT COMPLETE")
+        
         return json.dumps({})
     
     @cherrypy.expose
@@ -445,5 +451,7 @@ class Inventory(object):
             create_inventory_import_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids)
         except Exception:
             add_message(traceback.format_exc())
+        
+        add_message("INVENTORY IMPORT COMPLETE")
         
         return json.dumps({})
