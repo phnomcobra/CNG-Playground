@@ -65,7 +65,7 @@ var loadAndEditTextFile = function(objuuid) {
         'data' : {'objuuid' : objuuid},
         'success' : function(resp) {
             inventoryObject = resp;
-            editTask();
+            editTextFile();
             expandToNode(inventoryObject.objuuid);
         }
     });

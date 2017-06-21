@@ -204,6 +204,44 @@ var importJSONToInventory = function(item) {
     }); 
 }
 
+var importTextFileToInventory = function(item) {
+    $('.nav-tabs a[href="#console"]').tab('show');
+    
+    var formData = new FormData();
+    formData.append("file", item.files[0], item.files[0].name);
+         
+    $.ajax({
+        url: 'inventory/import_text_file',  //Server script to process data
+        type: 'POST',
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function(resp) {
+            $('#inventory').jstree('refresh');
+        }
+    }); 
+}
+
+var importBinaryFileToInventory = function(item) {
+    $('.nav-tabs a[href="#console"]').tab('show');
+    
+    var formData = new FormData();
+    formData.append("file", item.files[0], item.files[0].name);
+         
+    $.ajax({
+        url: 'inventory/import_binary_file',  //Server script to process data
+        type: 'POST',
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        success: function(resp) {
+            $('#inventory').jstree('refresh');
+        }
+    }); 
+}
+
 var importZipToInventory = function(item) {
     $('.nav-tabs a[href="#console"]').tab('show');
     
@@ -351,6 +389,10 @@ $('#inventory').on('select_node.jstree', function (evt, data) {
                                         addMessage("edit text file success");
                                         inventoryObject = resp;
                                         editTextFile();
+                                    } else if(obj.item.method == 'edit binary file') {
+                                        addMessage("edit binary file success");
+                                        inventoryObject = resp;
+                                        editBinaryFile();
                                     } else if(obj.item.method == 'edit schedule') {
                                         addMessage('edit schedule success');
                                         inventoryObject = resp;
