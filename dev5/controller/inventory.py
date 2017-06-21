@@ -20,6 +20,7 @@ import json
 import traceback
 import zipfile
 import StringIO
+import hashlib
 
 from cherrypy.lib.static import serve_fileobj
 from time import sleep, time
@@ -29,6 +30,7 @@ from .messaging import add_message
 from .auth import require
 from ..model import schedule
 from ..model.document import Collection
+from ..model.datastore import File as DatastoreFile
 from ..model.inventory import get_child_nodes, \
                               get_status_objects, \
                               set_parent_objuuid, \
@@ -42,6 +44,7 @@ from ..model.inventory import get_child_nodes, \
                               create_rfc, \
                               create_schedule, \
                               create_text_file, \
+                              create_binary_file, \
                               create_status_code, \
                               create_host, \
                               create_host_group, \
@@ -348,8 +351,11 @@ class Inventory(object):
             inventory = {}
             
             for objuuid in objuuids.split(","):
-                inventory[objuuid] = collection.get_object(objuuid).object
-                add_message("inventory controller: exported: {0}, type: {1}, name: {2}".format(objuuid, inventory[objuuid]["type"], inventory[objuuid]["name"]))
+                current = collection.get_object(objuuid)
+                
+                if current.object["type"] != "binary file":
+                    inventory[objuuid] = current.object
+                    add_message("inventory controller: exported: {0}, type: {1}, name: {2}".format(objuuid, current.object["type"], current.object["name"]))
         
             cherrypy.response.headers['Content-Type'] = "application/x-download"
             cherrypy.response.headers['Content-Disposition'] = 'attachment; filename=export.{0}.json'.format(time())
@@ -372,10 +378,17 @@ class Inventory(object):
         
             inventory = {}
             
+            dstuuids = []
+            
             for objuuid in objuuids.split(","):
-                inventory[objuuid] = collection.get_object(objuuid).object
-                add_message("inventory controller: exported: {0}, type: {1}, name: {2}".format(objuuid, inventory[objuuid]["type"], inventory[objuuid]["name"]))
-        
+                current = collection.get_object(objuuid)
+                inventory[objuuid] = current.object
+                
+                if current.object["type"] == "binary file":
+                    dstuuids.append(current.object["sequuid"])
+                
+                add_message("inventory controller: exported: {0}, type: {1}, name: {2}".format(objuuid, current.object["type"], current.object["name"]))
+                
             cherrypy.response.headers['Content-Type'] = "application/x-download"
             cherrypy.response.headers['Content-Disposition'] = 'attachment; filename=export.{0}.zip'.format(time())
             
@@ -383,6 +396,9 @@ class Inventory(object):
             
             with zipfile.ZipFile(mem_file, mode = 'w', compression = zipfile.ZIP_DEFLATED) as zf:
                 zf.writestr('inventory.json', json.dumps(inventory))
+                
+                for dstuuid in dstuuids:
+                    zf.writestr('{0}.bin'.format(dstuuid), buffer(DatastoreFile(dstuuid).read()))
             
             create_inventory_export_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids.split(","))
             
@@ -442,6 +458,23 @@ class Inventory(object):
             
             objects = json.loads(archive.read("inventory.json"))
             
+            for objuuid, object in objects.iteritems():
+                if object["type"] == "binary file":
+                    datastore_file = DatastoreFile(object["sequuid"])
+                    
+                    zipped_file = archive.open("{0}.bin".format(object["sequuid"]), "r")
+                    
+                    sha1hash = hashlib.sha1()
+                    
+                    for chunk in iter(lambda: zipped_file.read(65536), b''):
+                        datastore_file.write(chunk)
+                        sha1hash.update(chunk)
+                    
+                    datastore_file.truncate()
+                    
+                    object["size"] = datastore_file.size()
+                    object["sha1sum"] = sha1hash.hexdigest()
+            
             import_objects(objects)
             
             objuuids = []
@@ -449,6 +482,53 @@ class Inventory(object):
                 objuuids.append(objuuid)
             
             create_inventory_import_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids)
+        except Exception:
+            add_message(traceback.format_exc())
+        
+        add_message("INVENTORY IMPORT COMPLETE")
+        
+        return json.dumps({})
+    
+    @cherrypy.expose
+    @require()
+    def import_text_file(self, file):
+        add_message("inventory controller: importing text file...")
+        
+        try:
+            text_file = create_text_file("#", file.filename)
+            text_file.object["body"] = file.file.read()
+            text_file.set()
+            
+            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], text_file)
+            
+        except Exception:
+            add_message(traceback.format_exc())
+        
+        add_message("INVENTORY IMPORT COMPLETE")
+        
+        return json.dumps({})
+    
+    @cherrypy.expose
+    @require()
+    def import_binary_file(self, file):
+        add_message("inventory controller: importing binary file...")
+        
+        try:
+            binary_file_inv = create_binary_file("#", file.filename)
+            
+            binary_file_dst = DatastoreFile(binary_file_inv.object["sequuid"])
+            
+            sha1hash = hashlib.sha1()
+            
+            for chunk in iter(lambda: file.file.read(65536), b''):
+                binary_file_dst.write(chunk)
+                sha1hash.update(chunk)
+            
+            binary_file_inv.object["size"] = binary_file_dst.size()
+            binary_file_inv.object["sha1sum"] = sha1hash.hexdigest()
+            binary_file_inv.set()
+            
+            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], binary_file_inv)
         except Exception:
             add_message(traceback.format_exc())
         
