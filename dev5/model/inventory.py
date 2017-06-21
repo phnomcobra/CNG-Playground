@@ -13,6 +13,7 @@
 import traceback
 
 from .document import Collection
+from .datastore import File, delete_sequence
 from .utils import sucky_uuid
 from ..controller.messaging import add_message
 
@@ -81,9 +82,22 @@ def delete_node(objuuid):
     
     for node in get_child_nodes(objuuid):
         current = collection.get_object(node["id"])
+        
+        if "type" in current.object and\
+           "sequuid" in current.object:
+            if current.object["type"] == "binary file":
+                delete_sequence(current.object["sequuid"])
+                
         current.destroy()
     
-    collection.get_object(objuuid).destroy()
+    current = collection.get_object(objuuid)
+    
+    if "type" in current.object and\
+       "sequuid" in current.object:
+        if current.object["type"] == "binary file":
+            delete_sequence(current.object["sequuid"])
+    
+    current.destroy()
     
 def get_context_menu(objuuid):
     return Collection("inventory").get_object(objuuid).object["context"]
@@ -294,13 +308,58 @@ def create_text_file(parent_objuuid, name = "New Text File", objuuid = None):
         "accepts" : []
     }
     
-    parent = collection.get_object(parent_objuuid)
-    parent.object["children"].append(text_file.objuuid)
-    parent.set()
+    if parent_objuuid != "#":
+        parent = collection.get_object(parent_objuuid)
+        parent.object["children"].append(text_file.objuuid)
+        parent.set()
     
     text_file.set()
     return text_file
 
+def create_binary_file(parent_objuuid, name = "New Binary File", objuuid = None):
+    collection = Collection("inventory")
+    binary_file = collection.get_object(objuuid)
+    binary_file.object = {
+        "type" : "binary file",
+        "parent" : parent_objuuid,
+        "children" : [],
+        "name" : name,
+        "size" : 0,
+        "sha1sum" : 0,
+        "chunks" : 0,
+        "sequuid" : File()._File__sequence.objuuid,
+        "icon" : "/images/binary_file_icon.png",
+        "context" : {
+            "delete" : {
+                "label" : "Delete",
+                "action" : {"method" : "delete node",
+                            "route" : "inventory/ajax_delete",
+                            "params" : {"objuuid" : binary_file.objuuid}}
+            },
+            "edit" : {
+                "label" : "Edit",
+                "action" : {"method" : "edit binary file",
+                            "route" : "inventory/ajax_get_object",
+                            "params" : {"objuuid" : binary_file.objuuid}}
+            },
+            "create link" : {
+                "label" : "Create Link",
+                "action" : {"method" : "create link",
+                            "route" : "inventory/ajax_create_link",
+                            "params" : {"objuuid" : binary_file.objuuid}}
+            }
+        },
+        "accepts" : []
+    }
+    
+    if parent_objuuid != "#":
+        parent = collection.get_object(parent_objuuid)
+        parent.object["children"].append(binary_file.objuuid)
+        parent.set()
+    
+    binary_file.set()
+    return binary_file
+    
 def create_host_group(parent_objuuid, name = "New Host Group", objuuid = None):
     collection = Collection("inventory")
     group = collection.get_object(objuuid)
