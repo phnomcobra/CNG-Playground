@@ -314,7 +314,7 @@ var drawCells = function(resultItems) {
         cell = document.getElementById('controller-cell-' + resultItems[i].host.objuuid + '-' + resultItems[i].procedure.objuuid);
 
         if(resultItems[i].stop) {
-            if(currentTime - resultItems[i].stop > 3600) {
+            if(currentTime - resultItems[i].stop > 14400) {
                 cell.style.color = '#' + resultItems[i].status.sfg;
                 cell.style.backgroundColor = '#' + resultItems[i].status.sbg;
             } else {
