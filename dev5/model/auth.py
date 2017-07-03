@@ -9,6 +9,7 @@
 # 12/30/2016 Original construction
 # 02/22/2017 Added session id to user objects
 #            Added session id as an attribute to users collection
+# 06/23/2017 Updated get_users_grid to trap for empty objects
 ################################################################################
 
 import traceback
@@ -42,7 +43,10 @@ def get_users_grid():
     
     for usruuid in collection.list_objuuids():
         user = collection.get_object(usruuid)
-        grid_data.append({"name" : user.object["name"], "objuuid" : user.object["objuuid"]})
+        if "name" in user.object:
+            grid_data.append({"name" : user.object["name"], "objuuid" : user.object["objuuid"]})
+        else:
+            grid_data.append({"name" : "undefined", "objuuid" : user.object["objuuid"]})
     
     for i in range(0, len(grid_data)):
         for j in range(i, len(grid_data)):

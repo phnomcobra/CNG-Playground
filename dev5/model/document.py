@@ -60,7 +60,7 @@ class Document:
         
         DOCUMENT_LOCK.acquire()
         
-        self.connection = sqlite3.connect("db.sqlite", 5)
+        self.connection = sqlite3.connect("db.sqlite", 300)
         self.cursor = self.connection.cursor()
 
         self.cursor.execute("PRAGMA foreign_keys = ON")
