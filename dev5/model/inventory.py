@@ -249,7 +249,7 @@ class Task:
             self.output.append(traceback.format_exc())
             self.status = STATUS_EXCEPTION
 
-        return self.status""".format(datetime.now().strftime('%d/%m/%Y'), author, email, phone),
+        return self.status""".format(datetime.now().strftime('%m/%d/%Y'), author, email, phone),
         "hosts" : [],
         "icon" : "/images/task_icon.png",
         "context" : {
