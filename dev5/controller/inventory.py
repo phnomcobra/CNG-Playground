@@ -181,9 +181,16 @@ class Inventory(object):
     def ajax_create_task(self, objuuid):
         add_message("inventory controller: create task: {0}".format(objuuid))
         try:
-            task = create_task(objuuid, "New Task")
-        
-            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], task)
+            current_user = Collection("users").find(sessionid = cherrypy.session.id)[0]
+            
+            task = create_task(objuuid, \
+                               "New Task", \
+                               author = "{0} {1}".format(current_user.object["first name"], \
+                                                         current_user.object["last name"]), \
+                               email = current_user.object["email"], \
+                               phone = current_user.object["phone"])
+            
+            create_inventory_create_event(current_user, task)
             
             return json.dumps(task.object)
         except Exception:
