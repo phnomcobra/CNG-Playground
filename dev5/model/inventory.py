@@ -12,6 +12,7 @@
 
 import traceback
 
+from datetime import datetime
 from .document import Collection
 from .datastore import File, delete_sequence
 from .utils import sucky_uuid
@@ -208,8 +209,8 @@ def create_container(parent_objuuid, name = "New Container", objuuid = None):
     
     container.set()
     return container
-
-def create_task(parent_objuuid, name = "New Task", objuuid = None):
+    
+def create_task(parent_objuuid, name = "New Task", objuuid = None, author = "<author>", email = "<email>", phone = "<phone>"):
     collection = Collection("inventory")
     task = collection.get_object(objuuid)
     task.object = {
@@ -217,7 +218,38 @@ def create_task(parent_objuuid, name = "New Task", objuuid = None):
         "parent" : parent_objuuid,
         "children" : [],
         "name" : name,
-        "body" : "",
+        "body" : """#!/usr/bin/python
+################################################################################
+# NEW TASK
+#
+# {1}
+# {2}
+# {3}
+#
+# {0} Original Construction
+################################################################################
+
+import traceback
+
+class Task:
+    def __init__(self):
+        self.output = []
+        self.status = STATUS_NOT_EXECUTED
+
+    def execute(self, cli):
+        try:
+            status, stdout, stderr = cli.system("whoami", return_tuple = True)
+            if status:
+                self.output.append(str(stderr))
+                self.status = STATUS_FAILURE
+            else:
+                self.output.append(str(stdout))
+                self.status = STATUS_SUCCESS
+        except Exception:
+            self.output.append(traceback.format_exc())
+            self.status = STATUS_EXCEPTION
+
+        return self.status""".format(datetime.now().strftime('%d/%m/%Y'), author, email, phone),
         "hosts" : [],
         "icon" : "/images/task_icon.png",
         "context" : {
