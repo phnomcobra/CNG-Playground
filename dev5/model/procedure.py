@@ -338,7 +338,7 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
         try:
             result.object["output"].append("importing console...")
             exec inventory.get_object(host.object["console"]).object["body"] in tempmodule.__dict__
-            cli = tempmodule.Console(session = session, host = host.object["host"])
+            cli = tempmodule.Console(session = session, host = host.object)
         except Exception:
             result.object["output"] += traceback.format_exc().split("\n")
         

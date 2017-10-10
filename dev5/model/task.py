@@ -62,7 +62,7 @@ def execute(tskuuid, hstuuid, session):
     
     try:
         exec inventory.get_object(host.object["console"]).object["body"] in tempmodule.__dict__
-        cli = tempmodule.Console(session = session, host = host.object["host"])
+        cli = tempmodule.Console(session = session, host = host.object)
         
         try:
             inv_task = inventory.get_object(tskuuid)
