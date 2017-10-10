@@ -7,13 +7,14 @@
 # (614) 692 2050
 #
 # 10/16/2016 Original construction
+# 10/10/2017 Updated timestamps to be human readable
 ################################################################################
 
 import cherrypy
 import json
 
 from threading import Lock
-from time import time
+from time import time, strftime, localtime
 
 global global_messages
 global global_messages_lock
@@ -25,7 +26,7 @@ def add_message(message, timestamp = None):
         timestamp = time()
     
     global_messages_lock.acquire()
-    global_messages["messages"] = [{"message" : message, "timestamp" : timestamp}] + \
+    global_messages["messages"] = [{"message" : message, "timestamp" : strftime('%H:%M:%S', localtime(timestamp))}] + \
                                     global_messages["messages"][:49]
     global_messages_lock.release()
 
