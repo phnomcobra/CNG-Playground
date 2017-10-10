@@ -3,6 +3,9 @@ var inventoryObject = {};
 var saving = false;
 var inventoryStateFlag = null;
 var queueStateFlag = null;
+var polling_messages = false;
+var polling_queue = false;
+var polling_inventory = false;
 
  $('#inventory').jstree({
     'contextmenu': {
@@ -656,8 +659,13 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
                 saving = false;
                 document.getElementById('connectionStatus').innerHTML = '<font style="color:#F00">NO CONN</font>';
             });
-        } else {
+        }
+        
+        if(!polling_messages) {
+            polling_messages = true;
+            
             $http.post("messaging/ajax_get_messages").then(function (response) {
+                polling_messages = false;
                 var messageData = '<table>';
                 var responseJSON = angular.fromJson(response)['data']['messages'];
                 for(item in responseJSON) {
@@ -666,8 +674,14 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
                 messageData += '</table>'
             
                 $scope.messages = $sce.trustAsHtml(messageData);
+            }, function errorCallback(response) {
+                polling_messages = false;
             });
+        }
         
+        if(!polling_inventory) {
+            polling_inventory = true;
+            
             $.ajax({
                 'url' : 'flags/ajax_get',
                 'dataType' : 'json',
@@ -676,12 +690,21 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
                     'key' : 'inventoryState'
                 },
                 'success' : function(resp) {
+                    polling_inventory = false;
+                    
                     if(inventoryStateFlag != resp.value) {
                         inventoryStateFlag = resp.value;
                         $('#inventory').jstree('refresh');
                     }
                 },
+                'error' : function(resp) {
+                    polling_inventory = false;
+                }
             });
+        }
+        
+        if(!polling_queue) {
+            polling_queue = true;
             
             $.ajax({
                 'url' : 'flags/ajax_get',
@@ -691,6 +714,8 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
                     'key' : 'queueState'
                 },
                 'success' : function(resp) {
+                    polling_queue = false;
+                    
                     if(queueStateFlag != resp.value) {
                         queueStateFlag = resp.value;
                         updateQueueState();
@@ -698,6 +723,8 @@ inventoryApp.controller('inventoryCtrl', function($scope, $interval, $http, $sce
                     document.getElementById('connectionStatus').innerHTML = '<font style="color:#0F0">OK</font>';
                 },
                 'error' : function(resp) {
+                    polling_queue = false;
+                    
                     document.getElementById('connectionStatus').innerHTML = '<font style="color:#F00">NO CONN</font>';
                 }
             });

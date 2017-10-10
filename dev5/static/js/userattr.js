@@ -1,6 +1,7 @@
 var userObject = {};
 var saving = false;
 var usersStateFlag = null;
+var polling_messages = false;
 
 var loadUserAttributes = function() {
     initAttributes();
@@ -79,18 +80,23 @@ usersApp.controller('usersCtrl', function($scope, $interval, $http, $sce) {
                 saving = false;
                 document.getElementById('connectionStatus').innerHTML = '<font style="color:#F00">NO CONN</font>';
             });
-        } else {
+        }
+        
+        if(!polling_messages) {
+            polling_messages = true;
+            
             $http.post("/messaging/ajax_get_messages").then(function (response) {
+                polling_messages = false;
                 var messageData = '<table>';
                 var responseJSON = angular.fromJson(response)['data']['messages'];
                 for(item in responseJSON) {
                     messageData += '<tr><td>' + responseJSON[item]['timestamp'] + '</td><td>' + responseJSON[item]['message'] + '</td></tr>';
                 }
                 messageData += '</table>'
-                
+            
                 $scope.messages = $sce.trustAsHtml(messageData);
-                
-                document.getElementById('connectionStatus').innerHTML = '<font style="color:#0F0">OK</font>';
+            }, function errorCallback(response) {
+                polling_messages = false;
             });
         }
     }, 1000);
