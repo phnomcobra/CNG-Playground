@@ -7,15 +7,8 @@
  
 /* Toggle Styles */
 
-.terminal {
-  padding: 10px;
-  width: calc(100vw - 500px);
-  height: calc(100vh - 200px);
-  font-size: 1.2vmax;
-}
-
 #procedureResultAccordion td {
-  min-width: 2px;
+  min-width: 200px;
 }
 
 #procedureResultAccordion {
