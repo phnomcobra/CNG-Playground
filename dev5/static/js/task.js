@@ -120,6 +120,7 @@ var executeTask = function() {
     document.title = inventoryObject.name;
     document.getElementById('bodyTitle').innerHTML = inventoryObject.type.toUpperCase() + ': ' + inventoryObject.name;
     $('.nav-tabs a[href="#body"]').tab('show');
+    document.getElementById('menuBarDynamic').innerHTML = '';
     
     document.getElementById('body').innerHTML = '<div id="taskResultAccordion"></div>';
     
