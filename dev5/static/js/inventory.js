@@ -6,6 +6,7 @@ var queueStateFlag = null;
 var polling_messages = false;
 var polling_queue = false;
 var polling_inventory = false;
+var selected_objuuids = [];
 
  $('#inventory').jstree({
     'contextmenu': {
@@ -797,6 +798,75 @@ var selectDependencies = function() {
             }
         },
     });
+}
+
+var cutInventoryItems = function() {
+    var nodes = $('#inventory').jstree().get_selected(true);
+    for(i in nodes) {
+       selected_objuuids.push(nodes[i].id);
+       //$("#inventory").jstree("select_node", "#30"); 
+       $("#" + nodes[i].id + " >a").css("background", "yellow");
+    }
+    $('#inventory').jstree("deselect_all");
+}
+
+var deleteInventoryItems = function() {
+    var nodes = $('#inventory').jstree().get_selected(true);
+    $('#inventory').jstree("deselect_all");
+    
+    for(i in nodes) {
+        deleteNode(nodes[i].id);
+        
+        $.ajax({
+            'url' : 'inventory/ajax_delete',
+            'dataType' : 'json',
+            'method': 'POST',
+            'data' : {
+                'objuuid' : nodes[i].id
+            },
+            'success' : function(resp) {
+                $('.nav-tabs a[href="#console"]').tab('show');
+                addMessage('delete success');
+                touchInventory();
+            },
+            'error' : function(resp, status, error) {
+                addMessage('delete failure');
+                $('.nav-tabs a[href="#console"]').tab('show');
+                $('#inventory').jstree('refresh');
+            }
+        });
+       
+    }
+}
+
+var pasteInventoryItems = function() {
+    var parent_objuuid = $('#inventory').jstree().get_selected(true)[0];
+    
+    for(i in selected_objuuids) {
+        $('#inventory').jstree("move_node", selected_objuuids[i], parent_objuuid.id, 0);
+        $("#" + selected_objuuids[i] + " >a").css("background", null);
+                
+        $.ajax({
+            'url' : 'inventory/ajax_move',
+            'dataType' : 'json',
+            'method': 'POST',
+            'data' : {
+                'objuuid' : selected_objuuids[i],
+                'parent_objuuid' : parent_objuuid.id
+            },
+            'success' : function(resp) {
+                $('.nav-tabs a[href="#console"]').tab('show');
+                addMessage('move success');
+                touchInventory();
+            },
+            'error' : function(resp, status, error) {
+                addMessage('move failure');
+                $('.nav-tabs a[href="#console"]').tab('show');
+                $('#inventory').jstree('refresh');
+            }
+        });
+    }    
+    selected_objuuids = [];
 }
 
 var filterSelectionByType = function(type) {
