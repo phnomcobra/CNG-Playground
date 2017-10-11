@@ -14,13 +14,13 @@
 import cherrypy
 import os
 import ssl
-
+"""
 from cherrypy.wsgiserver.ssl_builtin import BuiltinSSLAdapter
 from cherrypy import wsgiserver
 from cherrypy.wsgiserver import ssl_adapters  
-
+"""
 from .controller.root import Root
-
+"""
 class BuiltinSsl(BuiltinSSLAdapter):
     def wrap(self, sock):
         try:
@@ -48,12 +48,12 @@ class BuiltinSsl(BuiltinSSLAdapter):
         return s, self.get_environ(s)
 
 ssl_adapters['custom-ssl'] = BuiltinSsl
-
+"""
 def start():
     current_dir = os.path.dirname(os.path.abspath(__file__))
     
     config = {
-        'log.screen': False,
+        'log.screen': True,
         'tools.staticdir.on' : True,
         'tools.sessions.on' : True,
         'tools.sessions.locking' : 'explicit',
@@ -61,10 +61,11 @@ def start():
         'tools.staticdir.dir' : os.path.join(current_dir, './static'),
         'server.thread_pool' : 100,
         'server.socket_host' : '0.0.0.0',
-        'server.socket_port' : 443,
-        'server.ssl_module' : 'custom-ssl',
-        'server.ssl_certificate' : os.path.join(current_dir, './cert.pem'),
-        'server.ssl_private_key' : os.path.join(current_dir, './privkey.pem')
+        'server.socket_port' : 8080
+        #'server.socket_port' : 443,
+        #'server.ssl_module' : 'custom-ssl',
+        #'server.ssl_certificate' : os.path.join(current_dir, './cert.pem'),
+        #'server.ssl_private_key' : os.path.join(current_dir, './privkey.pem')
         #'log.error_file': 'error.log'
     }
     

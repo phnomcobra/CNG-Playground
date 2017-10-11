@@ -802,40 +802,65 @@ var selectDependencies = function() {
 
 var cutInventoryItems = function() {
     var nodes = $('#inventory').jstree().get_selected(true);
-    for(i in nodes) {
-       selected_objuuids.push(nodes[i].id);
-       //$("#inventory").jstree("select_node", "#30"); 
-       $("#" + nodes[i].id + " >a").css("background", "yellow");
+    var objuuids = [];
+    
+    for(i in nodes)
+        objuuids.push(nodes[i].id);
+    
+    for(i in objuuids) {
+        var node = $("#inventory").jstree("get_node", "#" + objuuids[i]);
+        var parent = $("#inventory").jstree("get_node", "#" + node.parent);
+        if(!parent.state.selected) {
+            selected_objuuids.push(objuuids[i]);
+            $("#" + objuuids[i] + " >a").css("background", "yellow");
+        }
+        
     }
+    
     $('#inventory').jstree("deselect_all");
+}
+
+var unCutInventoryItems = function() {
+    for(i in selected_objuuids)
+        $("#" + selected_objuuids[i] + " >a").css("background", "white");    
+    selected_objuuids = [];
 }
 
 var deleteInventoryItems = function() {
     var nodes = $('#inventory').jstree().get_selected(true);
+    
     $('#inventory').jstree("deselect_all");
     
-    for(i in nodes) {
-        deleteNode(nodes[i].id);
+    var objuuids = [];
+    
+    for(i in nodes)
+        objuuids.push(nodes[i].id);
+    
+    for(i in objuuids) {
+        var node = $("#inventory").jstree("get_node", "#" + objuuids[i]);
+        var parent = $("#inventory").jstree("get_node", "#" + node.parent);
+        if(!parent.state.selected) {
+            deleteNode(objuuids[i]);
         
-        $.ajax({
-            'url' : 'inventory/ajax_delete',
-            'dataType' : 'json',
-            'method': 'POST',
-            'data' : {
-                'objuuid' : nodes[i].id
-            },
-            'success' : function(resp) {
-                $('.nav-tabs a[href="#console"]').tab('show');
-                addMessage('delete success');
-                touchInventory();
-            },
-            'error' : function(resp, status, error) {
-                addMessage('delete failure');
-                $('.nav-tabs a[href="#console"]').tab('show');
-                $('#inventory').jstree('refresh');
-            }
-        });
-       
+            $.ajax({
+                'url' : 'inventory/ajax_delete',
+                'dataType' : 'json',
+                'method': 'POST',
+                'data' : {
+                    'objuuid' : objuuids[i]
+                },
+                'success' : function(resp) {
+                    $('.nav-tabs a[href="#console"]').tab('show');
+                    addMessage('delete success');
+                    touchInventory();
+                },
+                'error' : function(resp, status, error) {
+                    addMessage('delete failure');
+                    $('.nav-tabs a[href="#console"]').tab('show');
+                    $('#inventory').jstree('refresh');
+                }
+            });
+        }
     }
 }
 
@@ -844,7 +869,7 @@ var pasteInventoryItems = function() {
     
     for(i in selected_objuuids) {
         $('#inventory').jstree("move_node", selected_objuuids[i], parent_objuuid.id, 0);
-        $("#" + selected_objuuids[i] + " >a").css("background", null);
+        $("#" + selected_objuuids[i] + " >a").css("background", "white");
                 
         $.ajax({
             'url' : 'inventory/ajax_move',
