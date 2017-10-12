@@ -76,7 +76,7 @@ def create_session(hstuuid, session):
             raise Exception, "recv method not present in console object!"
         
         cli_sessions[ttyuuid] = {}
-        cli_sessions[ttyuuid]["console"] = tempmodule.Console(session = session, host = host.object["host"])
+        cli_sessions[ttyuuid]["console"] = tempmodule.Console(session = session, host = host.object)
         cli_sessions[ttyuuid]["contact"] = time()
     except Exception:
         cli_sessions[ttyuuid] = {}
