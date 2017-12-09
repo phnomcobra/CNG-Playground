@@ -65,7 +65,7 @@ def run_schedule(schuuid):
     
     schedule = inventory.get_object(schuuid)
     
-    create_schedule_event(schedule)
+    #create_schedule_event(schedule)
     
     tempmodule = new_module("tempmodule")
     

@@ -30,7 +30,8 @@ def __get_child_nodes(nodes, object, collection):
     
         nodes.append(node)
 
-        for objuuid in object.object["children"]:
+        #for objuuid in object.object["children"]:
+        for objuuid in collection.find_objuuids(parent = object.objuuid):
             nodes = __get_child_nodes(nodes, collection.get_object(objuuid), collection)
     except Exception:
         print traceback.format_exc()
@@ -57,34 +58,29 @@ def set_parent_objuuid(objuuid, parent_objuuid):
 
     current = collection.get_object(objuuid)
     
-    if current.object["parent"] != '#':
-        try:
-            parent = collection.get_object(current.object["parent"])
-            parent.object["children"].remove(objuuid)
-            parent.set()
-        except Exception:
-            print traceback.format_exc()
-
+    old_parent_objuuid = current.object["parent"]
     current.object["parent"] = parent_objuuid
     current.set()
     
+    if old_parent_objuuid != '#':
+        parent = collection.get_object(old_parent_objuuid)
+        parent.object["children"] = collection.find_objuuids(parent = old_parent_objuuid)
+        parent.set()
+    
     if parent_objuuid != '#':
         new_parent = collection.get_object(parent_objuuid)
-        new_parent.object["children"].append(objuuid)
+        new_parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
         new_parent.set()
     
 def delete_node(objuuid):
     collection = Collection("inventory")
     
-    if collection.get_object(objuuid).object["parent"] != "#":
-        parent = collection.get_object(collection.get_object(objuuid).object["parent"])
-        parent.object["children"].remove(objuuid)
-        parent.set()
+    parent_objuuid = collection.get_object(objuuid).object["parent"]
     
     for node in get_child_nodes(objuuid):
         current = collection.get_object(node["id"])
         
-        if "type" in current.object and\
+        if "type" in current.object and \
            "sequuid" in current.object:
             if current.object["type"] == "binary file":
                 delete_sequence(current.object["sequuid"])
@@ -93,12 +89,17 @@ def delete_node(objuuid):
     
     current = collection.get_object(objuuid)
     
-    if "type" in current.object and\
+    if "type" in current.object and \
        "sequuid" in current.object:
         if current.object["type"] == "binary file":
             delete_sequence(current.object["sequuid"])
     
     current.destroy()
+    
+    if parent_objuuid != "#":
+        parent = collection.get_object(parent_objuuid)
+        parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
+        parent.set()
     
 def get_context_menu(objuuid):
     return Collection("inventory").get_object(objuuid).object["context"]
@@ -199,15 +200,17 @@ def create_container(parent_objuuid, name = "New Container", objuuid = None):
         },
         "accepts" : ["container", "task"]
     }
+    
+    container.set()
+    
     if parent_objuuid == "#":
         #del container.object["context"]["delete"]
         container.object["icon"] = "images/tree_icon.png"
     else:
         parent = collection.get_object(parent_objuuid)
-        parent.object["children"].append(container.objuuid)
+        parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
         parent.set()
     
-    container.set()
     return container
     
 def create_task(parent_objuuid, name = "New Task", objuuid = None, author = "<author>", email = "<email>", phone = "<phone>"):
@@ -293,11 +296,12 @@ class Task:
         "accepts" : []
     }
     
+    task.set()
+    
     parent = collection.get_object(parent_objuuid)
-    parent.object["children"].append(task.objuuid)
+    parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
     parent.set()
     
-    task.set()
     return task
 
 def create_text_file(parent_objuuid, name = "New Text File", objuuid = None):
@@ -340,12 +344,13 @@ def create_text_file(parent_objuuid, name = "New Text File", objuuid = None):
         "accepts" : []
     }
     
+    text_file.set()
+    
     if parent_objuuid != "#":
         parent = collection.get_object(parent_objuuid)
-        parent.object["children"].append(text_file.objuuid)
+        parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
         parent.set()
     
-    text_file.set()
     return text_file
 
 def create_binary_file(parent_objuuid, name = "New Binary File", objuuid = None):
@@ -384,12 +389,13 @@ def create_binary_file(parent_objuuid, name = "New Binary File", objuuid = None)
         "accepts" : []
     }
     
+    binary_file.set()
+    
     if parent_objuuid != "#":
         parent = collection.get_object(parent_objuuid)
-        parent.object["children"].append(binary_file.objuuid)
+        parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
         parent.set()
     
-    binary_file.set()
     return binary_file
     
 def create_host_group(parent_objuuid, name = "New Host Group", objuuid = None):
@@ -431,11 +437,12 @@ def create_host_group(parent_objuuid, name = "New Host Group", objuuid = None):
         "accepts" : []
     }
     
+    group.set()
+    
     parent = collection.get_object(parent_objuuid)
-    parent.object["children"].append(group.objuuid)
+    parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
     parent.set()
     
-    group.set()
     return group
 
 def create_schedule(parent_objuuid, name = "New Schedule", objuuid = None):
@@ -484,11 +491,12 @@ def create_schedule(parent_objuuid, name = "New Schedule", objuuid = None):
         "accepts" : []
     }
     
+    schedule.set()
+    
     parent = collection.get_object(parent_objuuid)
-    parent.object["children"].append(schedule.objuuid)
+    parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
     parent.set()
     
-    schedule.set()
     return schedule
     
 def create_procedure(parent_objuuid, name = "New Procedure", objuuid = None):
@@ -540,11 +548,12 @@ def create_procedure(parent_objuuid, name = "New Procedure", objuuid = None):
         "accepts" : []
     }
     
+    procedure.set()
+    
     parent = collection.get_object(parent_objuuid)
-    parent.object["children"].append(procedure.objuuid)
+    parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
     parent.set()
     
-    procedure.set()
     return procedure
 
 def create_rfc(parent_objuuid, name = "New RFC", objuuid = None):
@@ -591,11 +600,12 @@ def create_rfc(parent_objuuid, name = "New RFC", objuuid = None):
         "accepts" : []
     }
     
+    rfc.set()
+    
     parent = collection.get_object(parent_objuuid)
-    parent.object["children"].append(rfc.objuuid)
+    parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
     parent.set()
     
-    rfc.set()
     return rfc
 
 def create_controller(parent_objuuid, name = "New Controller", objuuid = None):
@@ -644,11 +654,12 @@ def create_controller(parent_objuuid, name = "New Controller", objuuid = None):
         "accepts" : []
     }
     
+    controller.set()
+    
     parent = collection.get_object(parent_objuuid)
-    parent.object["children"].append(controller.objuuid)
+    parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
     parent.set()
     
-    controller.set()
     return controller
 
 def create_status_code(parent_objuuid, name = "New Status Code", objuuid = None):
@@ -690,11 +701,12 @@ def create_status_code(parent_objuuid, name = "New Status Code", objuuid = None)
         "accepts" : []
     }
     
+    status.set()
+    
     parent = collection.get_object(parent_objuuid)
-    parent.object["children"].append(status.objuuid)
+    parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
     parent.set()
     
-    status.set()
     return status
 
 def create_host(parent_objuuid, name = "New Host", objuuid = None):
@@ -743,11 +755,12 @@ def create_host(parent_objuuid, name = "New Host", objuuid = None):
         "accepts" : []
     }
     
+    host.set()
+    
     parent = collection.get_object(parent_objuuid)
-    parent.object["children"].append(host.objuuid)
+    parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
     parent.set()
     
-    host.set()
     return host
 
 def create_console(parent_objuuid, name = "New Console", objuuid = None):
@@ -783,11 +796,12 @@ def create_console(parent_objuuid, name = "New Console", objuuid = None):
         "accepts" : []
     }
     
+    console.set()
+    
     parent = collection.get_object(parent_objuuid)
-    parent.object["children"].append(console.objuuid)
+    parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
     parent.set()
     
-    console.set()
     return console
 
 def create_link(target_objuuid, parent_objuuid = None, objuuid = None):
@@ -820,11 +834,12 @@ def create_link(target_objuuid, parent_objuuid = None, objuuid = None):
         }
     }
     
+    link.set()
+    
     parent = collection.get_object(parent_objuuid)
-    parent.object["children"].append(link.objuuid)
+    parent.object["children"] = collection.find_objuuids(parent = parent_objuuid)
     parent.set()
     
-    link.set()
     return link
 
 def recstrrepl(object, find, replace):
@@ -865,7 +880,7 @@ def copy_object(objuuid):
     new_object.object["name"] = new_object.object["name"] + " (Copy)"
     
     parent = collection.get_object(new_object.object["parent"])
-    parent.object["children"].append(new_objuuid)
+    parent.object["children"] = collection.find_objuuids(parent = new_object.object["parent"])
     parent.set()
     
     new_object.set()

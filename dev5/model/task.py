@@ -15,7 +15,7 @@ import traceback
 from .document import Collection
 from .ramdocument import Collection as RAMCollection
 from ..controller.messaging import add_message
-from .eventlog import create_task_execute_event
+#from .eventlog import create_task_execute_event
 
 from imp import new_module
 from time import time
@@ -56,7 +56,7 @@ def execute(tskuuid, hstuuid, session):
     result.object['host']['name'] = host.object['name']
     result.object['host']['objuuid'] = hstuuid
     
-    create_task_execute_event(session, inventory.get_object(tskuuid), host)
+    #create_task_execute_event(session, inventory.get_object(tskuuid), host)
     
     tempmodule = new_module("tempmodule")
     
@@ -143,6 +143,9 @@ def get_host_grid(tskuuid):
                                   "objuuid" : host.object["objuuid"]})
         else:
             add_message("host {0} is missing!".format(hstuuid))
-            grid_data.append({"name" : "MISSING!", "host" : "?.?.?.?", "objuuid" : hstuuid})
+            #grid_data.append({"name" : "MISSING!", "host" : "?.?.?.?", "objuuid" : hstuuid})
+            host.destroy()
+            task.object["hosts"].remove(hstuuid)
+            task.set()
         
     return grid_data

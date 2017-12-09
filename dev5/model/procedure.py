@@ -25,8 +25,8 @@ from .ramdocument import Collection as RAMCollection
 from .utils import sucky_uuid
 from ..controller.flags import touch_flag
 from ..controller.messaging import add_message
-from .eventlog import create_procedure_execute_event, \
-                      create_task_execute_event
+#from .eventlog import create_procedure_execute_event, \
+#                      create_task_execute_event
 
 global global_jobs
 global global_jobs_lock
@@ -79,7 +79,10 @@ def get_host_grid(prcuuid):
                                   "objuuid" : host.object["objuuid"]})
         else:
             add_message("host {0} is missing!".format(hstuuid))
-            grid_data.append({"name" : "MISSING!", "host" : "?.?.?.?", "objuuid" : hstuuid})
+            #grid_data.append({"name" : "MISSING!", "host" : "?.?.?.?", "objuuid" : hstuuid})
+            host.destroy()
+            procedure.object["hosts"].remove(hstuuid)
+            procedure.set()
         
     return grid_data
 
@@ -262,7 +265,7 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
     result.object['host']['name'] = host.object['name']
     result.object['host']['objuuid'] = hstuuid
     
-    create_procedure_execute_event(session, inventory.get_object(prcuuid), host)    
+    #create_procedure_execute_event(session, inventory.get_object(prcuuid), host)    
     
     tempmodule = new_module("tempmodule")
     
@@ -362,7 +365,7 @@ def run_procedure(hstuuid, prcuuid, session, jobuuid = None):
                     
                     task_result["stop"] = time()
                     
-                    create_task_execute_event(session, inventory.get_object(tskuuid), host)
+                    #create_task_execute_event(session, inventory.get_object(tskuuid), host)
             except Exception:
                 task = TaskError(tskuuid)
                 result.object["output"] += traceback.format_exc().split("\n")

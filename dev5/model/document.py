@@ -14,6 +14,7 @@
 # 05/01/2017 Fixed bug with create attribute method. All collections and indexes
 #              with matching attribute names were being affected.
 # 06/19/2017 Removed UTF decoder from AES cipher.
+# 11/24/2017 Added automatic vacuuming.
 ################################################################################
 
 import sqlite3
@@ -24,7 +25,7 @@ import hashlib
 
 from Crypto import Random
 from Crypto.Cipher import AES
-from threading import Lock
+from threading import Lock, Timer
 from .utils import sucky_uuid
 
 global DOCUMENT_LOCK
@@ -97,6 +98,21 @@ class Document:
         self.connection.commit()
         
         DOCUMENT_LOCK.release()
+        
+        Timer(3600, self.vacuum)
+    
+    def vacuum(self):
+        Timer(3600, self.vacuum)
+        
+        try:
+            DOCUMENT_LOCK.acquire()
+            self.cursor.execute("VACUUM;")
+            self.connection.commit()
+        except Exception:
+            print traceback.format_exc()
+        finally:
+            self.connection.commit()
+            DOCUMENT_LOCK.release()
     
     def create_object(self, coluuid, objuuid):
         try:

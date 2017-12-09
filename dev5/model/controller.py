@@ -61,25 +61,29 @@ def get_host_grid(ctruuid):
                                   "objuuid" : host.object["objuuid"]})
         else:
             add_message("host {0} is missing!".format(hstuuid))
-            grid_data.append({"name" : "MISSING!", "host" : "?.?.?.?", "objuuid" : hstuuid})
+            #grid_data.append({"name" : "MISSING!", "host" : "?.?.?.?", "objuuid" : hstuuid})
+            host.destroy()
+            controller.object["hosts"].remove(hstuuid)
+            controller.set()
         
     return grid_data
 
 def get_hosts(hstuuid, hstuuids, grpuuids, inventory):
     o = inventory.get_object(hstuuid)
-        
-    if o.object["type"] == "host":
-        if hstuuid not in hstuuids:
-            hstuuids.append(hstuuid)
-    elif o.object["type"] == "host group":
-        for uuid in o.object["hosts"]:
-            if inventory.get_object(uuid).object["type"] == "host group":
-                if uuid not in grpuuids:
-                    grpuuids.append(uuid)
-                    get_hosts(uuid, hstuuids, grpuuids, inventory)
-            elif inventory.get_object(uuid).object["type"] == "host":
-                if uuid not in hstuuids:
-                    hstuuids.append(uuid)
+    
+    if "type" in o.object:
+        if o.object["type"] == "host":
+            if hstuuid not in hstuuids:
+                hstuuids.append(hstuuid)
+        elif o.object["type"] == "host group":
+            for uuid in o.object["hosts"]:
+                if inventory.get_object(uuid).object["type"] == "host group":
+                    if uuid not in grpuuids:
+                        grpuuids.append(uuid)
+                        get_hosts(uuid, hstuuids, grpuuids, inventory)
+                elif inventory.get_object(uuid).object["type"] == "host":
+                    if uuid not in hstuuids:
+                        hstuuids.append(uuid)
     
 def get_tiles(ctruuid):
     collection = Collection("inventory")

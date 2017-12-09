@@ -2,6 +2,7 @@ var controllerStateFlag = null;
 var controllerStateData;
 var showControllerDetails = false;
 var controllerStateUpdating = false;
+var controllerLastUpdateTime = (new Date).getTime() / 1000;
 
 /*
 var touchController = function() {
@@ -72,41 +73,82 @@ var executeController = function() {
             
             row = table.insertRow(-1);
             cell = row.insertCell(-1);
-            for(var x = 0; x < resp.hosts.length; x++) {
-                cell = row.insertCell(-1);
-                cell.setAttribute('data-host-objuuid', resp.hosts[x].objuuid);
-                cell.setAttribute('data-selected', 'false');
-                cell.setAttribute('class', 'controllerHostCell');
-                cell.setAttribute('onclick', 'hostClick(this)');
-                cell.innerHTML = resp.hosts[x].name + '<br>' + resp.hosts[x].host;
-            }
             
-            for(var y = 0; y < resp.procedures.length; y++) {
-                row = table.insertRow(-1);
-                
-                cell = row.insertCell(-1);
-                cell.innerHTML = resp.procedures[y].name;
-                cell.setAttribute('data-procedure-objuuid', resp.procedures[y].objuuid);
-                cell.setAttribute('data-selected', 'false');
-                cell.setAttribute('onclick', 'procedureClick(this)');
-                cell.setAttribute('class', 'controllerProcedureCell');
-                
+            if(resp.procedures.length >= resp.hosts.length) {
                 for(var x = 0; x < resp.hosts.length; x++) {
                     cell = row.insertCell(-1);
-                    cell.setAttribute('id', 'controller-cell-' + resp.hosts[x].objuuid + '-' + resp.procedures[y].objuuid);
                     cell.setAttribute('data-host-objuuid', resp.hosts[x].objuuid);
-                    cell.setAttribute('data-host-name', resp.hosts[x].name);
-                    cell.setAttribute('data-host-host', resp.hosts[x].host);
-                    cell.setAttribute('data-procedure-objuuid', resp.procedures[y].objuuid);
-                    cell.setAttribute('data-procedure-name', resp.procedures[y].name);
                     cell.setAttribute('data-selected', 'false');
-                    cell.setAttribute('onclick', 'cellClick(this)');
-                    cell.setAttribute('class', 'controllerCell');
+                    cell.setAttribute('class', 'controllerHostCell');
+                    cell.setAttribute('onclick', 'hostClick(this)');
+                    cell.innerHTML = resp.hosts[x].name;
+                }
+                
+                for(var y = 0; y < resp.procedures.length; y++) {
+                    row = table.insertRow(-1);
                     
-                    cell.style.borderColor = '#CCC';
-                   
-                    document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + resp.hosts[x].objuuid + '-' + resp.procedures[y].objuuid + '"></div>';
-                    document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + resp.hosts[x].objuuid + '-' + resp.procedures[y].objuuid + '"></code></pre>';
+                    cell = row.insertCell(-1);
+                    cell.innerHTML = resp.procedures[y].name;
+                    cell.setAttribute('data-procedure-objuuid', resp.procedures[y].objuuid);
+                    cell.setAttribute('data-selected', 'false');
+                    cell.setAttribute('onclick', 'procedureClick(this)');
+                    cell.setAttribute('class', 'controllerProcedureCell');
+                    
+                    for(var x = 0; x < resp.hosts.length; x++) {
+                        cell = row.insertCell(-1);
+                        cell.setAttribute('id', 'controller-cell-' + resp.hosts[x].objuuid + '-' + resp.procedures[y].objuuid);
+                        cell.setAttribute('data-host-objuuid', resp.hosts[x].objuuid);
+                        cell.setAttribute('data-host-name', resp.hosts[x].name);
+                        cell.setAttribute('data-host-host', resp.hosts[x].host);
+                        cell.setAttribute('data-procedure-objuuid', resp.procedures[y].objuuid);
+                        cell.setAttribute('data-procedure-name', resp.procedures[y].name);
+                        cell.setAttribute('data-selected', 'false');
+                        cell.setAttribute('onclick', 'cellClick(this)');
+                        cell.setAttribute('class', 'controllerCell');
+                        
+                        cell.style.borderColor = '#CCC';
+                       
+                        document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + resp.hosts[x].objuuid + '-' + resp.procedures[y].objuuid + '"></div>';
+                        document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + resp.hosts[x].objuuid + '-' + resp.procedures[y].objuuid + '"></code></pre>';
+                    }
+                }
+            } else {
+                for(var x = 0; x < resp.procedures.length; x++) {
+                    cell = row.insertCell(-1);
+                    cell.innerHTML = resp.procedures[x].name;
+                    cell.setAttribute('data-procedure-objuuid', resp.procedures[x].objuuid);
+                    cell.setAttribute('data-selected', 'false');
+                    cell.setAttribute('onclick', 'procedureClick(this)');
+                    cell.setAttribute('class', 'controllerProcedureCell');
+                }
+                
+                for(var y = 0; y < resp.hosts.length; y++) {
+                    row = table.insertRow(-1);
+                    
+                    cell = row.insertCell(-1);
+                    cell.setAttribute('data-host-objuuid', resp.hosts[y].objuuid);
+                    cell.setAttribute('data-selected', 'false');
+                    cell.setAttribute('class', 'controllerHostCell');
+                    cell.setAttribute('onclick', 'hostClick(this)');
+                    cell.innerHTML = resp.hosts[y].name;
+                    
+                    for(var x = 0; x < resp.procedures.length; x++) {
+                        cell = row.insertCell(-1);
+                        cell.setAttribute('id', 'controller-cell-' + resp.hosts[y].objuuid + '-' + resp.procedures[x].objuuid);
+                        cell.setAttribute('data-host-objuuid', resp.hosts[y].objuuid);
+                        cell.setAttribute('data-host-name', resp.hosts[y].name);
+                        cell.setAttribute('data-host-host', resp.hosts[y].host);
+                        cell.setAttribute('data-procedure-objuuid', resp.procedures[x].objuuid);
+                        cell.setAttribute('data-procedure-name', resp.procedures[x].name);
+                        cell.setAttribute('data-selected', 'false');
+                        cell.setAttribute('onclick', 'cellClick(this)');
+                        cell.setAttribute('class', 'controllerCell');
+                        
+                        cell.style.borderColor = '#CCC';
+                       
+                        document.getElementById('procedureResultAccordion').innerHTML += '<div id="section-header-' + resp.hosts[y].objuuid + '-' + resp.procedures[x].objuuid + '"></div>';
+                        document.getElementById('procedureResultAccordion').innerHTML += '<pre><code id="section-body-' + resp.hosts[y].objuuid + '-' + resp.procedures[x].objuuid + '"></code></pre>';
+                    }
                 }
             }
             
@@ -257,30 +299,34 @@ var procedureClick = function(item) {
 }
 
 var executeSelectedProcedures = function() {
+    var items = [];
+    
     $('#controllerTable tr').each(function(){
         $(this).find('td').each(function(){
             if($(this)[0].id) {
                 if($(this)[0].attributes['data-selected'].value == 'true') {
-                    addMessage("queuing " + $(this)[0].attributes['data-procedure-name'].value + " on " + $(this)[0].attributes['data-host-name'].value + "...");
-                    
-                    $.ajax({
-                        'url' : 'procedure/ajax_queue_procedure',
-                        'dataType' : 'json',
-                        'method': 'POST',
-                        'data' : {
-                            'prcuuid' : $(this)[0].attributes['data-procedure-objuuid'].value, 
-                            'hstuuid' : $(this)[0].attributes['data-host-objuuid'].value
-                        },
-                        'success' : function(resp){
-                            //$('.nav-tabs a[href="#queue"]').tab('show');
-                        },
-                        'failure' : function(resp){
-                            $('.nav-tabs a[href="#console"]').tab('show');
-                        }
+                    items.push({
+                        "prcuuid" : $(this)[0].attributes['data-procedure-objuuid'].value, 
+                        "hstuuid" : $(this)[0].attributes['data-host-objuuid'].value
                     });
                 }
             }
         });
+    });
+    
+    $.ajax({
+        'url' : 'procedure/ajax_queue_procedures',
+        'dataType' : 'json',
+        'method': 'POST',
+        'data' : {
+            'queuelist' : JSON.stringify(items)
+        },
+        'success' : function(resp){
+            //$('.nav-tabs a[href="#queue"]').tab('show');
+        },
+        'failure' : function(resp){
+            $('.nav-tabs a[href="#console"]').tab('show');
+        }
     });
 }
 
@@ -308,13 +354,12 @@ var deselectAllProcedures = function() {
 
 var drawCells = function(resultItems) {
     var cell;
-    var currentTime = (new Date).getTime() / 1000;
-
+    
     for(var i = 0; i < resultItems.length; i++) {
         cell = document.getElementById('controller-cell-' + resultItems[i].host.objuuid + '-' + resultItems[i].procedure.objuuid);
 
         if(resultItems[i].stop) {
-            if(currentTime - resultItems[i].stop > 14400) {
+            if(resultItems[i].age > 60) {
                 cell.style.color = '#' + resultItems[i].status.sfg;
                 cell.style.backgroundColor = '#' + resultItems[i].status.sbg;
             } else {
@@ -338,6 +383,7 @@ var drawResults = function(resultItems) {
 }
 
 
+
 var updateControllerTimer = function() {
     if(document.getElementById('controllerTable')) {
         $.ajax({
@@ -357,9 +403,9 @@ var updateControllerTimer = function() {
                     controllerStateFlag = resp.value;
                     controllerStateUpdating = true;
                     updateControllerStateData();
-                } else {
-                    if(controllerStateData)
-                        drawCells(controllerStateData);
+                } else if((new Date).getTime() / 1000 - controllerLastUpdateTime > 60 && !controllerStateUpdating) {
+                    controllerStateUpdating = true;
+                    updateControllerStateData();
                 }
             },
         });
@@ -373,6 +419,7 @@ var updateControllerStateData = function() {
         'method': 'POST',
         'data' : {'objuuid' : inventoryObject.objuuid},
         'success' : function(resp) {
+            controllerLastUpdateTime = (new Date).getTime() / 1000;
             controllerStateUpdating = false;
             controllerStateData = resp;
             drawCells(controllerStateData);

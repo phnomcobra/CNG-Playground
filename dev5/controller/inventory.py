@@ -89,8 +89,8 @@ class Inventory(object):
         finally:
             self.moving = False
         
-        create_inventory_move_event(Collection("users").find(sessionid = cherrypy.session.id)[0], \
-                                    Collection("inventory").get_object(objuuid))
+        #create_inventory_move_event(Collection("users").find(sessionid = cherrypy.session.id)[0], \
+        #                            Collection("inventory").get_object(objuuid))
         
         return json.dumps({})
     
@@ -107,8 +107,8 @@ class Inventory(object):
         except Exception:
             add_message(traceback.format_exc())
         
-        create_inventory_copy_event(Collection("users").find(sessionid = cherrypy.session.id)[0], \
-                                    Collection("inventory").get_object(objuuid))
+        #create_inventory_copy_event(Collection("users").find(sessionid = cherrypy.session.id)[0], \
+        #                            Collection("inventory").get_object(objuuid))
         
     
     @cherrypy.expose
@@ -118,7 +118,7 @@ class Inventory(object):
         try:
             container = create_container(objuuid, "New Container")
             
-            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], container)
+            #create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], container)
         
             return json.dumps(container.object)
         except Exception:
@@ -131,7 +131,7 @@ class Inventory(object):
         try:
             host = create_host(objuuid, "New Host")
             
-            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], host)
+            #create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], host)
         
             return json.dumps(host.object)
         except Exception:
@@ -144,7 +144,7 @@ class Inventory(object):
         try:
             text_file = create_text_file(objuuid, "New Text File.txt")
             
-            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], text_file)
+            #create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], text_file)
         
             return json.dumps(text_file.object)
         except Exception:
@@ -157,7 +157,7 @@ class Inventory(object):
         try:
             group = create_host_group(objuuid, "New Host Group")
             
-            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], group)
+            #create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], group)
         
             return json.dumps(group.object)
         except Exception:
@@ -170,7 +170,7 @@ class Inventory(object):
         try:
             console = create_console(objuuid, "New Console")
             
-            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], console)
+            #create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], console)
         
             return json.dumps(console.object)
         except Exception:
@@ -190,7 +190,7 @@ class Inventory(object):
                                email = current_user.object["email"], \
                                phone = current_user.object["phone"])
             
-            create_inventory_create_event(current_user, task)
+            #create_inventory_create_event(current_user, task)
             
             return json.dumps(task.object)
         except Exception:
@@ -203,7 +203,7 @@ class Inventory(object):
         try:
             schedule = create_schedule(objuuid, "New Schedule")
         
-            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], schedule)
+            #create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], schedule)
             
             return json.dumps(schedule.object)
         except Exception:
@@ -216,7 +216,7 @@ class Inventory(object):
         try:
             status_code = create_status_code(objuuid, "New Status Code")
             
-            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], status_code)
+            #create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], status_code)
             
             return json.dumps(status_code.object)
         except Exception:
@@ -229,7 +229,7 @@ class Inventory(object):
         try:
             procedure = create_procedure(objuuid, "New Procedure")
         
-            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], procedure)
+            #create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], procedure)
             
             return json.dumps(procedure.object)
         except Exception:
@@ -242,7 +242,7 @@ class Inventory(object):
         try:
             controller = create_controller(objuuid, "New Controller")
             
-            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], controller)
+            #create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], controller)
             
             return json.dumps(controller.object)
         except Exception:
@@ -255,7 +255,7 @@ class Inventory(object):
         try:
             rfc = create_rfc(objuuid, "New RFC")
             
-            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], rfc)
+            #create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], rfc)
             
             return json.dumps(rfc.object)
         except Exception:
@@ -278,8 +278,8 @@ class Inventory(object):
             while self.moving:
                 sleep(.1)
             
-            create_inventory_delete_event(Collection("users").find(sessionid = cherrypy.session.id)[0], \
-                                          Collection("inventory").get_object(objuuid))
+            #create_inventory_delete_event(Collection("users").find(sessionid = cherrypy.session.id)[0], \
+            #                              Collection("inventory").get_object(objuuid))
             
             delete_node(objuuid)
             return json.dumps({"id" : objuuid})
@@ -367,7 +367,7 @@ class Inventory(object):
             cherrypy.response.headers['Content-Type'] = "application/x-download"
             cherrypy.response.headers['Content-Disposition'] = 'attachment; filename=export.{0}.json'.format(time())
             
-            create_inventory_export_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids.split(","))
+            #create_inventory_export_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids.split(","))
             
             add_message("INVENTORY EXPORT COMPLETE")
             
@@ -407,7 +407,7 @@ class Inventory(object):
                 for dstuuid in dstuuids:
                     zf.writestr('{0}.bin'.format(dstuuid), buffer(DatastoreFile(dstuuid).read()))
             
-            create_inventory_export_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids.split(","))
+            #create_inventory_export_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids.split(","))
             
             add_message("INVENTORY EXPORT COMPLETE")
             
@@ -447,7 +447,7 @@ class Inventory(object):
             for objuuid in objects:
                 objuuids.append(objuuid)
             
-            create_inventory_import_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids)
+            #create_inventory_import_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids)
         except Exception:
             add_message(traceback.format_exc())
         
@@ -488,7 +488,7 @@ class Inventory(object):
             for objuuid in objects:
                 objuuids.append(objuuid)
             
-            create_inventory_import_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids)
+            #create_inventory_import_event(Collection("users").find(sessionid = cherrypy.session.id)[0], objuuids)
         except Exception:
             add_message(traceback.format_exc())
         
@@ -506,7 +506,7 @@ class Inventory(object):
             text_file.object["body"] = file.file.read()
             text_file.set()
             
-            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], text_file)
+            #create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], text_file)
             
         except Exception:
             add_message(traceback.format_exc())
@@ -535,7 +535,7 @@ class Inventory(object):
             binary_file_inv.object["sha1sum"] = sha1hash.hexdigest()
             binary_file_inv.set()
             
-            create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], binary_file_inv)
+            #create_inventory_create_event(Collection("users").find(sessionid = cherrypy.session.id)[0], binary_file_inv)
         except Exception:
             add_message(traceback.format_exc())
         

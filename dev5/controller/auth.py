@@ -114,6 +114,11 @@ def all_of(*conditions):
 class Auth(object):
     def on_login(self, username):
         users = Collection("users")
+        
+        for user in users.find(sessionid = cherrypy.session.id):
+            user.object['session id'] = None
+            user.set()
+        
         for user in users.find(name = username):
             user.object['session id'] = cherrypy.session.id
             user.set()

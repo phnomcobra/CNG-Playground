@@ -304,7 +304,7 @@ String.prototype.toHHMMSS = function () {
 }
 
 var viewProcedureResult = function(result) {
-    document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML = result.procedure.name + '<br>' + result.host.name + ' ' + result.host.host + ' <br>' + new Date(result.stop * 1000) + ' [' + result.status.name + ']';
+    document.getElementById('section-header-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML = result.procedure.name + '<br>' + result.host.name + ' ' + result.host.host + ' <br>' + new Date(result.stop * 1000) + '<br> [Duration: ' + String(result.duration).toHHMMSS() + '] [' + result.status.name + ']';
     
     document.getElementById('section-body-' + result.host.objuuid + '-' + result.procedure.objuuid).innerHTML = '<table class="table" id="section-body-procedure-header-' + result.host.objuuid + '-' + result.procedure.objuuid + '"></table>';
     
@@ -511,23 +511,29 @@ var executeProcedure = function() {
 }
 
 var runProcedure = function () {
+    var items = [];
+    
     for(var i = 0; i < inventoryObject.hosts.length; i++) {
-        $.ajax({
-            'url' : 'procedure/ajax_queue_procedure',
-            'dataType' : 'json',
-            'method': 'POST',
-            'data' : {
-                'prcuuid' : inventoryObject.objuuid, 
-                'hstuuid' : inventoryObject.hosts[i]
-            },
-            'success' : function(resp){
-                //$('.nav-tabs a[href="#queue"]').tab('show');
-            },
-            'failure' : function(resp){
-                $('.nav-tabs a[href="#console"]').tab('show');
-            }
+        items.push({
+            "prcuuid" : inventoryObject.objuuid, 
+            "hstuuid" : inventoryObject.hosts[i]
         });
     }
+    
+    $.ajax({
+        'url' : 'procedure/ajax_queue_procedures',
+        'dataType' : 'json',
+        'method': 'POST',
+        'data' : {
+            'queuelist' : JSON.stringify(items)
+        },
+        'success' : function(resp){
+            //$('.nav-tabs a[href="#queue"]').tab('show');
+        },
+        'failure' : function(resp){
+            $('.nav-tabs a[href="#console"]').tab('show');
+        }
+    });
 }
 
 var updateProcedureTimer = function() {

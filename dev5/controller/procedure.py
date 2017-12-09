@@ -57,6 +57,20 @@ class Procedure(object):
             add_message(traceback.format_exc())
     
     @cherrypy.expose
+    def ajax_queue_procedures(self, queuelist):
+        try:
+            for item in json.loads(queuelist):
+                try:
+                    add_message("procedure controller: queuing procedure: hstuuid: {0}, prcuuid: {1}".format(item["hstuuid"], item["prcuuid"]))
+                    queue_procedure(item["hstuuid"], item["prcuuid"], Collection("users").find(sessionid = cherrypy.session.id)[0].object)
+                except Exception:
+                    add_message(traceback.format_exc())
+        
+            return queuelist
+        except Exception:
+            add_message(traceback.format_exc())
+    
+    @cherrypy.expose
     def ajax_get_queue_grid(self):
         try:
             return json.dumps(get_jobs_grid())

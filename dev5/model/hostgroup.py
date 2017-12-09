@@ -47,6 +47,9 @@ def get_host_grid(grpuuid):
                                   "objuuid" : host.object["objuuid"]})
         else:
             add_message("host {0} is missing!".format(hstuuid))
-            grid_data.append({"name" : "MISSING!", "host" : "?.?.?.?", "objuuid" : hstuuid})
+            #grid_data.append({"name" : "MISSING!", "host" : "?.?.?.?", "objuuid" : hstuuid})
+            host.destroy()
+            group.object["hosts"].remove(hstuuid)
+            group.set()
         
     return grid_data

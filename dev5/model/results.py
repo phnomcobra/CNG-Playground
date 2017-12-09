@@ -56,7 +56,21 @@ def get_controller_results(ctruuid):
     for hstuuid in hstuuids:
         for prcuuid in controller.object["procedures"]:
             try:
-                controller_results.append(results.find(hstuuid = hstuuid, prcuuid = prcuuid)[0].object)
+                result = results.find(hstuuid = hstuuid, prcuuid = prcuuid)[0].object
+                
+                if result["start"] != None and result["stop"] != None:
+                    result["duration"] = result["stop"] - result["start"]
+                elif result["start"] != None:
+                    result["duration"] = time() - result["start"]
+                else:
+                    result["duration"] = 0
+                
+                if result["stop"] == None:
+                    result["age"] = 0
+                else:
+                    result["age"] = time() - result["stop"]
+                    
+                controller_results.append(result)
             except IndexError:
                 pass
     
@@ -77,7 +91,16 @@ def get_procedure_result(prcuuid, hstuuid):
 
     for hstuuid in hstuuids:
         try:
-            result_objects.append(results.find(hstuuid = hstuuid, prcuuid = prcuuid)[0].object)
+            result = results.find(hstuuid = hstuuid, prcuuid = prcuuid)[0].object
+            
+            if result["start"] != None and result["stop"] != None:
+                result["duration"] = result["stop"] - result["start"]
+            elif result["start"] != None:
+                result["duration"] = time() - result["start"]
+            else:
+                result["duration"] = 0
+            
+            result_objects.append(result)
         except IndexError:
             pass
     

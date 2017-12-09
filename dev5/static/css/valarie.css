@@ -71,6 +71,13 @@
     position: fixed;
 }
 
+.terminal {
+  padding: 10px;
+  width: calc(100vw - 500px);
+  height: calc(100vh - 200px);
+  font-size: 1.2vmax;
+}
+
 #console {
   height: calc(100vh - 120px);
   width: 100%;
@@ -164,7 +171,8 @@
     font-size:xx-small;
     max-width: 40px;
     border-style:solid;
-    border-width:thin;
+    border-width:1px;
+    border-left-width:20px;
     text-align: center;
     border-color: #CCC;
 }
