@@ -35,11 +35,18 @@ def get_host_grid(grpuuid):
                 
                 for uuid in host.object["hosts"]:
                     h = collection.get_object(uuid)
-                    if h.object["type"] == "host":
-                        hosts.append("{0} ({1})".format(h.object["name"], \
-                                                        h.object["host"]))
-                    elif h.object["type"] == "host group":
-                        hosts.append(h.object["name"])
+                    
+                    if "type" in h.object:
+                        if h.object["type"] == "host":
+                            hosts.append("{0} ({1})".format(h.object["name"], \
+                                                            h.object["host"]))
+                        elif h.object["type"] == "host group":
+                            hosts.append(h.object["name"])
+                    else:
+                        host.object["hosts"].remove(uuid)
+                        host.set()
+                        h.destroy()
+                        
                 
                 grid_data.append({"type" : host.object["type"], \
                                   "name" : host.object["name"], \

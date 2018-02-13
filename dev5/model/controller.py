@@ -53,7 +53,13 @@ def get_host_grid(ctruuid):
                 hosts = []
                 
                 for uuid in host.object["hosts"]:
-                    hosts.append(collection.get_object(uuid).object["name"])
+                    c = collection.get_object(uuid)
+                    if "name" in c.object:
+                        hosts.append(c.object["name"])
+                    else:
+                        host.object["hosts"].remove(uuid)
+                        host.set()
+                        c.destroy()
                 
                 grid_data.append({"type" : host.object["type"], \
                                   "name" : host.object["name"], \
@@ -77,13 +83,19 @@ def get_hosts(hstuuid, hstuuids, grpuuids, inventory):
                 hstuuids.append(hstuuid)
         elif o.object["type"] == "host group":
             for uuid in o.object["hosts"]:
-                if inventory.get_object(uuid).object["type"] == "host group":
-                    if uuid not in grpuuids:
-                        grpuuids.append(uuid)
-                        get_hosts(uuid, hstuuids, grpuuids, inventory)
-                elif inventory.get_object(uuid).object["type"] == "host":
-                    if uuid not in hstuuids:
-                        hstuuids.append(uuid)
+                c = inventory.get_object(uuid)
+                if "type" in c.object:
+                    if c.object["type"] == "host group":
+                        if uuid not in grpuuids:
+                            grpuuids.append(uuid)
+                            get_hosts(uuid, hstuuids, grpuuids, inventory)
+                    elif c.object["type"] == "host":
+                        if uuid not in hstuuids:
+                            hstuuids.append(uuid)
+                else:
+                    o.object["hosts"].remove(uuid)
+                    o.set()
+                    c.destroy()
     
 def get_tiles(ctruuid):
     collection = Collection("inventory")

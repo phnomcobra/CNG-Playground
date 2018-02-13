@@ -25,19 +25,26 @@ def delete(objuuid):
 
 def get_hosts(hstuuid, hstuuids, grpuuids, inventory):
     o = inventory.get_object(hstuuid)
-        
-    if o.object["type"] == "host":
-        if hstuuid not in hstuuids:
-            hstuuids.append(hstuuid)
-    elif o.object["type"] == "host group":
-        for uuid in o.object["hosts"]:
-            if inventory.get_object(uuid).object["type"] == "host group":
-                if uuid not in grpuuids:
-                    grpuuids.append(uuid)
-                    get_hosts(uuid, hstuuids, grpuuids, inventory)
-            elif inventory.get_object(uuid).object["type"] == "host":
-                if uuid not in hstuuids:
-                    hstuuids.append(uuid)
+    
+    if "type" in o.object:
+        if o.object["type"] == "host":
+            if hstuuid not in hstuuids:
+                hstuuids.append(hstuuid)
+        elif o.object["type"] == "host group":
+            for uuid in o.object["hosts"]:
+                c = inventory.get_object(uuid)
+                if "type" in c.object:
+                    if c.object["type"] == "host group":
+                        if uuid not in grpuuids:
+                            grpuuids.append(uuid)
+                            get_hosts(uuid, hstuuids, grpuuids, inventory)
+                    elif c.object["type"] == "host":
+                        if uuid not in hstuuids:
+                            hstuuids.append(uuid)
+                else:
+                    o.object["hosts"].remove(uuid)
+                    o.set()
+                    c.destroy()
     
 def get_controller_results(ctruuid):
     results = RAMCollection("results")

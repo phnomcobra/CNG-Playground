@@ -135,7 +135,13 @@ def get_host_grid(tskuuid):
                 hosts = []
                 
                 for uuid in host.object["hosts"]:
-                    hosts.append(collection.get_object(uuid).object["name"])
+                    c = collection.get_object(uuid)
+                    if "name" in c.object:
+                        hosts.append(c.object["name"])
+                    else:
+                        c.destroy()
+                        host.object["hosts"].remove(uuid)
+                        host.set()
                 
                 grid_data.append({"type" : host.object["type"], \
                                   "name" : host.object["name"], \
